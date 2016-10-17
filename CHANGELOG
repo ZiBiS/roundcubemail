@@ -1,7 +1,10 @@
 CHANGELOG Roundcube Webmail
 ===========================
 
+- Add missing sql upgrade file for 'ip' column resize in session table (#5465)
+- Do not show inline images of unsupported mimetype (#5463)
 - Password: Added LDAP PPolicy driver (#5364)
+- Password: Added possibility to nicely redirect from other plugins on password expiration (#5468)
 - Implement separate action to mark all messages in a folder as \Seen (#5006)
 - Implement marking as \Seen in all folders or in a folder and its subfolders (#5076)
 - Archive: Don't reload messages list when it's not needed (#5225)
@@ -48,11 +51,16 @@ CHANGELOG Roundcube Webmail
 - Managesieve: Unhide advanced rule controls if there are inputs with errors
 - Managesieve: Display warning message when filter form contains errors
 - Control search engine crawlers via X-Robots-Tag header instead of <meta> and robots.txt (#5098)
+- Fix flickering of header topline in min-mode (#5426)
 - Fix bug where folders list would scroll to top when clicking on subscription checkbox (#5447)
 - Fix decoding of GB2312/GBK text when iconv is not installed (#5448)
 - Fix regression where creation of default folders wasn't functioning without prefix (#5460)
 - Enigma: Fix bug where last records on keys list were hidden (#5461)
 - Enigma: Fix key search with keyword containing non-ascii characters (#5459)
+- Fix bug where deleting folders with subfolders could fail in some cases (#5466)
+- Fix bug where IMAP password could be exposed via error message (#5472)
+- Fix bug where it wasn't possible to store more that 2MB objects in memcache/apc,
+  Added memcache_max_allowed_packet and apc_max_allowed_packet settings (#5452)
 
 RELEASE 1.2.2
 -------------
