@@ -60,6 +60,8 @@ function rcube_mail_ui()
     if (bw.tablet) {
       $('#viewport').attr('content', "width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0");
     }
+
+    $(document).ready(function() { me.init(); });
   }
 
 
@@ -288,8 +290,8 @@ function rcube_mail_ui()
       else if (rcmail.env.action == 'edit-prefs') {
         var legend = $('#preferences-details fieldset.advanced legend'),
           toggle = $('<a href="#toggle"></a>')
-            .text(env.toggleoptions)
-            .attr('title', env.toggleoptions)
+            .text(rcmail.gettext('toggleadvancedoptions'))
+            .attr('title', rcmail.gettext('toggleadvancedoptions'))
             .addClass('advanced-toggle');
 
         legend.click(function(e) {
@@ -448,8 +450,8 @@ function rcube_mail_ui()
         .dialog({
           resizable: false,
           closeOnEscape: true,
-          dialogClass: 'popupmessage ' + p.type,
-          title: env.errortitle,
+          dialogClass: p.type,
+          title: rcmail.gettext('errortitle'),
           close: dialog_close,
           hide: {effect: 'fadeOut'},
           width: 420,

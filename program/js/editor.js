@@ -39,7 +39,7 @@ function rcube_text_editor(config, id)
     abs_url = location.href.replace(/[?#].*$/, '').replace(/\/$/, ''),
     conf = {
       selector: '#' + ($('#' + id).is('.mce_editor') ? id : 'fake-editor-id'),
-      cache_suffix: 's=4031300',
+      cache_suffix: 's=4031301',
       theme: 'modern',
       language: config.lang,
       content_css: rcmail.assets_path('program/js/tinymce/roundcube/content.css'),
@@ -412,15 +412,21 @@ function rcube_text_editor(config, id)
   {
     var format, ed = this.editor;
 
+    if (!input)
+      return false;
+
     // insert into tinymce editor
     if (ed) {
       ed.getWin().focus(); // correct focus in IE & Chrome
 
-      if ($.type(input) == 'object') {
+      if ($.type(input) == 'object' && ('html' in input)) {
         input = input.html;
         format = 'html';
       }
       else {
+        if ($.type(input) == 'object')
+          input = input.text || '';
+
         input = rcmail.quote_html(input).replace(/\r?\n/g, '<br/>');
         format = 'text';
       }
@@ -435,7 +441,7 @@ function rcube_text_editor(config, id)
         end = value.substring(selection.end, value.length);
 
       if ($.type(input) == 'object')
-        input = input.text;
+        input = input.text || '';
 
       // insert response text
       ed.value = pre + input + end;
