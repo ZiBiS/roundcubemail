@@ -599,7 +599,7 @@ class rcube
      *
      * @return string Localized text
      */
-    public function gettext($attrib, $domain=null)
+    public function gettext($attrib, $domain = null)
     {
         // load localization files if not done yet
         if (empty($this->texts)) {
@@ -633,18 +633,25 @@ class rcube
             }
         }
 
-        // format output
-        if (($attrib['uppercase'] && strtolower($attrib['uppercase'] == 'first')) || $attrib['ucfirst']) {
-            return ucfirst($text);
+        // replace \n with real line break
+        $text = strtr($text, array('\n' => "\n"));
+
+        // case folding
+        if (($attrib['uppercase'] && strtolower($attrib['uppercase']) == 'first') || $attrib['ucfirst']) {
+            $case_mode = MB_CASE_TITLE;
         }
         else if ($attrib['uppercase']) {
-            return mb_strtoupper($text);
+            $case_mode = MB_CASE_UPPER;
         }
         else if ($attrib['lowercase']) {
-            return mb_strtolower($text);
+            $case_mode = MB_CASE_LOWER;
         }
 
-        return strtr($text, array('\n' => "\n"));
+        if (isset($case_mode)) {
+            $text = mb_convert_case($text, $case_mode);
+        }
+
+        return $text;
     }
 
     /**
@@ -1172,6 +1179,8 @@ class rcube
      *
      * @param string $name Name of the log file
      * @param mixed  $line Line to append
+     *
+     * @return bool True on success, False on failure
      */
     public static function write_log($name, $line)
     {
@@ -1209,14 +1218,12 @@ class rcube
 
         if ($log_driver == 'syslog') {
             $prio = $name == 'errors' ? LOG_ERR : LOG_INFO;
-            syslog($prio, $line);
-            return true;
+            return syslog($prio, $line);
         }
 
         // log_driver == 'file' is assumed here
 
         $line = sprintf("[%s]: %s\n", $date, $line);
-        $log_dir = null;
 
         // per-user logging is activated
         if (self::$instance && self::$instance->config->get('per_user_logging', false) && self::$instance->get_user_id()) {
@@ -1322,7 +1329,6 @@ class rcube
 
         // write error to local log file
         if (($level & 1) || !empty($arg_arr['fatal'])) {
-            $post_query = '';
             if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                 foreach (array('_task', '_action') as $arg) {
                     if ($_POST[$arg] && !$_GET[$arg]) {

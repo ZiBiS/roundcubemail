@@ -189,7 +189,7 @@ $config['imap_force_caps'] = false;
 
 // By default list of subscribed folders is determined using LIST-EXTENDED
 // extension if available. Some servers (dovecot 1.x) returns wrong results
-// for shared namespaces in this case. http://trac.roundcube.net/ticket/1486225
+// for shared namespaces in this case. https://github.com/roundcube/roundcubemail/issues/2474
 // Enable this option to force LSUB command usage instead.
 // Deprecated: Use imap_disabled_caps = array('LIST-EXTENDED')
 $config['imap_force_lsub'] = false;
@@ -391,9 +391,10 @@ $config['temp_dir'] = RCUBE_INSTALL_PATH . 'temp/';
 // possible units: s, m, h, d, w
 $config['temp_dir_ttl'] = '48h';
 
-// enforce connections over https
-// with this option enabled, all non-secure connections will be redirected.
-// set the port for the ssl connection as value of this option if it differs from the default 443
+// Enforce connections over https
+// With this option enabled, all non-secure connections will be redirected.
+// It can be also a port number, hostname or hostname:port if they are
+// different than default HTTP_HOST:443
 $config['force_https'] = false;
 
 // tell PHP that it should work as under secure connection
@@ -468,7 +469,8 @@ $config['proxy_whitelist'] = array();
 $config['referer_check'] = false;
 
 // X-Frame-Options HTTP header value sent to prevent from Clickjacking.
-// Possible values: sameorigin|deny. Set to false in order to disable sending them
+// Possible values: sameorigin|deny|allow-from <uri>.
+// Set to false in order to disable sending the header.
 $config['x_frame_options'] = 'sameorigin';
 
 // This key is used for encrypting purposes, like storing of imap password
@@ -541,7 +543,8 @@ $config['product_name'] = 'Roundcube Webmail';
 $config['useragent'] = 'Roundcube Webmail/'.RCMAIL_VERSION;
 
 // try to load host-specific configuration
-// see http://trac.roundcube.net/wiki/Howto_Config for more details
+// see https://github.com/roundcube/roundcubemail/wiki/Configuration:-Multi-Domain-Setup
+// for more details
 $config['include_host_config'] = false;
 
 // path to a text file which will be added to each sent message
@@ -661,7 +664,7 @@ $config['message_sort_col'] = '';
 $config['message_sort_order'] = 'DESC';
 
 // These cols are shown in the message list. Available cols are:
-// subject, from, to, fromto, cc, replyto, date, size, status, flag, attachment, 'priority'
+// subject, from, to, fromto, cc, replyto, date, size, status, flag, attachment, priority
 $config['list_cols'] = array('subject', 'status', 'fromto', 'date', 'size', 'flag', 'attachment');
 
 // the default locale setting (leave empty for auto-detection)
@@ -1085,12 +1088,15 @@ $config['prettydate'] = true;
 // save compose message every 300 seconds (5min)
 $config['draft_autosave'] = 300;
 
-// default setting if preview pane is enabled
-$config['preview_pane'] = false;
+// Interface layout. Default: 'widescreen'.
+//  'widescreen' - three columns
+//  'desktop'    - two columns, preview on bottom
+//  'list'       - two columns, no preview
+$config['layout'] = 'widescreen';
 
-// Mark as read when viewed in preview pane (delay in seconds)
-// Set to -1 if messages in preview pane should not be marked as read
-$config['preview_pane_mark_read'] = 0;
+// Mark as read when viewing a message (delay in seconds)
+// Set to -1 if messages should not be marked as read
+$config['mail_read_time'] = 0;
 
 // Clear Trash on logout
 $config['logout_purge'] = false;

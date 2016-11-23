@@ -11,7 +11,6 @@ $RCI->bool_config_props = array(
   'auto_create_user' => 1,
   'smtp_log' => 1,
   'prefer_html' => 1,
-  'preview_pane' => 1,
   'debug_level' => 1,
 );
 
@@ -57,7 +56,7 @@ if (!empty($_POST['submit'])) {
   }
 
   echo '<p class="hint">Of course there are more options to configure.
-    Have a look at the defaults.inc.php file or visit <a href="http://trac.roundcube.net/wiki/Howto_Config" target="_blank">Howto_Config</a> to find out.</p>';
+    Have a look at the defaults.inc.php file or visit <a href="https://github.com/roundcube/roundcubemail/wiki/Configuration" target="_blank">Howto_Config</a> to find out.</p>';
 
   echo '<p><input type="button" onclick="location.href=\'./index.php?_step=3\'" value="CONTINUE" /></p>';
 
@@ -596,17 +595,6 @@ echo $check_htmlview->show(intval($RCI->getprop('prefer_html')));
 
 ?>
 <label for="cfghtmlview">Prefer displaying HTML messages</label><br />
-</dd>
-
-<dt class="propname">preview_pane <span class="userconf">*</span></dt>
-<dd>
-<?php
-
-$check_prevpane = new html_checkbox(array('name' => '_preview_pane', 'id' => "cfgprevpane", 'value' => 1));
-echo $check_prevpane->show(intval($RCI->getprop('preview_pane')));
-
-?>
-<label for="cfgprevpane">If preview pane is enabled</label><br />
 </dd>
 
 <dt class="propname">htmleditor <span class="userconf">*</span></dt>

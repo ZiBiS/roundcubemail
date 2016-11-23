@@ -84,11 +84,12 @@ class rcube_sieve_engine
     {
         // register UI objects
         $this->rc->output->add_handlers(array(
-            'filterslist'    => array($this, 'filters_list'),
-            'filtersetslist' => array($this, 'filtersets_list'),
-            'filterframe'    => array($this, 'filter_frame'),
-            'filterform'     => array($this, 'filter_form'),
-            'filtersetform'  => array($this, 'filterset_form'),
+            'filterslist'      => array($this, 'filters_list'),
+            'filtersetslist'   => array($this, 'filtersets_list'),
+            'filterframe'      => array($this, 'filter_frame'),
+            'filterform'       => array($this, 'filter_form'),
+            'filtersetform'    => array($this, 'filterset_form'),
+            'filterseteditraw' => array($this, 'filterset_editraw'),
         ));
 
         // connect to managesieve server
@@ -144,6 +145,8 @@ class rcube_sieve_engine
             $this->rc->output->set_env('currentset', $this->sieve->current);
             $_SESSION['managesieve_current'] = $this->sieve->current;
         }
+
+        $this->rc->output->set_env('raw_sieve_editor', $this->rc->config->get('managesieve_raw_editor', true));
 
         return $error;
     }
@@ -486,6 +489,26 @@ class rcube_sieve_engine
                     ),
                 );
             }
+        }
+
+        $this->send();
+    }
+
+    function saveraw()
+    {
+        // Init plugin and handle managesieve connection
+        $error = $this->start();
+
+        $script_name = rcube_utils::get_input_value('_set', rcube_utils::INPUT_POST);
+
+        $result = $this->sieve->save_script($script_name, $_POST['rawsetcontent']);
+
+        if ($result === false) {
+            $this->rc->output->show_message('managesieve.filtersaveerror', 'error');
+        }
+        else {
+            $this->rc->output->show_message('managesieve.setupdated', 'confirmation');
+            $this->rc->output->command('parent.managesieve_updatelist', 'refresh');
         }
 
         $this->send();
@@ -1121,8 +1144,9 @@ class rcube_sieve_engine
                     $fid = $this->sieve->script->update_rule($fid, $this->form);
                 }
 
-                if ($fid !== false)
+                if ($fid !== false) {
                     $save = $this->save_script();
+                }
 
                 if ($save && $fid !== false) {
                     $this->rc->output->show_message('managesieve.filtersaved', 'confirmation');
@@ -1142,7 +1166,6 @@ class rcube_sieve_engine
                 }
                 else {
                     $this->rc->output->show_message('managesieve.filtersaveerror', 'error');
-//                  $this->rc->output->send();
                 }
             }
             else {
@@ -1159,6 +1182,9 @@ class rcube_sieve_engine
         if (isset($_GET['_framed']) || isset($_POST['_framed'])) {
             if (isset($_GET['_newset']) || isset($_POST['_newset'])) {
                 $this->rc->output->send('managesieve.setedit');
+            }
+            else if (isset($_GET['_seteditraw']) || isset($_POST['_seteditraw'])) {
+                $this->rc->output->send('managesieve.seteditraw');
             }
             else {
                 $this->rc->output->send('managesieve.filteredit');
@@ -1199,8 +1225,9 @@ class rcube_sieve_engine
     function filtersets_list($attrib, $no_env = false)
     {
         // add id to message list table if not specified
-        if (!strlen($attrib['id']))
+        if (!strlen($attrib['id'])) {
             $attrib['id'] = 'rcmfiltersetslist';
+        }
 
         $list = $this->list_scripts();
 
@@ -1253,6 +1280,40 @@ class rcube_sieve_engine
     function filter_frame($attrib)
     {
         return $this->rc->output->frame($attrib, true);
+    }
+
+    function filterset_editraw($attrib)
+    {
+        $script_name = isset($_GET['_set']) ? $_GET['_set'] : $_POST['_set'];
+        $script      = $this->sieve->get_script($script_name);
+        $script_post = $_POST['rawsetcontent'];
+
+        $out = '<form name="filtersetrawform" action="./" method="post" enctype="multipart/form-data">'."\n";
+
+        $hiddenfields = new html_hiddenfield();
+        $hiddenfields->add(array('name' => '_task',   'value' => $this->rc->task));
+        $hiddenfields->add(array('name' => '_action', 'value' => 'plugin.managesieve-saveraw'));
+        $hiddenfields->add(array('name' => '_set',    'value' => $script_name));
+        $hiddenfields->add(array('name' => '_seteditraw', 'value' => 1));
+        $hiddenfields->add(array('name' => '_framed', 'value' => ($_POST['_framed'] || $_GET['_framed'] ? 1 : 0)));
+
+        $out .= $hiddenfields->show();
+
+        $txtarea = new html_textarea(array(
+                'id'   => 'rawfiltersettxt',
+                'name' => 'rawsetcontent',
+                'rows' => '15'
+        ));
+
+        $out .= $txtarea->show($script_post !== null ? $script_post : ($script !== false ? $script : ''));
+
+        $this->rc->output->add_gui_object('sievesetrawform', 'filtersetrawform');
+
+        if ($script === false) {
+            $this->rc->output->show_message('managesieve.filterunknownerror', 'error');
+        }
+
+        return $out;
     }
 
     function filterset_form($attrib)

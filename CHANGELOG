@@ -1,6 +1,11 @@
 CHANGELOG Roundcube Webmail
 ===========================
 
+- Widescreen layout aka three column view (#5093)
+- Unify automatic marking as \Seen in preview pane, full-page and extwin views (#5071)
+- Disable double-click on the list when preview pane is on (#5199)
+- Support hostname and hostname:port in force_https option (#5511)
+- Support ALLOW-FROM in x_frame_options (#5122)
 - Allow to omit a subject when sending an email (#5068)
 - Warn about too many disclosed recipients in composed email [max_disclosed_recipients] (#5132)
 - identity_select: Support Received header (#5085)
@@ -51,6 +56,7 @@ CHANGELOG Roundcube Webmail
 - Indicate that a collapsed thread has flagged children (#5013)
 - Implemented message/rfc822 attachment preview
 - Update to jsTimezoneDetect 1.0.6
+- Managesieve: Add (optional) RAW script editor (#5414)
 - Managesieve: Add option to automatically set vacation :from address (#5428)
 - Managesieve: Support 'string' test from variables extension [RFC 5229] (#5248)
 - Managesieve: Support 'duplicate' extension [RFC 7352]
@@ -69,6 +75,10 @@ CHANGELOG Roundcube Webmail
 - Fix bug where IMAP password could be exposed via error message (#5472)
 - Fix bug where it wasn't possible to store more that 2MB objects in memcache/apc,
   Added memcache_max_allowed_packet and apc_max_allowed_packet settings (#5452)
+- Fix "Illegal string offset" warning in rcube::log_bug() on PHP 7.1 (#5508)
+- Fix storing "empty" values in rcube_cache/rcube_cache_shared (#5519)
+- Fix missing content check when image resize fails on attachment thumbnail generation (#5485)
+- Fix displaying attached images with wrong Content-Type specified (#5527)
 
 RELEASE 1.2.2
 -------------
