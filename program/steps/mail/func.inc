@@ -1006,7 +1006,7 @@ function rcmail_washtml_callback($tagname, $attrib, $content, $washtml)
 
         // now check for evil strings like expression, behavior or url()
         if (!preg_match('/expression|behavior|javascript:|import[^a]/i', $stripped)) {
-            if (!$washtml->get_config('allow_remote') && stripos($stripped, 'url(')) {
+            if (!$washtml->get_config('allow_remote') && preg_match('/url\((?!data:image)/', $stripped)) {
                 $washtml->extlinks = true;
             }
             else {
@@ -1910,7 +1910,7 @@ function rcmail_send_mdn($message, &$smtp_error)
         // SMTP options
         $options = array('mdn_use_from' => (bool) $RCMAIL->config->get('mdn_use_from'));
 
-        $sent = $RCMAIL->deliver_message($compose, $identity['email'], $mailto, $smtp_error, $body_file, $options);
+        $sent = $RCMAIL->deliver_message($compose, $identity['email'], $mailto, $smtp_error, $body_file, $options, true);
 
         if ($sent) {
             $RCMAIL->storage->set_flag($message->uid, 'MDNSENT');
@@ -2248,41 +2248,50 @@ function rcmail_save_attachment($message, $pid, $compose_id, $params = array())
         $mimetype = $part->ctype_primary . '/' . $part->ctype_secondary;
         $filename = $params['filename'] ?: rcmail_attachment_name($part);
     }
-    else {
+    else if (is_object($message)) {
         // the whole message requested
-        $size = $message->size;
+        $size     = $message->size;
         $mimetype = 'message/rfc822';
         $filename = $params['filename'] ?: 'message_rfc822.eml';
     }
+    else if (is_string($message)) {
+        // the whole message requested
+        $size     = strlen($message);
+        $data     = $message;
+        $mimetype = $params['mimetype'];
+        $filename = $params['filename'];
+    }
 
-    // don't load too big attachments into memory
-    if (!rcube_utils::mem_check($size)) {
-        $temp_dir = unslashify($rcmail->config->get('temp_dir'));
-        $path     = tempnam($temp_dir, 'rcmAttmnt');
+    if (!isset($data)) {
+        // don't load too big attachments into memory
+        if (!rcube_utils::mem_check($size)) {
+            $temp_dir = unslashify($rcmail->config->get('temp_dir'));
+            $path     = tempnam($temp_dir, 'rcmAttmnt');
 
-        if ($fp = fopen($path, 'w')) {
-            if ($pid) {
-                // part body
-                $message->get_part_body($pid, false, 0, $fp);
+            if ($fp = fopen($path, 'w')) {
+                if ($pid) {
+                    // part body
+                    $message->get_part_body($pid, false, 0, $fp);
+                }
+                else {
+                    // complete message
+                    $storage->get_raw_body($message->uid, $fp);
+                }
+
+                fclose($fp);
             }
             else {
-                // complete message
-                $storage->get_raw_body($message->uid, $fp);
+                return false;
             }
-
-            fclose($fp);
+        }
+        else if ($pid) {
+            // part body
+            $data = $message->get_part_body($pid);
         }
         else {
-            return false;
+            // complete message
+            $data = $storage->get_raw_body($message->uid);
         }
-    }
-    else if ($pid) {
-        // part body
-        $data = $message->get_part_body($pid);
-    }
-    else {
-        // complete message
-        $data = $storage->get_raw_body($message->uid);
     }
 
     $attachment = array(
@@ -2293,7 +2302,7 @@ function rcmail_save_attachment($message, $pid, $compose_id, $params = array())
         'data'       => $data,
         'path'       => $path,
         'size'       => $path ? filesize($path) : strlen($data),
-        'charset'    => $part ? $part->charset : null,
+        'charset'    => $part ? $part->charset : $params['charset'],
     );
 
     $attachment = $rcmail->plugins->exec_hook('attachment_save', $attachment);

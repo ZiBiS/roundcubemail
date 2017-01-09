@@ -354,7 +354,20 @@ function rcube_webmail()
           this.init_messageform();
         }
         else if (this.env.action == 'get') {
-          this.enable_command('download', 'print', true);
+          this.enable_command('download', true);
+
+          // Mozilla's PDF.js viewer does not allow printing from host page (#5125)
+          // to minimize user confusion we disable the Print button
+          if (bw.mz && this.env.mimetype == 'application/pdf') {
+            n = 0; // there will be two onload events, first for the preload page
+            $(this.gui_objects.messagepartframe).on('load', function() {
+              if (n++) try { if (this.contentWindow.document) ref.enable_command('print', true); }
+                catch (e) {/* ignore */}
+            });
+          }
+          else
+            this.enable_command('print', true);
+
           if (this.env.is_message) {
             this.enable_command('reply', 'reply-all', 'edit', 'viewsource',
               'forward', 'forward-inline', 'forward-attachment', true);
@@ -474,7 +487,7 @@ function rcube_webmail()
         this.set_page_buttons();
 
         if (this.env.cid) {
-          this.enable_command('show', 'edit', true);
+          this.enable_command('show', 'edit', 'qrcode', true);
           // register handlers for group assignment via checkboxes
           if (this.gui_objects.editform) {
             $('input.groupmember').change(function() {
@@ -593,10 +606,6 @@ function rcube_webmail()
     if (this.gui_objects.editform)
       $("input,select,textarea", this.gui_objects.editform)
         .not(':hidden').not(':disabled').first().select().focus();
-
-    // unset contentframe variable if preview_pane is enabled
-    if (this.env.contentframe && !$('#' + this.env.contentframe).is(':visible'))
-      this.env.contentframe = null;
 
     // prevent from form submit with Enter key in file input fields
     if (bw.ie)
@@ -2431,7 +2440,7 @@ function rcube_webmail()
   {
     var frame, win, name = this.env.contentframe;
 
-    if (name && (frame = this.get_frame_element(name))) {
+    if (frame = this.get_frame_element(name)) {
       if (!show && (win = this.get_frame_window(name))) {
         if (win.location.href.indexOf(this.env.blankpage) < 0) {
           if (win.stop)
@@ -3793,15 +3802,27 @@ function rcube_webmail()
   // wrapper for the mailvelope.createDisplayContainer API call
   this.mailvelope_display_container = function(selector, data, keyring, msgid)
   {
-    mailvelope.createDisplayContainer(selector, data, keyring, { showExternalContent: this.env.safemode }).then(function() {
+    var error_handler = function(error) {
+      // remove mailvelope frame with the error message
+      $(selector + ' > iframe').remove();
+      ref.hide_message(msgid);
+      ref.display_message(error.message, 'error');
+    };
+
+    mailvelope.createDisplayContainer(selector, data, keyring, { showExternalContent: this.env.safemode }).then(function(status) {
+      if (status.error && status.error.message) {
+        return error_handler(status.error);
+      }
+
+      ref.hide_message(msgid);
       $(selector).addClass('mailvelope').children().not('iframe').hide();
-      ref.hide_message(msgid);
+
+      // on success we can remove encrypted part from the attachments list
+      if (ref.env.pgp_mime_part)
+        $('#attach' + ref.env.pgp_mime_part).remove();
+
       setTimeout(function() { $(window).resize(); }, 10);
-    }, function(err) {
-      console.error(err);
-      ref.hide_message(msgid);
-      ref.display_message('Message decryption failed: ' + err.message, 'error')
-    });
+    }, error_handler);
   };
 
   // subroutine to query keyservers for public keys
@@ -5874,6 +5895,9 @@ function rcube_webmail()
       url._search = this.env.search_request;
 
     this.http_request(this.env.task == 'mail' ? 'list-contacts' : 'list', url, lock);
+
+    if (this.env.task != 'mail')
+      this.update_state({_source: src, _page: page && page > 1 ? page : null, _gid: group});
   };
 
   this.list_contacts_clear = function()
@@ -6632,6 +6656,24 @@ function rcube_webmail()
     this.http_request('search', {_sid: id}, lock);
   };
 
+  // display a dialog with QR code image
+  this.qrcode = function()
+  {
+    var title = this.get_label('qrcode'),
+      buttons = [{
+        text: this.get_label('close'),
+        'class': 'mainaction',
+        click: function() {
+          (ref.is_framed() ? parent.$ : $)(this).dialog('destroy');
+        }
+      }],
+      img = new Image(300, 300);
+
+    img.src = this.url('addressbook/qrcode', {_source: this.env.source, _cid: this.env.cid});
+
+    return this.show_popup_dialog(img, title, buttons, {width: 310, height: 410});
+  };
+
 
   /*********************************************************/
   /*********        user settings methods          *********/
@@ -6736,7 +6778,7 @@ function rcube_webmail()
 
     if (this.responses_list) {
       this.responses_list.remove_row(key);
-      if (this.env.contentframe && (frame = this.get_frame_window(this.env.contentframe))) {
+      if (frame = this.get_frame_window(this.env.contentframe)) {
         frame.location.href = this.env.blankpage;
       }
     }
@@ -6751,7 +6793,7 @@ function rcube_webmail()
 
     if (list && id) {
       list.remove_row(rid);
-      if (this.env.contentframe && (frame = this.get_frame_window(this.env.contentframe))) {
+      if (frame = this.get_frame_window(this.env.contentframe)) {
         frame.location.href = this.env.blankpage;
       }
     }
@@ -9193,10 +9235,15 @@ function rcube_webmail()
     }
 
     window.setTimeout(function() {
-      $('<object>').css({position: 'absolute', left: '-10000px'})
-        .attr({data: ref.assets_path('program/resources/dummy.pdf'), width: 1, height: 1, type: 'application/pdf'})
-        .on('load', function() { ref.env.browser_capabilities.pdf = 1; })
-        .on('error', function() { ref.env.browser_capabilities.pdf = 0; })
+      $('<object>').attr({
+          data: ref.assets_path('program/resources/dummy.pdf'),
+          type: 'application/pdf',
+          style: 'position: "absolute"; top: -1000px; height: 1px; width: 1px'
+        })
+        .on('load error', function(e) {
+          ref.env.browser_capabilities.pdf = e.type == 'load' ? 1 : 0;
+          $(this).remove();
+        })
         .appendTo($('body'));
       }, 10);
 
