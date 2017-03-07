@@ -114,8 +114,7 @@ class rcube_imap_generic
         $res = fwrite($this->fp, $string);
 
         if ($res === false) {
-            @fclose($this->fp);
-            $this->fp = null;
+            $this->closeSocket();
         }
 
         return $res;
@@ -2643,7 +2642,7 @@ class rcube_imap_generic
 
         reset($messages);
 
-        while (list($key, $headers) = each($messages)) {
+        foreach ($messages as $key => $headers) {
             $value = null;
 
             switch ($field) {
@@ -2685,7 +2684,7 @@ class rcube_imap_generic
             }
 
             // form new array based on index
-            while (list($key, $val) = each($index)) {
+            foreach ($index as $key => $val) {
                 $result[$key] = $messages[$key];
             }
         }
@@ -3630,14 +3629,12 @@ class rcube_imap_generic
             $data['type'] = 'multipart';
         }
         else {
-            $data['type'] = strtolower($part_a[0]);
-
-            // encoding
+            $data['type']     = strtolower($part_a[0]);
             $data['encoding'] = strtolower($part_a[5]);
 
             // charset
             if (is_array($part_a[2])) {
-               while (list($key, $val) = each($part_a[2])) {
+               foreach ($part_a[2] as $key => $val) {
                     if (strcasecmp($val, 'charset') == 0) {
                         $data['charset'] = $part_a[2][$key+1];
                         break;
