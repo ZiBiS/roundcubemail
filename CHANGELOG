@@ -1,6 +1,26 @@
 CHANGELOG Roundcube Webmail
 ===========================
 
+- Password: Automatic virtualmin domain setting, removed password_virtualmin_format option (#5759)
+- Support AUTHENTICATE LOGIN for IMAP connections (#5563)
+- Support LDAP GSSAPI authentication (#5703)
+- Allow contacts without an email address (#5079)
+- Localized timezone selector (#4983)
+- Update to TinyMCE 4.5.7
+- Fix bug where invalid recipients could be silently discarded (#5739)
+- Fix conflict with _gid cookie of Google Analytics (#5748)
+- Print error from CLI scripts when system/exec function is disabled (#5744)
+- Fix bug where comment notation within style tag would cause the whole style to be ignored (#5747)
+- Fix bug where it wasn't possible to scroll folders list in Edge (#5750)
+- Fix folders list sorting on Windows - if php-intl is available (#5732)
+- Fix addressbook searching by gender (#5757)
+- Fix prevention from using % and * characters in folder name (#5762)
+- Enigma: Fix compatibility with assets_dir
+- Managesieve: Skip redundant LISTSCRIPTS command
+
+RELEASE 1.3-rc
+--------------
+- "Flattened" the larry theme: fresher look by removing shadows and gradients
 - Support logging to php://stdout (#5721)
 - Add support for DelSp=Yes in format=flowed messages (#5702)
 - Update to jQuery 3.2.1
@@ -9,6 +29,7 @@ CHANGELOG Roundcube Webmail
 - Enigma: Always use detached signatures (#5624)
 - Enigma: Fix handling of messages with nested PGP encrypted parts (#5634)
 - Minimize unwanted message loading in preview frame on drag (#5616)
+- Fix failing database schema check in all engines except mysql (#5730)
 - Fix autocomplete popup closing with click outside the input, don't handle Tab key as Enter (#5606)
 - Fix jsdeps.json synchronization on update, warn about missing requirements of install-jsdeps.sh (#5598)
 - Fix missing thread expand icon on search result in widescreen mode (#5613)
@@ -32,6 +53,7 @@ CHANGELOG Roundcube Webmail
 - Fix undesired effects when postgres database uses different timezone than PHP host (#5708)
 - Installer: Fix DB schema initialization on MS SQL Server
 - Fix bug where base_dn setting was ignored inside group_filters (#5720)
+- Password: Fix security issue in virtualmin and sasl drivers [CVE-2017-8114]
 
 RELEASE 1.3-beta
 ----------------
