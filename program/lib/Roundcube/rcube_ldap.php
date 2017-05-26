@@ -61,6 +61,7 @@ class rcube_ldap extends rcube_addressbook
         'kolabgroupofuniquenames' => 'uniqueMember',
         'univentiongroup'         => 'uniqueMember',
         'groupofurls'             => null,
+    	'posixgroup'			  => 'memberUid',
     );
 
     private $base_dn        = '';
@@ -91,6 +92,12 @@ class rcube_ldap extends rcube_addressbook
                 $this->prop['member_attr'] = strtolower($p['groups']['member_attr']);
             else if (empty($p['member_attr']))
                 $this->prop['member_attr'] = 'member';
+            // set user field
+            if (!empty($p['groups']['user_attr']))
+                $this->prop['user_attr'] = strtolower($p['groups']['user_attr']);
+            else if (empty($p['user_attr']))
+                $this->prop['user_attr'] = 'uid';
+            $this->fieldmap['user_attr'] = $this->prop['user_attr'];            
             // set default name attribute to cn
             if (empty($this->prop['groups']['name_attr']))
                 $this->prop['groups']['name_attr'] = 'cn';
@@ -632,7 +639,10 @@ class rcube_ldap extends rcube_addressbook
                     $members       = $this->_list_group_memberurl($dn, $entry, $count);
                     $group_members = array_merge($group_members, $members);
                 }
-
+                else if (!empty($entry['memberuid'])) {
+                	$members       = $this->_list_group_memberuid($dn, $entry, $count);
+                	$group_members = array_merge($group_members, $members);
+                }
                 if ($this->prop['sizelimit'] && count($group_members) > $this->prop['sizelimit']) {
                     break 2;
                 }
@@ -721,6 +731,37 @@ class rcube_ldap extends rcube_addressbook
         return $group_members;
     }
 
+    /**
+     * List members of group class posixGroup
+     *
+     * @param string Group DN
+     * @param array  Group entry
+     * @param boolean True if only used for counting
+     * @return array Accumulated group members
+     */
+    private function _list_group_memberuid($dn, $entry, $count)
+    {
+    	$group_members = array();
+    
+    	for ($i=0; $i < $entry['memberuid']['count']; $i++) {
+    
+    		// add search filter if any
+    		$filter = '(&(objectClass=posixAccount)(uid=' . $entry['memberuid'][$i]. '))';
+    		$attrs = $count ? array('dn','cn') : $this->prop['list_attributes'];
+    		if ($result = $this->ldap->search($this->base_dn, $filter, $this->prop['scope'], $attrs, $this->group_data)) {
+    			$entries = $result->entries();
+    			for ($j = 0; $j < $entries['count']; $j++) {
+    				if ($this->is_group_entry($entries[$j]) && ($nested_group_members = $this->list_group_members($entries[$j]['dn'], $count)))
+    					$group_members = array_merge($group_members, $nested_group_members);
+    				else
+    					$group_members[] = $entries[$j];
+    			}
+    		}
+    	}
+    
+    	return $group_members;
+    }
+    
     /**
      * Callback for sorting entries
      */
@@ -2066,12 +2107,18 @@ class rcube_ldap extends rcube_addressbook
         $contact_dn  = self::dn_decode($contact_id);
         $name_attr   = $this->prop['groups']['name_attr'] ?: 'cn';
         $member_attr = $this->get_group_member_attr();
-        $add_filter  = '';
+        $add_filter  = "(|(member=$contact_dn)(uniqueMember=$contact_dn))";
 
         if ($member_attr != 'member' && $member_attr != 'uniqueMember')
-            $add_filter = "($member_attr=$contact_dn)";
-        $filter = strtr("(|(member=$contact_dn)(uniqueMember=$contact_dn)$add_filter)", array('\\' => '\\\\'));
-
+        	if ($member_attr == 'memberUid'){
+        		$contact = $this->get_record($contact_id, true);
+        		$contact_uid = $contact['user_attr'];
+        		$add_filter  = "($member_attr=$contact_uid)";
+        	} else {
+        		$add_filter  = "($member_attr=$contact_dn)";
+        	}
+        $filter = strtr($add_filter, array('\\' => '\\\\'));
+        	 
         $ldap_data = $this->ldap->search($base_dn, $filter, 'sub', array('dn', $name_attr));
         if ($ldap_data === false) {
             return array();
