@@ -26,6 +26,7 @@ $labels['server']    = 'Server';
 $labels['login']     = 'Login';
 
 // taskbar
+$labels['menu']     = 'Menu';
 $labels['logout']   = 'Logout';
 $labels['mail']     = 'Mail';
 $labels['settings'] = 'Settings';
@@ -54,6 +55,7 @@ $labels['priority'] = 'Priority';
 $labels['organization'] = 'Organization';
 $labels['readstatus'] = 'Read status';
 $labels['listoptions'] = 'List options...';
+$labels['listoptionstitle'] = 'List options';
 
 $labels['mailboxlist'] = 'Folders';
 $labels['messagesfromto'] = 'Messages $from to $to of $count';
@@ -137,6 +139,8 @@ $labels['forward']          = 'Forward';
 $labels['forwardinline']    = 'Forward inline';
 $labels['forwardattachment'] = 'Forward as attachment';
 $labels['forwardmessage']   = 'Forward the message';
+$labels['bouncemsg']        = 'Resend (bounce)';
+$labels['bounce']           = 'Resend';
 $labels['deletemessage']    = 'Delete message';
 $labels['movemessagetotrash'] = 'Move message to trash';
 $labels['printmessage']     = 'Print this message';
@@ -207,6 +211,9 @@ $labels['layout'] = 'Layout';
 $labels['layoutwidescreen'] = 'Widescreen';
 $labels['layoutdesktop'] = 'Desktop';
 $labels['layoutlist'] = 'List';
+$labels['layoutwidescreendesc'] = 'Widescreen (3-column view)';
+$labels['layoutdesktopdesc'] = 'Desktop (wide list and mail preview below)';
+$labels['layoutlistdesc'] = 'List (no mail preview)';
 
 $labels['folderactions'] = 'Folder actions...';
 $labels['compact'] = 'Compact';
@@ -223,6 +230,7 @@ $labels['quotastorage'] = 'Disk space';
 $labels['quotamessage'] = 'Messages count';
 
 $labels['quicksearch']  = 'Quick search';
+$labels['searchplaceholder']  = 'Search...';
 $labels['resetsearch']  = 'Reset search';
 $labels['searchmod']  = 'Search modifiers';
 $labels['msgtext']  = 'Entire message';
@@ -530,6 +538,7 @@ $labels['signatureoptions'] = 'Signature Options';
 $labels['whenreplying'] = 'When replying';
 $labels['replyempty'] = 'do not quote the original message';
 $labels['replytopposting'] = 'start new message above the quote';
+$labels['replytoppostingnoindent'] = 'start new message above the quote (no indentation)';
 $labels['replybottomposting'] = 'start new message below the quote';
 $labels['replyremovesignature'] = 'When replying remove original signature from message';
 $labels['autoaddsignature'] = 'Automatically add signature';
@@ -582,9 +591,14 @@ $labels['personalfolder'] = 'Private Folder';
 $labels['otherfolder'] = 'Other User\'s Folder';
 $labels['sharedfolder'] = 'Public Folder';
 $labels['findfolders'] = 'Find folders';
+$labels['findcontacts'] = 'Find contacts';
+$labels['findmail'] = 'Find mail messages';
 $labels['namespace.personal'] = 'Personal';
 $labels['namespace.other'] = 'Other users';
 $labels['namespace.shared'] = 'Shared';
+$labels['dualuselabel'] = 'Can contain only';
+$labels['dualusemail'] = 'messages';
+$labels['dualusefolder'] = 'folders';
 
 $labels['sortby'] = 'Sort by';
 $labels['sortasc']  = 'Sort ascending';
@@ -597,6 +611,7 @@ $labels['version'] = 'Version';
 $labels['source'] = 'Source';
 $labels['license'] = 'License';
 $labels['support'] = 'Get support';
+$labels['savedsearches'] = 'Saved searches';
 
 // units
 $labels['B'] = 'B';
@@ -657,6 +672,7 @@ $labels['arialabelmarkmessagesas'] = 'Mark selected messages as...';
 $labels['arialabelcomposeoptions'] = 'Composition options';
 $labels['arialabelresponsesmenu'] = 'Canned responses menu';
 $labels['arialabelattachmentuploadform'] = 'Attachment upload form';
+$labels['arialabelattachmentmenu'] = 'Attachment options';
 $labels['arialabelattachmentpreview'] = 'Attachment preview';
 $labels['ariasummarycomposecontacts'] = 'List of contacts and groups to select as recipients';
 $labels['arialabelcontactexportoptions'] = 'Contact export options';
@@ -665,6 +681,7 @@ $labels['arialabelpreferencesform'] = 'Preferences form';
 $labels['arialabelidentityeditfrom'] = 'Identity edit form';
 $labels['arialabelresonseeditfrom'] = 'Response edit form';
 $labels['arialabelsearchterms'] = 'Search terms';
+$labels['arialabeldropactionmenu'] = 'Drag-n-Drop action menu';
 
 $labels['helplistnavigation'] = 'List keyboard navigation';
 $labels['helplistkeyboardnavigation'] = "Arrows up/down: Move row focus/selection.

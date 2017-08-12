@@ -380,7 +380,12 @@ class rcube_imap extends rcube_storage
                 return false;
             }
 
-            $_SESSION[$sess_key] = $this->conn->getCapability($cap);
+            if ($cap == rcube_storage::DUAL_USE_FOLDERS) {
+                $_SESSION[$sess_key] = $this->detect_dual_use_folders();
+            }
+            else {
+                $_SESSION[$sess_key] = $this->conn->getCapability($cap);
+            }
         }
 
         return $_SESSION[$sess_key];
@@ -2490,13 +2495,12 @@ class rcube_imap extends rcube_storage
 
             // clear cached counters
             if ($flag == 'SEEN' || $flag == 'UNSEEN') {
-                $this->clear_messagecount($folder, 'SEEN');
-                $this->clear_messagecount($folder, 'UNSEEN');
+                $this->clear_messagecount($folder, array('SEEN', 'UNSEEN'));
             }
             else if ($flag == 'DELETED' || $flag == 'UNDELETED') {
-                $this->clear_messagecount($folder, 'DELETED');
-                // remove cached messages
+                $this->clear_messagecount($folder, array('ALL', 'THREADS'));
                 if ($this->options['skip_deleted']) {
+                    // remove cached messages
                     $this->clear_message_cache($folder, $all_mode ? null : explode(',', $uids));
                 }
             }
@@ -3209,13 +3213,20 @@ class rcube_imap extends rcube_storage
      * @param string  $folder    New folder name
      * @param boolean $subscribe True if the new folder should be subscribed
      * @param string  $type      Optional folder type (junk, trash, drafts, sent, archive)
+     * @param boolean $noselect  Make the folder a \NoSelect folder by adding hierarchy
+     *                           separator at the end (useful for server that do not support
+     *                           both folders and messages as folder children)
      *
      * @return boolean True on success
      */
-    public function create_folder($folder, $subscribe = false, $type = null)
+    public function create_folder($folder, $subscribe = false, $type = null, $noselect = false)
     {
         if (!$this->check_connection()) {
             return false;
+        }
+
+        if ($noselect) {
+            $folder .= $this->delimiter;
         }
 
         $result = $this->conn->createFolder($folder, $type ? array("\\" . ucfirst($type)) : null);
@@ -3225,7 +3236,7 @@ class rcube_imap extends rcube_storage
             // clear cache
             $this->clear_cache('mailboxes', true);
 
-            if ($subscribe) {
+            if ($subscribe && !$noselect) {
                 $this->subscribe($folder);
             }
         }
@@ -3299,7 +3310,7 @@ class rcube_imap extends rcube_storage
      *
      * @return boolean True on success, False on failure
      */
-    function delete_folder($folder)
+    public function delete_folder($folder)
     {
         if (!$this->check_connection()) {
             return false;
@@ -4177,6 +4188,38 @@ class rcube_imap extends rcube_storage
      * --------------------------------*/
 
     /**
+     * Determines if server supports dual use folders (those can
+     * contain both sub-folders and messages).
+     *
+     * @return bool
+     */
+    protected function detect_dual_use_folders()
+    {
+        $val = rcube::get_instance()->config->get('imap_dual_use_folders');
+        if ($val !== null) {
+            return (bool) $val;
+        }
+
+        if (!$this->check_connection()) {
+            return false;
+        }
+
+        $folder    = str_replace('.', '', 'foldertest' . microtime(true));
+        $folder    = $this->mod_folder($folder, 'in');
+        $subfolder = $folder . $this->delimiter . 'foldertest';
+
+        if ($this->conn->createFolder($folder)) {
+            if ($created = $this->conn->createFolder($subfolder)) {
+                $this->conn->deleteFolder($subfolder);
+            }
+
+            $this->conn->deleteFolder($folder);
+
+            return $created;
+        }
+    }
+
+    /**
      * Validate the given input and save to local properties
      *
      * @param string $sort_field Sort column
@@ -4371,13 +4414,15 @@ class rcube_imap extends rcube_storage
     /**
      * Remove messagecount of a specific folder from cache
      */
-    protected function clear_messagecount($folder, $mode=null)
+    protected function clear_messagecount($folder, $mode = array())
     {
         $a_folder_cache = $this->get_cache('messagecount');
 
         if (is_array($a_folder_cache[$folder])) {
-            if ($mode) {
-                unset($a_folder_cache[$folder][$mode]);
+            if (!empty($mode)) {
+                foreach ((array) $mode as $key) {
+                    unset($a_folder_cache[$folder][$key]);
+                }
             }
             else {
                 unset($a_folder_cache[$folder]);

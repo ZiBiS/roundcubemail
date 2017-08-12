@@ -6,7 +6,7 @@
  * Plugin that adds a new button to the mailbox toolbar
  * to move messages to a (user selectable) archive folder.
  *
- * @version 3.0
+ * @version 3.2
  * @license GNU GPLv3+
  * @author Andre Rodier, Thomas Bruederli, Aleksander Machniak
  */
@@ -43,6 +43,7 @@ class archive extends rcube_plugin
                     'height'   => 32,
                     'title'    => 'buttontitle',
                     'domain'   => $this->ID,
+                    'innerclass' => 'inner',
                 ),
                 'toolbar');
 
@@ -188,16 +189,14 @@ class archive extends rcube_plugin
                             . $delimiter . $rcmail->format_date($message->timestamp, 'm');
                         break;
 
-                    case 'sender':
-                        $from = $message->get('from');
-                        preg_match('/[\b<](.+@.+)[\b>]/i', $from, $m);
-                        $subfolder = $m[1] ?: $this->gettext('unkownsender');
+                    case 'tbmonth':
+                        $subfolder = $rcmail->format_date($message->timestamp, 'Y')
+                            . $delimiter . $rcmail->format_date($message->timestamp, 'Y')
+                            . '-' . $rcmail->format_date($message->timestamp, 'm');
+                        break;
 
-                        // replace reserved characters in folder name
-                        $repl = $delimiter == '-' ? '_' : '-';
-                        $replacements[$delimiter] = $repl;
-                        $replacements['.'] = $repl;  // some IMAP server do not allow . characters
-                        $subfolder = strtr($subfolder, $replacements);
+                    case 'sender':
+                        $subfolder = $this->sender_subfolder($message->get('from'));
                         break;
                     }
 
@@ -291,8 +290,11 @@ class archive extends rcube_plugin
 
         // add new rows from next page (if any)
         if ($addrows && $count && $uids != '*' && ($jump_back || $nextpage_count > 0)) {
+            // #5862: Don't add more rows than it was on the next page
+            $count = $jump_back ? null : min($nextpage_count, $count);
+
             $a_headers = $storage->list_messages($mbox, null,
-                rcmail_sort_column(), rcmail_sort_order(), $jump_back ? null : $count);
+                rcmail_sort_column(), rcmail_sort_order(), $count);
 
             rcmail_js_message_list($a_headers, false);
         }
@@ -401,31 +403,36 @@ class archive extends rcube_plugin
             }
 
             $args['blocks']['main']['options']['archive_mbox'] = array(
-                'title'   => $this->gettext('archivefolder'),
-                'content' => $select->show($mbox, array('name' => "_archive_mbox"))
+                'title'   => html::label('_archive_mbox', rcube::Q($this->gettext('archivefolder'))),
+                'content' => $select->show($mbox, array('id' => '_archive_mbox', 'name' => '_archive_mbox'))
             );
 
-            // add option for structuring the archive folder
-            $archive_type = new html_select(array('name' => '_archive_type', 'id' => 'ff_archive_type'));
-            $archive_type->add($this->gettext('none'), '');
-            $archive_type->add($this->gettext('archivetypeyear'), 'year');
-            $archive_type->add($this->gettext('archivetypemonth'), 'month');
-            $archive_type->add($this->gettext('archivetypesender'), 'sender');
-            $archive_type->add($this->gettext('archivetypefolder'), 'folder');
+            // If the server supports only either messages or folders in a folder
+            // we do not allow archive splitting, for simplicity (#5057)
+            if ($rcmail->get_storage()->get_capability(rcube_storage::DUAL_USE_FOLDERS)) {
+                // add option for structuring the archive folder
+                $archive_type = new html_select(array('name' => '_archive_type', 'id' => 'ff_archive_type'));
+                $archive_type->add($this->gettext('none'), '');
+                $archive_type->add($this->gettext('archivetypeyear'), 'year');
+                $archive_type->add($this->gettext('archivetypemonth'), 'month');
+                $archive_type->add($this->gettext('archivetypetbmonth'), 'tbmonth');
+                $archive_type->add($this->gettext('archivetypesender'), 'sender');
+                $archive_type->add($this->gettext('archivetypefolder'), 'folder');
 
-            $args['blocks']['archive'] = array(
-                'name' => rcube::Q($this->gettext('settingstitle')),
-                'options' => array('archive_type' => array(
-                        'title'   => $this->gettext('archivetype'),
-                        'content' => $archive_type->show($type)
+                $args['blocks']['archive'] = array(
+                    'name'    => rcube::Q($this->gettext('settingstitle')),
+                    'options' => array('archive_type' => array(
+                            'title'   => html::label('ff_archive_type', rcube::Q($this->gettext('archivetype'))),
+                            'content' => $archive_type->show($type)
+                        )
                     )
-                )
-            );
+                );
+            }
         }
         else if ($args['section'] == 'server' && !in_array('read_on_archive', $dont_override)) {
             $chbox = new html_checkbox(array('name' => '_read_on_archive', 'id' => 'ff_read_on_archive', 'value' => 1));
             $args['blocks']['main']['options']['read_on_archive'] = array(
-                'title'   => $this->gettext('readonarchive'),
+                'title'   => html::label('ff_read_on_archive', rcube::Q($this->gettext('readonarchive'))),
                 'content' => $chbox->show($rcmail->config->get('read_on_archive') ? 1 : 0)
             );
         }
@@ -449,5 +456,41 @@ class archive extends rcube_plugin
         }
 
         return $args;
+    }
+
+    /**
+     * Create folder name from the message sender address
+     */
+    protected function sender_subfolder($from)
+    {
+        static $delim;
+        static $vendor;
+
+        preg_match('/[\b<](.+@.+)[\b>]/i', $from, $m);
+
+        if (empty($m[1])) {
+            return $this->gettext('unkownsender');
+        }
+
+        if ($delim === null) {
+            $storage = rcmail::get_instance()->get_storage();
+            $delim   = $storage->get_hierarchy_delimiter();
+            $vendor  = $storage->get_vendor();
+        }
+
+        $replace = $delim == '-' ? '_' : '-';
+        $replacements[$delim] = $replace;
+
+        // some IMAP servers do not allow . characters
+        // @FIXME: really? which ones?
+        $replacements['.'] = $replace;
+
+        // Cyrus-IMAP does not allow @ character in folder name
+        if ($vendor == 'cyrus') {
+            $replacements['@'] = $replace;
+        }
+
+        // replace reserved characters in folder name
+        return strtr($m[1], $replacements);
     }
 }

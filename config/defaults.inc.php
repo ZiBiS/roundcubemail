@@ -77,6 +77,9 @@ $config['log_date_format'] = 'd-M-Y H:i:s O';
 // set to 0 to avoid session IDs being logged.
 $config['log_session_id'] = 8;
 
+// Default extension used for log file name
+$config['log_file_ext'] = '.log';
+
 // Syslog ident string to use, if using the 'syslog' log driver.
 $config['syslog_id'] = 'roundcube';
 
@@ -203,6 +206,11 @@ $config['imap_force_ns'] = false;
 // from user home directory. IMAP RFC does not forbid that.
 // Enable this option to hide them and disable possibility to create such.
 $config['imap_skip_hidden_folders'] = false;
+
+// Some servers do not support folders with both folders and messages inside
+// If your server supports that use true, if it does not, use false.
+// By default it will be determined automatically (once per user session).
+$config['imap_dual_use_folders'] = null;
 
 // List of disabled imap extensions.
 // Use if your IMAP server has broken implementation of some feature
@@ -761,9 +769,6 @@ $config['spellcheck_ignore_nums'] = false;
 // Makes that words with symbols will be ignored (e.g. g@@gle)
 $config['spellcheck_ignore_syms'] = false;
 
-// Use this char/string to separate recipients when composing a new message
-$config['recipients_separator'] = ',';
-
 // Number of lines at the end of a message considered to contain the signature.
 // Increase this value if signatures are not properly detected and colored
 $config['sig_max_lines'] = 15;
@@ -1150,6 +1155,7 @@ $config['autoexpand_threads'] = 0;
 // -1 - don't cite the original message
 // 0  - place cursor below the original message
 // 1  - place cursor above original message (top posting)
+// 2  - place cursor above original message (top posting), but do not indent the quote
 $config['reply_mode'] = 0;
 
 // When replying strip original signature from message

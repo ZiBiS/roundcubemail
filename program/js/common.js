@@ -58,14 +58,15 @@ function roundcube_browser()
   this.dom = document.getElementById ? true : false;
   this.dom2 = document.addEventListener && document.removeEventListener;
 
-  this.webkit = this.agent_lc.indexOf('applewebkit') > 0;
+  this.edge = this.agent_lc.indexOf(' edge/') > 0;
+  this.webkit = !this.edge && this.agent_lc.indexOf('applewebkit') > 0;
   this.ie = (document.all && !window.opera) || (this.win && this.agent_lc.indexOf('trident/') > 0);
 
   if (window.opera) {
     this.opera = true; // Opera < 15
     this.vendver = opera.version();
   }
-  else if (!this.ie) {
+  else if (!this.ie && !this.edge) {
     this.chrome = this.agent_lc.indexOf('chrome') > 0;
     this.opera = this.webkit && this.agent.indexOf(' OPR/') > 0; // Opera >= 15
     this.safari = !this.chrome && !this.opera && (this.webkit || this.agent_lc.indexOf('safari') > 0);
@@ -91,6 +92,7 @@ function roundcube_browser()
   this.tablet = /ipad|android|xoom|sch-i800|playbook|tablet|kindle/i.test(this.agent_lc);
   this.mobile = /iphone|ipod|blackberry|iemobile|opera mini|opera mobi|mobile/i.test(this.agent_lc);
   this.touch = this.mobile || this.tablet;
+  this.pointer = typeof window.PointerEvent == "function";
   this.cookies = n.cookieEnabled;
 
   // test for XMLHTTP support
@@ -108,7 +110,9 @@ function roundcube_browser()
     var classname = ' js';
 
     if (this.ie)
-      classname += ' ie ie'+parseInt(this.vendver);
+      classname += ' ms ie ie'+parseInt(this.vendver);
+    else if (this.edge)
+      classname += ' ms edge';
     else if (this.opera)
       classname += ' opera';
     else if (this.konq)
@@ -607,6 +611,18 @@ if (!String.prototype.startsWith) {
   String.prototype.startsWith = function(search, position) {
     position = position || 0;
     return this.slice(position, search.length) === search;
+  };
+}
+
+if (!String.prototype.endsWith) {
+  String.prototype.endsWith = function(searchString, position) {
+    var subjectString = this.toString();
+    if (typeof position !== 'number' || !isFinite(position) || Math.floor(position) !== position || position > subjectString.length) {
+      position = subjectString.length;
+    }
+    position -= searchString.length;
+    var lastIndex = subjectString.lastIndexOf(searchString, position);
+    return lastIndex !== -1 && lastIndex === position;
   };
 }
 

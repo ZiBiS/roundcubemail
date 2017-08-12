@@ -1118,16 +1118,7 @@ class rcube_imap_generic
         if ($this->selected === $mailbox) {
             return true;
         }
-/*
-    Temporary commented out because Courier returns \Noselect for INBOX
-    Requires more investigation
 
-        if (is_array($this->data['LIST']) && is_array($opts = $this->data['LIST'][$mailbox])) {
-            if (in_array('\\Noselect', $opts)) {
-                return false;
-            }
-        }
-*/
         $params = array($this->escape($mailbox));
 
         // QRESYNC data items
@@ -1250,7 +1241,7 @@ class rcube_imap_generic
         }
 
         list($code, $response) = $this->execute('STATUS', array($this->escape($mailbox),
-            '(' . implode(' ', (array) $items) . ')'));
+            '(' . implode(' ', $items) . ')'));
 
         if ($code == self::ERROR_OK && preg_match('/^\* STATUS /i', $response)) {
             $result   = array();
@@ -1263,10 +1254,10 @@ class rcube_imap_generic
             if (!is_array($items) && ($pos = strpos($response, '(')) !== false) {
                 $response = substr($response, $pos);
                 $items    = $this->tokenizeResponse($response, 1);
+            }
 
-                if (!is_array($items)) {
-                    return $result;
-                }
+            if (!is_array($items)) {
+                return $result;
             }
 
             for ($i=0, $len=count($items); $i<$len; $i += 2) {
@@ -3415,37 +3406,16 @@ class rcube_imap_generic
 
             // The METADATA response can contain multiple entries in a single
             // response or multiple responses for each entry or group of entries
-            if (!empty($data) && ($size = count($data))) {
-                for ($i=0; $i<$size; $i++) {
-                    if (isset($mbox) && is_array($data[$i])) {
-                        $size_sub = count($data[$i]);
-                        for ($x=0; $x<$size_sub; $x+=2) {
-                            if ($data[$i][$x+1] !== null)
-                                $result[$mbox][$data[$i][$x]] = $data[$i][$x+1];
+            for ($i = 0, $size = count($data); $i < $size; $i++) {
+                if ($data[$i] === '*'
+                    && $data[++$i] === 'METADATA'
+                    && is_string($mbox = $data[++$i])
+                    && is_array($data[++$i])
+                ) {
+                    for ($x = 0, $size2 = count($data[$i]); $x < $size2; $x += 2) {
+                        if ($data[$i][$x+1] !== null) {
+                            $result[$mbox][$data[$i][$x]] = $data[$i][$x+1];
                         }
-                        unset($data[$i]);
-                    }
-                    else if ($data[$i] == '*') {
-                        if ($data[$i+1] == 'METADATA') {
-                            $mbox = $data[$i+2];
-                            unset($data[$i]);   // "*"
-                            unset($data[++$i]); // "METADATA"
-                            unset($data[++$i]); // Mailbox
-                        }
-                        // get rid of other untagged responses
-                        else {
-                            unset($mbox);
-                            unset($data[$i]);
-                        }
-                    }
-                    else if (isset($mbox)) {
-                        if ($data[++$i] !== null)
-                            $result[$mbox][$data[$i-1]] = $data[$i];
-                        unset($data[$i]);
-                        unset($data[$i-1]);
-                    }
-                    else {
-                        unset($data[$i]);
                     }
                 }
             }

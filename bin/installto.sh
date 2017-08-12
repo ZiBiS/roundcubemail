@@ -52,21 +52,24 @@ if (strtolower($input) == 'y') {
   if (file_exists("$target_dir/.htaccess")) {
     $htaccess_copied = copy("$target_dir/.htaccess", "$target_dir/.htaccess.orig");
   }
+  if (file_exists("$target_dir/.user.ini")) {
+    $user_ini_copied = copy("$target_dir/.user.ini", "$target_dir/.user.ini.orig");
+  }
 
   $dirs = array('program','installer','bin','SQL','plugins','skins');
-  if (is_dir(INSTALL_PATH . 'vendor') && !is_file(INSTALL_PATH . 'composer.json')) {
+  if (is_dir(INSTALL_PATH . 'vendor') && !is_file("$target_dir/composer.json")) {
     $dirs[] = 'vendor';
   }
   foreach ($dirs as $dir) {
     // @FIXME: should we use --delete for all directories?
-    $delete  = in_array($dir, array('program', 'installer')) ? '--delete ' : '';
-    $command = "rsync -aC --out-format \"%n\" " . $delete . INSTALL_PATH . "$dir/* $target_dir/$dir/";
+    $delete  = in_array($dir, array('program', 'installer', 'vendor')) ? '--delete ' : '';
+    $command = "rsync -aC --out-format=%n " . $delete . INSTALL_PATH . "$dir/ $target_dir/$dir/";
     if (!system($command, $ret) || $ret > 0) {
       rcube::raise_error("Failed to execute command: $command", false, true);
     }
   }
-  foreach (array('index.php','.htaccess','config/defaults.inc.php','composer.json-dist','jsdeps.json','CHANGELOG','README.md','UPGRADING','LICENSE','INSTALL') as $file) {
-    $command = "rsync -a --out-format \"%n\" " . INSTALL_PATH . "$file $target_dir/$file";
+  foreach (array('index.php','.htaccess','.user.ini','config/defaults.inc.php','composer.json-dist','jsdeps.json','CHANGELOG','README.md','UPGRADING','LICENSE','INSTALL') as $file) {
+    $command = "rsync -a --out-format=%n " . INSTALL_PATH . "$file $target_dir/$file";
     if (file_exists(INSTALL_PATH . $file) && (!system($command, $ret) || $ret > 0)) {
       rcube::raise_error("Failed to execute command: $command", false, true);
     }
@@ -86,6 +89,16 @@ if (strtolower($input) == 'y') {
     }
   }
 
+  // Inform the user about .user.ini change
+  if (!empty($user_ini_copied)) {
+    if (file_get_contents("$target_dir/.user.ini") != file_get_contents("$target_dir/.user.ini.orig")) {
+      echo "\n!! Old .user.ini file saved as .user.ini.orig !!";
+    }
+    else {
+      @unlink("$target_dir/.user.ini.orig");
+    }
+  }
+
   echo "\n\n";
 
   if (is_dir("$target_dir/skins/default")) {
@@ -97,6 +110,21 @@ if (strtolower($input) == 'y') {
             system("rm -rf $target_dir/$plugin_skin_dir/default");
       }
       echo "done.\n\n";
+  }
+
+  // check if js-deps are up-to-date
+  if (file_exists("$target_dir/jsdeps.json") && file_exists("$target_dir/bin/install-jsdeps.sh")) {
+    $jsdeps = json_decode(file_get_contents("$target_dir/jsdeps.json"));
+    $package = $jsdeps->dependencies[0];
+    $dest_file = $target_dir . '/' . $package->dest;
+    if (!file_exists($dest_file) || sha1_file($dest_file) !== $package->sha1) {
+        echo "Installing JavaScript dependencies...";
+        system("cd $target_dir && bin/install-jsdeps.sh");
+        echo "done.\n\n";
+    }
+  }
+  else {
+    echo "JavaScript dependencies installation skipped...\n";
   }
 
   echo "Running update script at target...\n";

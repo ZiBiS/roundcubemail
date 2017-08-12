@@ -66,8 +66,10 @@ if (empty($RCMAIL->action) || $RCMAIL->action == 'list') {
     if (empty($RCMAIL->action)) {
         $OUTPUT->set_env('search_mods', rcmail_search_mods());
 
-        if (!empty($_SESSION['search_scope']))
-            $OUTPUT->set_env('search_scope', $_SESSION['search_scope']);
+        $scope = rcube_utils::get_input_value('_scope', rcube_utils::INPUT_GET) ?: $_SESSION['search_scope'];
+        if ($scope && preg_match('/^(all|sub)$/i', $scope)) {
+            $OUTPUT->set_env('search_scope', strtolower($scope));
+        }
 
         rcmail_list_pagetitle();
     }
@@ -110,7 +112,8 @@ if (empty($RCMAIL->action) || $RCMAIL->action == 'list') {
             'copy', 'move', 'quota', 'replyall', 'replylist', 'stillsearching',
             'flagged', 'unflagged', 'unread', 'deleted', 'replied', 'forwarded',
             'priority', 'withattachment', 'fileuploaderror', 'mark', 'markallread',
-            'folders-cur', 'folders-sub', 'folders-all', 'cancel');
+            'folders-cur', 'folders-sub', 'folders-all', 'cancel', 'bounce', 'bouncemsg',
+            'sendingmessage');
     }
 }
 
@@ -594,7 +597,7 @@ function rcmail_message_list_head($attrib, $a_show_cols)
         $a_sort_cols = array('subject', 'date', 'from', 'to', 'fromto', 'size', 'cc');
 
     if (!empty($attrib['optionsmenuicon'])) {
-        $list_menu = rcmail_options_menu_link($attrib);
+        $list_menu = rcmail_options_menu_link();
     }
 
     $cells = $coltypes = array();
@@ -659,7 +662,7 @@ function rcmail_message_list_head($attrib, $a_show_cols)
     return $cells;
 }
 
-function rcmail_options_menu_link($attrib)
+function rcmail_options_menu_link($attrib = array())
 {
     global $RCMAIL;
 
@@ -669,11 +672,14 @@ function rcmail_options_menu_link($attrib)
     if (is_string($attrib['optionsmenuicon']) && $attrib['optionsmenuicon'] != 'true') {
         $inner = html::img(array('src' => $RCMAIL->output->abs_url($attrib['optionsmenuicon'], true), 'alt' => $title));
     }
+    else if ($attrib['innerclass']) {
+        $inner = html::span($attrib['innerclass'], $inner);
+    }
 
     return html::a(array(
             'href'     => '#list-options',
             'onclick'  => $onclick,
-            'class'    => 'listmenu',
+            'class'    => isset($attrib['class']) ? $attrib['class'] : 'listmenu',
             'id'       => 'listmenulink',
             'title'    => $title,
             'tabindex' => '0',
@@ -1701,18 +1707,21 @@ function rcmail_address_string($input, $max=null, $linked=false, $addicon=null, 
             }
 
             if ($addicon && $_SESSION['writeable_abook']) {
+                $label = $RCMAIL->gettext('addtoaddressbook');
+                $icon = html::img(array(
+                        'src'   => $RCMAIL->output->abs_url($addicon, true),
+                        'alt'   => $label,
+                        'class' => 'noselect',
+                ));
                 $address .= html::a(array(
                         'href'    => "#add",
-                        'title'   => $RCMAIL->gettext('addtoaddressbook'),
+                        'title'   => $label,
                         'class'   => 'rcmaddcontact',
                         'onclick' => sprintf("return %s.command('add-contact','%s',this)",
                             rcmail_output::JS_OBJECT_NAME, rcube::JQ($string)),
                     ),
-                    html::img(array(
-                        'src'   => $RCMAIL->output->abs_url($addicon, true),
-                        'alt'   => "Add contact",
-                        'class' => 'noselect',
-                )));
+                    $addicon == 'virtual' ? '' : $icon
+                );
             }
         }
         else {
@@ -1774,9 +1783,10 @@ function rcmail_address_string($input, $max=null, $linked=false, $addicon=null, 
  *
  * @param string Text to wrap
  * @param int    The line width
+ * @param bool   Enable quote indentation
  * @return string The wrapped text
  */
-function rcmail_wrap_and_quote($text, $length = 72)
+function rcmail_wrap_and_quote($text, $length = 72, $quote = true)
 {
     // Rebuild the message body with a maximum of $max chars, while keeping quoted message.
     $max   = max(75, $length + 8);
@@ -1786,18 +1796,28 @@ function rcmail_wrap_and_quote($text, $length = 72)
     foreach ($lines as $line) {
         // don't wrap already quoted lines
         if ($line[0] == '>') {
-            $line = '>' . rtrim($line);
+            $line = rtrim($line);
+            if ($quote) {
+                $line = '>' . $line;
+            }
         }
-        else if (mb_strlen($line) > $max) {
+        // wrap lines above the length limit, but skip these
+        // special lines with links list created by rcube_html2text
+        else if (mb_strlen($line) > $max && !preg_match('|^\[[0-9]+\] https?://\S+$|', $line)) {
             $newline = '';
 
             foreach (explode("\n", rcube_mime::wordwrap($line, $length - 2)) as $l) {
-                $newline .= strlen($l) ? "> $l\n" : ">\n";
+                if ($quote) {
+                    $newline .= strlen($l) ? "> $l\n" : ">\n";
+                }
+                else {
+                    $newline .= "$l\n";
+                }
             }
 
             $line = rtrim($newline);
         }
-        else {
+        else if ($quote) {
             $line = '> ' . $line;
         }
 
@@ -1806,36 +1826,6 @@ function rcmail_wrap_and_quote($text, $length = 72)
     }
 
     return rtrim($out, "\n");
-}
-
-function rcmail_draftinfo_encode($p)
-{
-    $parts = array();
-    foreach ($p as $key => $val) {
-        $encode  = $key == 'folder' || strpos($val, ';') !== false;
-        $parts[] = $key . '=' . ($encode ? 'B::' . base64_encode($val) : $val);
-    }
-
-    return join('; ', $parts);
-}
-
-function rcmail_draftinfo_decode($str)
-{
-    $info = array();
-
-    foreach (preg_split('/;\s+/', $str) as $part) {
-        list($key, $val) = explode('=', $part, 2);
-        if (strpos($val, 'B::') === 0) {
-            $val = base64_decode(substr($val, 3));
-        }
-        else if ($key == 'folder') {
-            $val = base64_decode($val);
-        }
-
-        $info[$key] = $val;
-    }
-
-    return $info;
 }
 
 /**
@@ -1857,7 +1847,7 @@ function rcmail_send_mdn($message, &$smtp_error)
     if ($message->headers->mdn_to && empty($message->headers->flags['MDNSENT']) &&
         ($RCMAIL->storage->check_permflag('MDNSENT') || $RCMAIL->storage->check_permflag('*'))
     ) {
-        $identity  = rcmail_identity_select($message);
+        $identity  = rcmail_sendmail::identity_select($message);
         $sender    = format_email_recipient($identity['email'], $identity['name']);
         $recipient = array_shift(rcube_mime::decode_address_list(
             $message->headers->mdn_to, 1, true, $message->headers->charset));
@@ -1926,110 +1916,11 @@ function rcmail_send_mdn($message, &$smtp_error)
 
 /**
  * Detect recipient identity from specified message
+ * @deprecated Use rcmail_sendmail::identity_select()
  */
 function rcmail_identity_select($MESSAGE, $identities = null, $compose_mode = 'reply')
 {
-    $a_recipients = array();
-    $a_names      = array();
-
-    if ($identities === null) {
-        $identities = rcmail::get_instance()->user->list_identities(null, true);
-    }
-
-    // extract all recipients of the reply-message
-    if (is_object($MESSAGE->headers) && in_array($compose_mode, array('reply', 'forward'))) {
-        $a_to = rcube_mime::decode_address_list($MESSAGE->headers->to, null, true, $MESSAGE->headers->charset);
-        foreach ($a_to as $addr) {
-            if (!empty($addr['mailto'])) {
-                $a_recipients[] = strtolower($addr['mailto']);
-                $a_names[]      = $addr['name'];
-            }
-        }
-
-        if (!empty($MESSAGE->headers->cc)) {
-            $a_cc = rcube_mime::decode_address_list($MESSAGE->headers->cc, null, true, $MESSAGE->headers->charset);
-            foreach ($a_cc as $addr) {
-                if (!empty($addr['mailto'])) {
-                    $a_recipients[] = strtolower($addr['mailto']);
-                    $a_names[]      = $addr['name'];
-                }
-            }
-        }
-    }
-
-    // decode From: address
-    $from = rcube_mime::decode_address_list($MESSAGE->headers->from, null, true, $MESSAGE->headers->charset);
-    $from = array_shift($from);
-    $from['mailto'] = strtolower($from['mailto']);
-
-    $from_idx   = null;
-    $found_idx  = array('to' => null, 'from' => null);
-    $check_from = in_array($compose_mode, array('draft', 'edit', 'reply'));
-
-    // Select identity
-    foreach ($identities as $idx => $ident) {
-        // use From: header when in edit/draft or reply-to-self
-        if ($check_from && $from['mailto'] == strtolower($ident['email_ascii'])) {
-            // remember first matching identity address
-            if ($found_idx['from'] === null) {
-                $found_idx['from'] = $idx;
-            }
-            // match identity name
-            if ($from['name'] && $ident['name'] && $from['name'] == $ident['name']) {
-                $from_idx = $idx;
-                break;
-            }
-        }
-        // use replied/forwarded message recipients
-        else if (($found = array_search(strtolower($ident['email_ascii']), $a_recipients)) !== false) {
-            // remember first matching identity address
-            if ($found_idx['to'] === null) {
-                $found_idx['to'] = $idx;
-            }
-            // match identity name
-            if ($a_names[$found] && $ident['name'] && $a_names[$found] == $ident['name']) {
-                $from_idx = $idx;
-                break;
-            }
-        }
-    }
-
-    // If matching by name+address didn't find any matches,
-    // get first found identity (address) if any
-    if ($from_idx === null) {
-        $from_idx = $found_idx['from'] !== null ? $found_idx['from'] : $found_idx['to'];
-    }
-
-    // Try Return-Path
-    if ($from_idx === null && ($return_path = $MESSAGE->headers->others['return-path'])) {
-        $return_path = array_map('strtolower', (array) $return_path);
-
-        foreach ($identities as $idx => $ident) {
-            // Return-Path header contains an email address, but on some mailing list
-            // it can be e.g. <pear-dev-return-55250-local=domain.tld@lists.php.net>
-            // where local@domain.tld is the address we're looking for (#1489241)
-            $ident1 = strtolower($ident['email_ascii']);
-            $ident2 = str_replace('@', '=', $ident1);
-            $ident1 = '<' . $ident1 . '>';
-            $ident2 = '-' . $ident2 . '@';
-
-            foreach ($return_path as $path) {
-                if ($path == $ident1 || stripos($path, $ident2)) {
-                    $from_idx = $idx;
-                    break 2;
-                }
-            }
-        }
-    }
-
-    // See identity_select plugin for example usage of this hook
-    $plugin = rcmail::get_instance()->plugins->exec_hook('identity_select',
-        array('message' => $MESSAGE, 'identities' => $identities, 'selected' => $from_idx));
-
-    $selected = $plugin['selected'];
-
-    // default identity is always first on the list
-    return $identities[$selected !== null ? $selected : 0];
+    return rcmail_sendmail::identity_select($MESSAGE, $identities, $compose_mode);
 }
 
 // Fixes some content-type names
@@ -2127,7 +2018,13 @@ function rcmail_search_filter($attrib)
 
     $RCMAIL->output->add_gui_object('search_filter', $attrib['id']);
 
-    return $select->show($_REQUEST['_search'] ? $_SESSION['search_filter'] : 'ALL');
+    $selected = rcube_utils::get_input_value('_filter', rcube_utils::INPUT_GET);
+
+    if (!$selected && $_REQUEST['_search']) {
+        $selected = $_SESSION['search_filter'];
+    }
+
+    return $select->show($selected ?: 'ALL');
 }
 
 function rcmail_search_interval($attrib)

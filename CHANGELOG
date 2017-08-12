@@ -1,12 +1,61 @@
 CHANGELOG Roundcube Webmail
 ===========================
 
+- Update to jquery-minicolors 2.2.6
+- Support _filter and _scope as GET arguments for opening mail UI (#5825)
+- Support for IMAP folders that cannot contain both folders and messages (#5057)
+- Added .user.ini file for php-fpm (#5846)
+- Email Resent (Bounce) feature (#4985)
+- Various improvements for templating engine and skin behaviours
+  - Support conditional include
+  - Support for 'link' objects
+  - Support including files with path relative to templates directory
+  - Use <button> instead of <input> for submit button on logon screen
+- Reset onerror on images if placeholder does not exist to prevent from requests storm
+- Unified and simplified code for loading content frame for responses and identities
+- Display contact import and advanced search in popup dialogs
+- Make possible to set (some) config options from a skin
+- Added optional checkbox selection for the list widget
+- Make 'compose' command always enabled
+- Add .log suffix to all log file names, add option log_file_ext to control this (#313)
+- Archive: Fix archiving by sender address on cyrus-imap
+- Archive: Add Thunderbird compatible Month option (#5623)
+- Return "401 Unauthorized" status when login fails (#5663)
+- Support both comma and semicolon as recipient separator, drop recipients_separator option (#5092)
+- Plugin API: Added 'show_bytes' hook (#5001)
+- subscriptions_option: show \\Noselect folders greyed out (#5621)
+- Add option to not indent quoted text on top-posting reply (#5105)
 - Removed global $CONFIG variable
 - Password: Automatic virtualmin domain setting, removed password_virtualmin_format option (#5759)
 - Support AUTHENTICATE LOGIN for IMAP connections (#5563)
 - Support LDAP GSSAPI authentication (#5703)
 - Allow contacts without an email address (#5079)
 - Localized timezone selector (#4983)
+- Use 7bit encoding for ISO-2022-* charsets in sent mail (#5640)
+- Fix duplicated signature when using Back button in Chrome (#5809)
+- Fix touch event issue on messages list in IE/Edge (#5781)
+- Fix so links over images are not removed in plain text signatures converted from HTML (#4473)
+- Fix various issues when downloading files with names containing non-ascii chars, use RFC 2231 (#5772)
+- Add Preferences > Mailbox View > Main Options > Layout (#5829)
+- Password: Fix compatibility with PHP 7+ in cpanel_webmail driver (#5820)
+- Managesieve: Fix parsing dot-staffed lines in multiline text (#5838)
+- Managesieve: Fix AM/PM suffix in vacation time selectors
+- Fix decoding non-ascii attachment names from TNEF attachments (#5646, #5799)
+- Fix uninitialized string offset in rcube_utils::bin2ascii() and make sure rcube_utils::random_bytes() result has always requested length (#5788)
+- Fix bug where HTML messages with @media styles could moddify style of page body (#5811)
+- Fix style issue on selected and unfocused message that is part of a thread (#5798)
+- Fix bug where a.button style from managesieve plugin could impact other elements (#5800)
+- Fix position of selected icon for (Mailvelope) Encrypt button
+- Fix fatal error when using DMY- or MDY-based date format in PostgreSQL (#5808)
+- Fix bug where errors were not printed when using bin/update.sh (#5834)
+- Fix PHP 7.2 warnings on count() use (#5845)
+- Fix bug where Chrome could not upload the same file that was selected before (#5854)
+- Fix duplicate messages on the list after deleting messages on the next to the last page (#5862)
+- Fix bug where messages count was not updated after delete when imap_cache is set (#5872)
+- Bring back double-click behavior on the message list which was removed in 1.3.0 (#5823)
+
+RELEASE 1.3.0
+-------------
 - Update to TinyMCE 4.5.7
 - Fix bug where invalid recipients could be silently discarded (#5739)
 - Fix conflict with _gid cookie of Google Analytics (#5748)
@@ -19,6 +68,9 @@ CHANGELOG Roundcube Webmail
 - Fix POST parameter reflection in default_charset selector (#5768)
 - Enigma: Fix compatibility with assets_dir
 - Managesieve: Skip redundant LISTSCRIPTS command
+- Fix SQL syntax error on MariaDB 10.2 (#5774)
+- Fix bug where zipdownload ignored files with the same name (#5777)
+- Fix bug where it wasn't possible to set timezone to auto-detected value (#5782)
 
 RELEASE 1.3-rc
 --------------

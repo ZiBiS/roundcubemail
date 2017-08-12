@@ -62,6 +62,7 @@ function rcube_list_widget(list, p)
   this.toggleselect = false;
   this.aria_listbox = false;
   this.parent_focus = true;
+  this.checkbox_selection = false;
 
   this.drag_active = false;
   this.col_drag_active = false;
@@ -72,6 +73,9 @@ function rcube_list_widget(list, p)
   this.drag_mouse_start = null;
   this.dblclick_time = 500; // default value on MS Windows is 500
   this.row_init = function(){};  // @deprecated; use list.addEventListener('initrow') instead
+
+  this.pointer_touch_start = 0; // start time of the touch event
+  this.pointer_touch_time = 500; // maximum time a touch should be considered a left mouse button event, after this its something else (eg contextmenu event)
 
   // overwrite default paramaters
   if (p && typeof p === 'object')
@@ -161,7 +165,25 @@ init_row: function(row)
           return true;
       });
 
-    if (bw.touch && row.addEventListener) {
+    // for IE and Edge differentiate between touch, touch+hold using pointer events rather than touch
+    if ((bw.ie || bw.edge) && bw.pointer) {
+      $(row).on('pointerdown', function(e) {
+          if (e.pointerType == 'touch') {
+            self.pointer_touch_start = new Date().getTime();
+            return false;
+          }
+        })
+        .on('pointerup', function(e) {
+          if (e.pointerType == 'touch') {
+            var duration = (new Date().getTime() - self.pointer_touch_start);
+            if (duration <= self.pointer_touch_time) {
+              self.drag_row(e, this.uid);
+              return self.click_row(e, this.uid);
+            }
+          }
+        });
+    }
+    else if (bw.touch && row.addEventListener) {
       row.addEventListener('touchstart', function(e) {
         if (e.touches.length == 1) {
           self.touchmoved = false;
@@ -189,7 +211,7 @@ init_row: function(row)
       $(row)
         .attr('role', 'option')
         .attr('aria-labelledby', lbl_id)
-        .find(this.col_tagname()).eq(this.subject_col).attr('id', lbl_id);
+        .find(this.col_tagname()).eq(this.subject_column()).attr('id', lbl_id);
     }
 
     if (document.all)
@@ -380,6 +402,27 @@ insert_row: function(row, before)
     row = domrow;
   }
 
+  if (this.checkbox_selection) {
+    var cell = document.createElement(this.col_tagname()),
+      chbox = document.createElement('input');
+
+    chbox.type = 'checkbox';
+    chbox.onchange = function(e) {
+      self.select_row(row.uid, CONTROL_KEY, true);
+      e.stopPropagation();
+    };
+    cell.className = 'selection';
+    cell.onclick = function(e) {
+      // this event handler fixes checkbox selection on touch devices
+      if (e.target.nodeName != 'INPUT')
+        chbox.click();
+      e.stopPropagation();
+    };
+    cell.appendChild(chbox);
+
+    row.insertBefore(cell, row.firstChild);
+  }
+
   if (before && tbody.childNodes.length)
     tbody.insertBefore(row, (typeof before == 'object' && before.parentNode == tbody) ? before : tbody.firstChild);
   else
@@ -437,7 +480,7 @@ focus: function(e)
   var focus_elem = null;
 
   if (this.last_selected && this.rows[this.last_selected]) {
-    focus_elem = $(this.rows[this.last_selected].obj).find(this.col_tagname()).eq(this.subject_col).attr('tabindex', '0');
+    focus_elem = $(this.rows[this.last_selected].obj).find(this.col_tagname()).eq(this.subject_column()).attr('tabindex', '0');
   }
 
   // Un-focus already focused elements (#1487123, #1487316, #1488600, #1488620)
@@ -472,7 +515,7 @@ blur: function(e)
 
   if (this.last_selected && this.rows[this.last_selected]) {
     $(this.rows[this.last_selected].obj)
-      .find(this.col_tagname()).eq(this.subject_col).removeAttr('tabindex');
+      .find(this.col_tagname()).eq(this.subject_column()).removeAttr('tabindex');
   }
 
   $(this.list).removeClass('focus');
@@ -922,7 +965,7 @@ col_tagname: function()
 
 get_cell: function(row, index)
 {
-  return $(this.col_tagname(), row).eq(index);
+  return $(this.col_tagname(), row).eq(index + (this.checkbox_selection ? 1 : 0));
 },
 
 /**
@@ -971,7 +1014,7 @@ select_row: function(id, mod_key, with_mouse)
 
   if (this.last_selected && this.rows[this.last_selected]) {
     $(this.rows[this.last_selected].obj).removeClass('focused')
-      .find(this.col_tagname()).eq(this.subject_col).removeAttr('tabindex');
+      .find(this.col_tagname()).eq(this.subject_column()).removeAttr('tabindex');
   }
 
   // unselect if toggleselect is active and the same row was clicked again
@@ -987,7 +1030,7 @@ select_row: function(id, mod_key, with_mouse)
     $(this.rows[id].obj).addClass('focused');
     // set cursor focus to link inside selected row
     if (this.focused)
-      this.focus_noscroll($(this.rows[id].obj).find(this.col_tagname()).eq(this.subject_col).attr('tabindex', '0'));
+      this.focus_noscroll($(this.rows[id].obj).find(this.col_tagname()).eq(this.subject_column()).attr('tabindex', '0'));
   }
 
   if (!this.selection.length)
@@ -1199,6 +1242,9 @@ clear_selection: function(id, no_event)
     this.selection = [];
   }
 
+  if (this.checkbox_selection)
+    $(this.row_tagname() + ':not(.selected) > .selection > input:checked', this.list).prop('checked', false);
+
   if (num_select && !this.selection.length && !no_event) {
     this.triggerEvent('select');
     this.last_selected = null;
@@ -1211,7 +1257,12 @@ clear_selection: function(id, no_event)
  */
 get_selection: function(deep)
 {
-  var res = $.merge([], this.selection);
+  var res;
+
+  if (res = this.triggerEvent('getselection', deep))
+    return res;
+
+  res = $.merge([], this.selection);
 
   // return children of selected threads even if only root is selected
   if (deep !== false && res.length) {
@@ -1257,6 +1308,9 @@ highlight_row: function(id, multiple, norecur)
       this.clear_selection(null, true);
       this.selection[0] = id;
       $(this.rows[id].obj).addClass('selected').attr('aria-selected', 'true');
+
+      if (this.checkbox_selection)
+        $('.selection > input', this.rows[id].obj).prop('checked', true);
     }
   }
   else {
@@ -1265,6 +1319,10 @@ highlight_row: function(id, multiple, norecur)
     if (p === false) { // select row
       this.selection.push(id);
       $(this.rows[id].obj).addClass('selected').attr('aria-selected', 'true');
+
+      if (this.checkbox_selection)
+        $('.selection > input', this.rows[id].obj).prop('checked', true);
+
       if (!norecur && !this.rows[id].expanded)
         this.highlight_children(id, true);
     }
@@ -1274,6 +1332,10 @@ highlight_row: function(id, multiple, norecur)
 
       this.selection = pre.concat(post);
       $(this.rows[id].obj).removeClass('selected').removeAttr('aria-selected');
+
+      if (this.checkbox_selection)
+        $('.selection > input', this.rows[id].obj).prop('checked', false);
+
       if (!norecur && !this.rows[id].expanded)
         this.highlight_children(id, false);
     }
@@ -1529,8 +1591,10 @@ drag_mouse_move: function(e)
         return false;
       }
 
+      var subject_col = self.subject_column();
+
       $('> ' + self.col_tagname(), self.rows[uid].obj).each(function(n, cell) {
-        if (self.subject_col < 0 || (self.subject_col >= 0 && self.subject_col == n)) {
+        if (subject_col < 0 || (subject_col >= 0 && subject_col == n)) {
           // remove elements marked with "skip-on-drag" class
           cell = $(cell).clone();
           $(cell).find('.skip-on-drag').remove();
@@ -1824,6 +1888,11 @@ column_replace: function(from, to)
     this.init_header();
 
   this.triggerEvent('column_replace');
+},
+
+subject_column: function()
+{
+  return this.subject_col + (this.checkbox_selection ? 1 : 0);
 }
 
 };

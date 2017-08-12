@@ -455,7 +455,7 @@ class rcmail extends rcube
 
         // add some basic labels to client
         $this->output->add_label('loading', 'servererror', 'connerror', 'requesttimedout',
-            'refreshing', 'windowopenerror', 'uploadingmany', 'close');
+            'refreshing', 'windowopenerror', 'uploadingmany', 'close', 'save', 'cancel');
 
         return $this->output;
     }
@@ -2164,8 +2164,9 @@ class rcmail extends rcube
             unset($attrib['buttons']);
             $form_attr['class'] = 'smart-upload';
             $input_attr = array_merge($input_attr, array(
-                // Note: Chrome sometimes executes onchange event on Cancel, make sure a file was selected
-                'onchange' => "if ((this.files && this.files.length) || (!this.files && this.value)) $event",
+                // #5854: Chrome does not execute onchange when selecting the same file.
+                //        To fix this we reset the input using null value.
+                'onchange' => "$event; this.value=null",
                 'class'    => 'smart-upload',
                 'tabindex' => '-1',
             ));
@@ -2330,6 +2331,15 @@ class rcmail extends rcube
      */
     public function show_bytes($bytes, &$unit = null)
     {
+        // Plugins may want to display different units
+        $plugin = $this->plugins->exec_hook('show_bytes', array('bytes' => $bytes));
+
+        $unit = $plugin['unit'];
+
+        if ($plugin['result'] !== null) {
+            return $plugin['result'];
+        }
+
         if ($bytes >= 1073741824) {
             $unit = 'GB';
             $gb   = $bytes/1073741824;

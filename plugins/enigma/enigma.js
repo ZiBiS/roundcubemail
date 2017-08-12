@@ -273,7 +273,7 @@ rcube_webmail.prototype.enigma_keylist_select = function(list)
         url = '&_action=plugin.enigmakeys&_a=info&_id=' + id;
 
     this.enigma_loadframe(url);
-    this.enable_command('plugin.enigma-key-delete', 'plugin.enigma-key-export-selected', list.selection.length > 0);
+    this.enable_command('plugin.enigma-key-delete', 'plugin.enigma-key-export-selected', list.get_selection().length > 0);
 };
 
 rcube_webmail.prototype.enigma_keylist_keypress = function(list)
@@ -500,7 +500,7 @@ rcube_webmail.prototype.enigma_password_request = function(data)
     this.show_popup_dialog(myprompt, this.get_label('enigma.enterkeypasstitle'),
         [{
             text: this.get_label('save'),
-            'class': 'mainaction',
+            'class': 'mainaction save',
             click: function(e) {
                 e.stopPropagation();
 
@@ -519,6 +519,7 @@ rcube_webmail.prototype.enigma_password_request = function(data)
         },
         {
             text: this.get_label('cancel'),
+            'class': 'cancel',
             click: function(e) {
                 var jq = ref.is_framed() ? window.parent.$ : $;
                 e.stopPropagation();

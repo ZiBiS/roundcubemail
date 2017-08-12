@@ -430,7 +430,10 @@ class rcube_utils
         $source = preg_replace(
             array(
                 '/(^\s*<\!--)|(-->\s*$)/m',
-                '/(^\s*|,\s*|\}\s*)([a-z0-9\._#\*][a-z0-9\.\-_]*)/im',
+                // (?!##str) below is to not match with ##str_replacement_0##
+                // from rcube_string_replacer used above, this is needed for
+                // cases like @media { body { position: fixed; } } (#5811)
+                '/(^\s*|,\s*|\}\s*|\{\s*)((?!##str)[a-z0-9\._#\*][a-z0-9\.\-_]*)/im',
                 '/'.preg_quote($container_id, '/').'\s+body/i',
             ),
             array(
@@ -1118,7 +1121,7 @@ class rcube_utils
             }
 
             $prefix = $schema . '://' . preg_replace('/:\d+$/', '', $_SERVER['HTTP_HOST']);
-            if ($_SERVER['SERVER_PORT'] != $default_port) {
+            if ($_SERVER['SERVER_PORT'] != $default_port && $_SERVER['SERVER_PORT'] != 80) {
                 $prefix .= ':' . $_SERVER['SERVER_PORT'];
             }
 
@@ -1138,28 +1141,33 @@ class rcube_utils
      */
     public static function random_bytes($length, $raw = false)
     {
+        $hextab  = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
+        $tabsize = strlen($hextab);
+
         // Use PHP7 true random generator
-        if (function_exists('random_bytes')) {
-            // random_bytes() can throw an Error/TypeError/Exception in some cases
-            try {
-                $random = random_bytes($length);
+        if ($raw && function_exists('random_bytes')) {
+            return random_bytes($length);
+        }
+
+        if (!$raw && function_exists('random_int')) {
+            $result = '';
+            while ($length-- > 0) {
+                $result .= $hextab[random_int(0, $tabsize - 1)];
             }
-            catch (Throwable $e) {}
+
+            return $result;
         }
 
-        if (!$random) {
-            $random = openssl_random_pseudo_bytes($length);
+        $random = openssl_random_pseudo_bytes($length);
+
+        if ($random === false) {
+            throw new Exception("Failed to get random bytes");
         }
 
-        if ($raw) {
-            return $random;
-        }
-
-        $random = self::bin2ascii($random);
-
-        // truncate to the specified size...
-        if ($length < strlen($random)) {
-            $random = substr($random, 0, $length);
+        if (!$raw) {
+            for ($x = 0; $x < $length; $x++) {
+                $random[$x] = $hextab[ord($random[$x]) % $tabsize];
+            }
         }
 
         return $random;
@@ -1170,40 +1178,16 @@ class rcube_utils
      *
      * @param string $input Binary input
      *
-     * @return string Readable output
+     * @return string Readable output (Base62)
+     * @deprecated since 1.3.1
      */
     public static function bin2ascii($input)
     {
-        // Above method returns "hexits".
-        // Based on bin_to_readable() function in ext/session/session.c.
-        // Note: removed ",-" characters from hextab
         $hextab = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
-        $nbits  = 6; // can be 4, 5 or 6
-        $length = strlen($input);
         $result = '';
-        $char   = 0;
-        $i      = 0;
-        $have   = 0;
-        $mask   = (1 << $nbits) - 1;
 
-        while (true) {
-            if ($have < $nbits) {
-                if ($i < $length) {
-                    $char |= ord($input[$i++]) << $have;
-                    $have += 8;
-                }
-                else if (!$have) {
-                    break;
-                }
-                else {
-                    $have = $nbits;
-                }
-            }
-
-            // consume nbits
-            $result .= $hextab[$char & $mask];
-            $char  >>= $nbits;
-            $have   -= $nbits;
+        for ($x = 0; $x < strlen($input); $x++) {
+            $result .= $hextab[ord($input[$x]) % 62];
         }
 
         return $result;

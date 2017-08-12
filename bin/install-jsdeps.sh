@@ -50,7 +50,7 @@ if (empty($CURL) && empty($WGET)) {
 
 $CACHEDIR = sys_get_temp_dir();
 
-if (is_writeable(INSTALL_PATH . 'temp/js_cache') || mkdir(INSTALL_PATH . 'temp/js_cache', 0774, true)) {
+if (is_writeable(INSTALL_PATH . 'temp/js_cache') || @mkdir(INSTALL_PATH . 'temp/js_cache', 0774, true)) {
   $CACHEDIR = INSTALL_PATH . 'temp/js_cache';
 }
 
@@ -215,6 +215,9 @@ function extract_zipfile($package, $srcfile)
   // unzip the archive and map source to dest files/directories
   else if (!empty($package['map'])) {
     $extract = $CACHEDIR . '/' . $package['lib'] . '-extract';
+    if (!is_dir($extract)) {
+      mkdir($extract, 0774, true);
+    }
     exec(sprintf('%s -o %s -d %s', $UNZIP, escapeshellarg($srcfile), $extract), $out, $retval);
 
     // get the root folder of the extracted package

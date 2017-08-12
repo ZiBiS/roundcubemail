@@ -73,6 +73,10 @@ class rcmail_output_html extends rcmail_output
         $this->set_env('locale', $_SESSION['language']);
         $this->set_env('devel_mode', $this->devel_mode);
 
+        // Version number e.g. 1.4.2 will be 10402
+        $version = explode('.', preg_replace('/[^0-9.].*/', '', RCMAIL_VERSION));
+        $this->set_env('rcversion', $version[0] * 10000 + $version[1] * 100 + $version[2]);
+
         // add cookie info
         $this->set_env('cookie_domain', ini_get('session.cookie_domain'));
         $this->set_env('cookie_path', ini_get('session.cookie_path'));
@@ -296,6 +300,10 @@ EOF;
             if (is_dir($path . $meta['extends']) && is_readable($path . $meta['extends'])) {
                 $this->load_skin('skins/' . $meta['extends']);
             }
+        }
+
+        foreach ((array) $meta['config'] as $key => $value) {
+            $this->config->set($key, $value, true);
         }
     }
 
@@ -525,7 +533,9 @@ EOF;
         }
 
         // write all javascript commands
-        $this->add_script($commands, 'head_top');
+        if (!empty($commands)) {
+            $this->add_script($commands, 'head_top');
+        }
 
         // allow (legal) iframe content to be loaded
         $iframe = $this->framed || $this->env['framed'];
@@ -1094,6 +1104,14 @@ EOF;
 
             // include a file
             case 'include':
+                if ($attrib['condition'] && !$this->check_condition($attrib['condition'])) {
+                    break;
+                }
+
+                if ($attrib['file'][0] != '/') {
+                    $attrib['file'] = '/templates/' . $attrib['file'];
+                }
+
                 $old_base_path = $this->base_path;
                 if (!empty($attrib['skin_path'])) $attrib['skinpath'] = $attrib['skin_path'];
                 if ($path = $this->get_skin_file($attrib['file'], $skin_path, $attrib['skinpath'])) {
@@ -1213,6 +1231,17 @@ EOF;
 
                 return $hook['content'];
 
+            // return <link> element
+            case 'link':
+                if ($attrib['condition'] && !$this->check_condition($attrib['condition'])) {
+                    break;
+                }
+
+                unset($attrib['condition']);
+
+                return html::tag('link', $attrib);
+
+
             // return code for a specified eval expression
             case 'exp':
                 return html::quote($this->eval_expression($attrib['expression']));
@@ -1325,7 +1354,7 @@ EOF;
             }
         }
         else {
-            $attrib['type'] = ($attrib['image'] || $attrib['imagepas'] || $attrib['imageact']) ? 'image' : 'link';
+            $attrib['type'] = ($attrib['image'] || $attrib['imagepas'] || $attrib['imageact']) ? 'image' : 'button';
         }
 
         $command = $attrib['command'];
@@ -1461,10 +1490,21 @@ EOF;
                 $attrib['value'] = $attrib['label'];
             }
             if ($attrib['command']) {
-              $attrib['disabled'] = 'disabled';
+                $attrib['disabled'] = 'disabled';
             }
 
             $out = html::tag('input', $attrib, null, array('type', 'value', 'onclick', 'id', 'class', 'style', 'tabindex', 'disabled'));
+        }
+        else {
+            if ($attrib['label']) {
+                $attrib['value'] = $attrib['label'];
+            }
+            if ($attrib['command']) {
+                $attrib['disabled'] = 'disabled';
+            }
+
+            $content = isset($attrib['content']) ? $attrib['content'] : $attrib['label'];
+            $out = html::tag('button', $attrib, $content, array('type', 'value', 'onclick', 'id', 'class', 'style', 'tabindex', 'disabled'));
         }
 
         // generate html code for button
@@ -1512,7 +1552,7 @@ EOF;
      * @param string $script   JS code snippet
      * @param string $position Target position [head|head_top|foot]
      */
-    public function add_script($script, $position='head')
+    public function add_script($script, $position = 'head')
     {
         if (!isset($this->scripts[$position])) {
             $this->scripts[$position] = "\n" . rtrim($script);
@@ -1714,7 +1754,7 @@ EOF;
         }
 
         $attrib['name'] = $attrib['id'];
-        $attrib['src']  = $attrib['src'] ? $this->abs_url($attrib['src'], true) : 'program/resources/blank.gif';
+        $attrib['src']  = $attrib['src'] ? $this->abs_url($attrib['src'], true) : 'about:blank';
 
         // register as 'contentframe' object
         if ($is_contentframe || $attrib['contentframe']) {
@@ -1915,9 +1955,8 @@ EOF;
         }
 
         if (rcube_utils::get_boolean($attrib['submit'])) {
-            $submit = new html_inputfield(array('type' => 'submit', 'id' => 'rcmloginsubmit',
-                'class' => 'button mainaction', 'value' => $this->app->gettext('login')));
-            $out .= html::p('formbuttons', $submit->show());
+            $button_attr = array('type' => 'submit', 'id' => 'rcmloginsubmit', 'class' => 'button mainaction submit');
+            $out .= html::p('formbuttons', html::tag('button', $button_attr, $this->app->gettext('login')));
         }
 
         // surround html output with a form tag
@@ -1976,19 +2015,70 @@ EOF;
         if ($attrib['type'] == 'search' && !$this->browser->khtml) {
             unset($attrib['type'], $attrib['results']);
         }
+        if (empty($attrib['placeholder'])) {
+            $attrib['placeholder'] = $this->app->gettext('searchplaceholder');
+        }
 
+        $label   = html::label(array('for' => $attrib['id'], 'class' => 'voice'), rcube::Q($this->app->gettext('arialabelsearchterms')));
         $input_q = new html_inputfield($attrib);
-        $out     = $input_q->show();
+        $out     = $label . $input_q->show();
 
+        // @TODO: At some point we'll need support for multiple searchforms on the same page
         $this->add_gui_object('qsearchbox', $attrib['id']);
 
         // add form tag around text field
-        if (empty($attrib['form'])) {
+        if (empty($attrib['form']) && empty($attrib['no-form'])) {
             $out = $this->form_tag(array(
                     'name'     => "rcmqsearchform",
                     'onsubmit' => self::JS_OBJECT_NAME . ".command('search'); return false",
-                    'style'    => "display:inline"
+                    // 'style'    => "display:inline"
                 ), $out);
+        }
+
+        if (!empty($attrib['wrapper'])) {
+            $header = html::tag($attrib['ariatag'] ?: 'h2', array(
+                    'id'    => 'aria-label-' . $attrib['label'],
+                    'class' => 'voice'
+                ), rcube::Q($this->app->gettext('arialabel' . $attrib['label'])));
+
+            if ($attrib['options']) {
+                $options_button = $this->button(array(
+                        'type'       => 'link',
+                        'href'       => '#search-filter',
+                        'class'      => 'button options',
+                        'label'      => 'options',
+                        'title'      => 'options',
+                        'tabindex'   => '0',
+                        'innerclass' => 'inner',
+                        'data-popup' => $attrib['options']
+                ));
+            }
+
+            $search_button = $this->button(array(
+                    'type'       => 'link',
+                    'href'       => '#search',
+                    'class'      => 'button search',
+                    'label'      => $attrib['buttontitle'],
+                    'title'      => $attrib['buttontitle'],
+                    'tabindex'   => '0',
+                    'innerclass' => 'inner',
+            ));
+
+            $reset_button = $this->button(array(
+                    'type'       => 'link',
+                    'command'    => 'reset-search',
+                    'class'      => 'button reset',
+                    'label'      => 'resetsearch',
+                    'title'      => 'resetsearch',
+                    'tabindex'   => '0',
+                    'innerclass' => 'inner',
+            ));
+
+            $out = html::div(array(
+                'role'            => 'search',
+                'aria-labelledby' => $attrib['label'] ? 'aria-label-' . $attrib['label'] : null,
+                'class'           => $attrib['wrapper'],
+            ), "$header$out\n$options_button\n$reset_button\n$search_button");
         }
 
         return $out;

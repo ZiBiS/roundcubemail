@@ -353,7 +353,7 @@ function rcmail_user_prefs($current = null)
                                 'alt'     => $skin,
                                 'width'   => 64,
                                 'height'  => 64,
-                                'onerror' => "this.src = rcmail.assets_path('program/resources/blank.gif')",
+                                'onerror' => "this.src = rcmail.assets_path('program/resources/blank.gif'); this.onerror = null",
                         ));
 
                         $skinnames[] = mb_strtolower($skinname);
@@ -409,6 +409,24 @@ function rcmail_user_prefs($current = null)
                 'new_message' => array('name' => rcube::Q($RCMAIL->gettext('newmessage'))),
                 'advanced'    => array('name' => rcube::Q($RCMAIL->gettext('advancedoptions'))),
             );
+
+            if (!isset($no_override['layout'])) {
+                if (!$current) {
+                    continue 2;
+                }
+
+                $field_id = 'rcmfd_layout';
+                $select   = new html_select(array('name' => '_layout', 'id' => $field_id));
+
+                $select->add($RCMAIL->gettext('layoutwidescreendesc'), 'widescreen');
+                $select->add($RCMAIL->gettext('layoutdesktopdesc'), 'desktop');
+                $select->add($RCMAIL->gettext('layoutlistdesc'), 'list');
+
+                $blocks['main']['options']['layout'] = array(
+                    'title'   => html::label($field_id, rcube::Q($RCMAIL->gettext('layout'))),
+                    'content' => $select->show($config['layout'] ?: 'widescreen'),
+                );
+            }
 
             // show config parameter for auto marking the previewed message as read
             if (!isset($no_override['mail_read_time'])) {
@@ -773,6 +791,7 @@ function rcmail_user_prefs($current = null)
                 $select->add($RCMAIL->gettext('replyempty'), -1);
                 $select->add($RCMAIL->gettext('replybottomposting'), 0);
                 $select->add($RCMAIL->gettext('replytopposting'), 1);
+                $select->add($RCMAIL->gettext('replytoppostingnoindent'), 2);
 
                 $blocks['main']['options']['reply_mode'] = array(
                     'title'   => html::label($field_id, rcube::Q($RCMAIL->gettext('whenreplying'))),
@@ -1092,9 +1111,10 @@ function rcmail_user_prefs($current = null)
                     continue 2;
                 }
 
+                $attrs = array('id' => '_drafts_mbox', 'name' => '_drafts_mbox', 'onchange' => $onchange);
                 $blocks['main']['options']['drafts_mbox'] = array(
-                    'title'   => rcube::Q($RCMAIL->gettext('drafts')),
-                    'content' => $select->show($config['drafts_mbox'], array('name' => "_drafts_mbox", 'onchange' => $onchange)),
+                    'title'   => html::label($attrs['id'], rcube::Q($RCMAIL->gettext('drafts'))),
+                    'content' => $select->show($config['drafts_mbox'], $attrs),
                 );
             }
 
@@ -1103,9 +1123,10 @@ function rcmail_user_prefs($current = null)
                     continue 2;
                 }
 
+                $attrs = array('id' => '_sent_mbox', 'name' => '_sent_mbox', 'onchange' => '');
                 $blocks['main']['options']['sent_mbox'] = array(
-                    'title'   => rcube::Q($RCMAIL->gettext('sent')),
-                    'content' => $select->show($config['sent_mbox'], array('name' => "_sent_mbox", 'onchange' => '')),
+                    'title'   => html::label($attrs['id'], rcube::Q($RCMAIL->gettext('sent'))),
+                    'content' => $select->show($config['sent_mbox'], $attrs),
                 );
             }
 
@@ -1114,9 +1135,10 @@ function rcmail_user_prefs($current = null)
                     continue 2;
                 }
 
+                $attrs = array('id' => '_junk_mbox', 'name' => '_junk_mbox', 'onchange' => $onchange);
                 $blocks['main']['options']['junk_mbox'] = array(
-                    'title'   => rcube::Q($RCMAIL->gettext('junk')),
-                    'content' => $select->show($config['junk_mbox'], array('name' => "_junk_mbox", 'onchange' => $onchange)),
+                    'title'   => html::label($attrs['id'], rcube::Q($RCMAIL->gettext('junk'))),
+                    'content' => $select->show($config['junk_mbox'], $attrs),
                 );
             }
 
@@ -1125,9 +1147,10 @@ function rcmail_user_prefs($current = null)
                     continue 2;
                 }
 
+                $attrs = array('id' => '_trash_mbox', 'name' => '_trash_mbox', 'onchange' => $onchange);
                 $blocks['main']['options']['trash_mbox'] = array(
-                    'title'   => rcube::Q($RCMAIL->gettext('trash')),
-                    'content' => $select->show($config['trash_mbox'], array('name' => "_trash_mbox", 'onchange' => $onchange)),
+                    'title'   => html::label($attrs['id'], rcube::Q($RCMAIL->gettext('trash'))),
+                    'content' => $select->show($config['trash_mbox'], $attrs),
                 );
             }
         break;
@@ -1334,25 +1357,24 @@ function rcmail_folder_options($mailbox)
  */
 function rcmail_update_folder_row($name, $oldname=null, $subscribe=false, $class_name=null)
 {
-    global $RCMAIL, $OUTPUT;
+    global $RCMAIL;
 
-    $protect_folders = $RCMAIL->config->get('protect_default_folders');
-    $storage         = $RCMAIL->get_storage();
-    $delimiter       = $storage->get_hierarchy_delimiter();
-
+    $storage      = $RCMAIL->get_storage();
+    $delimiter    = $storage->get_hierarchy_delimiter();
+    $options      = rcmail_folder_options($name);
     $name_utf8    = rcube_charset::convert($name, 'UTF7-IMAP');
-    $protected    = $protect_folders && $storage->is_special_folder($name);
     $foldersplit  = explode($delimiter, $storage->mod_folder($name));
     $level        = count($foldersplit) - 1;
-    $display_name = $protected ? $RCMAIL->localize_foldername($name) : rcube_charset::convert($foldersplit[$level], 'UTF7-IMAP');
+    $display_name = $options['protected'] ? $RCMAIL->localize_foldername($name) : rcube_charset::convert($foldersplit[$level], 'UTF7-IMAP');
     $class_name   = trim($class_name . ' mailbox');
 
     if ($oldname === null) {
-        $OUTPUT->command('add_folder_row', $name, $name_utf8, $display_name, $protected, $subscribe,
-            $class_name);
+        $RCMAIL->output->command('add_folder_row', $name, $name_utf8, $display_name,
+            $options['protected'] || $options['noselect'], $subscribe, $class_name);
     }
     else {
-        $OUTPUT->command('replace_folder_row', $oldname, $name, $name_utf8, $display_name, $protected, $class_name);
+        $RCMAIL->output->command('replace_folder_row', $oldname, $name, $name_utf8, $display_name,
+            $options['protected'] || $options['noselect'], $class_name);
     }
 }
 
@@ -1395,7 +1417,7 @@ function rcmail_settings_tabs($attrib)
             $action['href'] = $RCMAIL->url(array('_action' => $action['action']));
         }
 
-        $button = $OUTPUT->button($action);
+        $button = $OUTPUT->button($action + array('type' => 'link'));
         $attr   = $attrib;
 
         $cmd = $action['action'] ?: $action['command'];
@@ -1444,17 +1466,16 @@ function rcmail_timezone_label($tz)
         return str_replace('_', ' ', $tz);
     }
 
-    list($glob, $city) = explode('/', $tz);
+    $tokens = explode('/', $tz);
+    $key    = 'tz';
 
-    $glob_idx   = 'tz:' . strtolower($glob);
-    $city_idx   = 'tz:' . strtolower($glob) . ':' . strtolower($city);
-    $glob_label = $labels[$glob_idx] ?: $glob;
-    $city_label = $labels[$city_idx] ?: str_replace('_', ' ', $city);
+    foreach ($tokens as $i => $token) {
+        $idx   = strtolower($token);
+        $token = str_replace('_', ' ', $token);
+        $key  .= ":$idx";
 
-    $label = $glob_label;
-    if ($city) {
-        $label .= '/' . $city_label;
+        $tokens[$i] = $labels[$key] ?: $token;
     }
 
-    return $label;
+    return implode('/', $tokens);
 }

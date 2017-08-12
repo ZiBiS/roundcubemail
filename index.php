@@ -245,6 +245,10 @@ if (empty($RCMAIL->user->ID)) {
 
     $RCMAIL->set_task($plugin['task']);
 
+    if (!$session_error) {
+        header('HTTP/1.0 401 Unauthorized');
+    }
+
     $OUTPUT->send($plugin['task']);
 }
 else {
@@ -282,7 +286,7 @@ if (is_file($incfile = INSTALL_PATH . 'program/steps/'.$RCMAIL->task.'/func.inc'
 }
 
 // allow 5 "redirects" to another action
-$redirects = 0; $incstep = null;
+$redirects = 0;
 while ($redirects < 5) {
     // execute a plugin action
     if (preg_match('/^plugin\./', $RCMAIL->action)) {

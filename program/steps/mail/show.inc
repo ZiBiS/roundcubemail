@@ -99,7 +99,8 @@ if ($uid) {
 
     if (!$OUTPUT->ajax_call) {
         $OUTPUT->add_label('checkingmail', 'deletemessage', 'movemessagetotrash',
-            'movingmessage', 'deletingmessage', 'markingmessage', 'replyall', 'replylist');
+            'movingmessage', 'deletingmessage', 'markingmessage', 'replyall', 'replylist',
+            'bounce', 'bouncemsg', 'sendingmessage');
     }
 
     // check for unset disposition notification
@@ -336,7 +337,7 @@ function rcmail_message_contactphoto($attrib)
             '_email'  => $MESSAGE->sender['mailto'],
         ));
 
-        $attrib['onerror'] = "this.src = '$placeholder'";
+        $attrib['onerror'] = "this.src = '$placeholder'; this.onerror = null";
     }
     else {
         $photo_img = $placeholder;

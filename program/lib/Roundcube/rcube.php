@@ -1234,9 +1234,9 @@ class rcube
         $line = sprintf("[%s]: %s\n", $date, $line);
 
         // per-user logging is activated
-        if (self::$instance && self::$instance->config->get('per_user_logging', false) && self::$instance->get_user_id()) {
+        if (self::$instance && self::$instance->config->get('per_user_logging') && self::$instance->get_user_id()) {
             $log_dir = self::$instance->get_user_log_dir();
-            if (empty($log_dir) && $name != 'errors') {
+            if (empty($log_dir) && !in_array($name, array('errors', 'userlogins', 'sendmail'))) {
                 return false;
             }
         }
@@ -1252,6 +1252,13 @@ class rcube
 
         if (empty($log_dir)) {
             $log_dir = RCUBE_INSTALL_PATH . 'logs';
+        }
+
+        if (self::$instance) {
+            $name .= self::$instance->config->get('log_file_ext', '.log');
+        }
+        else {
+            $name .= '.log';
         }
 
         return file_put_contents("$log_dir/$name", $line, FILE_APPEND) !== false;
@@ -1288,14 +1295,14 @@ class rcube
             $arg['code'] = 500;
         }
 
+        $cli = php_sapi_name() == 'cli';
+
         // installer
-        if (class_exists('rcmail_install', false)) {
+        if (!$cli && class_exists('rcmail_install', false)) {
             $rci = rcmail_install::get_instance();
             $rci->raise_error($arg);
             return;
         }
-
-        $cli = php_sapi_name() == 'cli';
 
         if (($log || $terminate) && !$cli && $arg['message']) {
             $arg['fatal'] = $terminate;
