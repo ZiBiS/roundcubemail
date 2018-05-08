@@ -12,7 +12,7 @@
  */
 class archive extends rcube_plugin
 {
-    public $task = 'settings|mail';
+    public $task = 'settings|mail|login';
 
 
     function init()
@@ -22,14 +22,10 @@ class archive extends rcube_plugin
         // register special folder type
         rcube_storage::$folder_types[] = 'archive';
 
-        if ($rcmail->task == 'mail' && ($rcmail->action == '' || $rcmail->action == 'show')
-            && ($archive_folder = $rcmail->config->get('archive_mbox'))
-        ) {
-            $skin_path = $this->local_skin_path();
-            if (is_file($this->home . "/$skin_path/archive.css")) {
-                $this->include_stylesheet("$skin_path/archive.css");
-            }
+        $archive_folder = $rcmail->config->get('archive_mbox');
 
+        if ($rcmail->task == 'mail' && ($rcmail->action == '' || $rcmail->action == 'show') && $archive_folder) {
+            $this->include_stylesheet($this->local_skin_path() . '/archive.css');
             $this->include_script('archive.js');
             $this->add_texts('localization', true);
             $this->add_button(
@@ -61,6 +57,13 @@ class archive extends rcube_plugin
         else if ($rcmail->task == 'settings') {
             $this->add_hook('preferences_list', array($this, 'prefs_table'));
             $this->add_hook('preferences_save', array($this, 'save_prefs'));
+
+            if ($rcmail->action == 'folders' && $archive_folder) {
+                $this->include_stylesheet($this->local_skin_path() . '/archive.css');
+                $this->include_script('archive.js');
+                // set env variables for client
+                $rcmail->output->set_env('archive_folder', $archive_folder);
+            }
         }
     }
 
@@ -128,9 +131,7 @@ class archive extends rcube_plugin
         $archive_type   = $rcmail->config->get('archive_type', '');
         $archive_folder = $rcmail->config->get('archive_mbox');
         $archive_prefix = $archive_folder . $delimiter;
-        $current_mbox   = rcube_utils::get_input_value('_mbox', rcube_utils::INPUT_POST);
         $search_request = rcube_utils::get_input_value('_search', rcube_utils::INPUT_GPC);
-        $uids           = rcube_utils::get_input_value('_uid', rcube_utils::INPUT_POST);
 
         // count messages before changing anything
         if ($_POST['_from'] != 'show') {
@@ -150,8 +151,8 @@ class archive extends rcube_plugin
             'destinations' => array(),
         );
 
-        foreach (rcmail::get_uids(null, null, $multifolder) as $mbox => $uids) {
-            if (!$archive_folder  || strpos($mbox, $archive_prefix) === 0) {
+        foreach (rcmail::get_uids(null, null, $multifolder, rcube_utils::INPUT_POST) as $mbox => $uids) {
+            if (!$archive_folder || $mbox === $archive_folder || strpos($mbox, $archive_prefix) === 0) {
                 $count = count($uids);
                 continue;
             }
@@ -161,10 +162,10 @@ class archive extends rcube_plugin
                 if ($archive_type == 'folder') {
                     // compose full folder path
                     $folder .= $delimiter . $mbox;
-
-                    // create archive subfolder if it doesn't yet exist
-                    $this->subfolder_worker($folder);
                 }
+
+                // create archive subfolder if it doesn't yet exist
+                $this->subfolder_worker($folder);
 
                 $count += $this->move_messages_worker($uids, $mbox, $folder, $read_on_move);
             }
@@ -465,6 +466,7 @@ class archive extends rcube_plugin
     {
         static $delim;
         static $vendor;
+        static $skip_hidden;
 
         preg_match('/[\b<](.+@.+)[\b>]/i', $from, $m);
 
@@ -473,17 +475,29 @@ class archive extends rcube_plugin
         }
 
         if ($delim === null) {
-            $storage = rcmail::get_instance()->get_storage();
-            $delim   = $storage->get_hierarchy_delimiter();
-            $vendor  = $storage->get_vendor();
+            $rcmail      = rcmail::get_instance();
+            $storage     = $rcmail->get_storage();
+            $delim       = $storage->get_hierarchy_delimiter();
+            $vendor      = $storage->get_vendor();
+            $skip_hidden = $rcmail->config->get('imap_skip_hidden_folders');
+        }
+
+        // Remove some forbidden characters
+        $regexp = '\\x00-\\x1F\\x7F%*';
+
+        if ($vendor == 'cyrus') {
+            // List based on testing Kolab's Cyrus-IMAP 2.5
+            $regexp .= '!`(){}|\\?<;"';
+        }
+
+        $folder_name = preg_replace("/[$regexp]/", '', $m[1]);
+
+        if ($skip_hidden && $folder_name[0] == '.') {
+            $folder_name = substr($folder_name, 1);
         }
 
         $replace = $delim == '-' ? '_' : '-';
         $replacements[$delim] = $replace;
-
-        // some IMAP servers do not allow . characters
-        // @FIXME: really? which ones?
-        $replacements['.'] = $replace;
 
         // Cyrus-IMAP does not allow @ character in folder name
         if ($vendor == 'cyrus') {
@@ -491,6 +505,6 @@ class archive extends rcube_plugin
         }
 
         // replace reserved characters in folder name
-        return strtr($m[1], $replacements);
+        return strtr($folder_name, $replacements);
     }
 }

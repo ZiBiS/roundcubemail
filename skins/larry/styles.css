@@ -106,6 +106,10 @@ label input + span {
 	-webkit-user-select: none;
 }
 
+li > .input-group {
+	display: inline;
+}
+
 /*** buttons ***/
 
 button,
@@ -1076,7 +1080,6 @@ a.iconlink.upload {
 .uibox .listing thead td {
 	background: #b0ccd7;
 	color: #004458;
-	border-radius: 4px 4px 0 0;
 }
 
 .listbox .listitem,
@@ -1693,6 +1696,11 @@ ul.proplist li {
 	width: auto;
 }
 
+ul.proplist.simplelist li {
+	border: 0;
+	background: transparent;
+}
+
 #pluginbody {
 	position: absolute;
 	top: 0;
@@ -1701,6 +1709,15 @@ ul.proplist li {
 	bottom: 0;
 }
 
+.formcontent input,
+.formcontent textarea {
+	width: 95%;
+}
+
+.formcontent .hint {
+	font-style: italic;
+	margin-bottom: 1em;
+}
 
 /*** Login form ***/
 
@@ -2046,11 +2063,24 @@ ul.proplist li {
 }
 
 .toolbar a.button.encrypt {
+	min-width: 66px;
 	background-position: center -2025px;
 }
 
 .toolbar a.button.encrypt.selected {
 	background-position: center -2065px;
+}
+
+.toolbar a.button.rotate {
+	background-position: center -2148px;
+}
+
+.toolbar a.button.zoomin {
+	background-position: center -2190px;
+}
+
+.toolbar a.button.zoomout {
+	background-position: center -2230px;
 }
 
 a.menuselector {
@@ -2962,6 +2992,20 @@ ul.toolbarmenu li span.copy {
 	background-position: -6px -378px;
 }
 
+.attachmentslist li a.filename {
+	display: flex;
+	overflow: hidden;
+}
+.attachmentslist li .attachment-name {
+	overflow: hidden;
+	text-overflow: ellipsis;
+}
+
+.attachmentslist li .attachment-size {
+	padding: 0 .25em;
+}
+
+
 /*** fieldset tabs ***/
 
 .tabbed.ui-tabs {
@@ -3084,13 +3128,13 @@ button.mce-close,
 	padding: 0.3em;
 }
 
-.pgpkeyimport div.key input.button.importkey {
+.pgpkeyimport div.key button.importkey {
 	position: absolute;
 	top: 0.8em;
 	right: 0.8em;
 	padding: 4px 6px;
 }
 
-.pgpkeyimport div.key input.button[disabled] {
+.pgpkeyimport div.key button[disabled] {
 	display: none;
 }

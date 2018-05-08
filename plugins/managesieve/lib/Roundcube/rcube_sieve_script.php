@@ -39,7 +39,7 @@ class rcube_sieve_script
         'imap4flags',               // RFC5232
         'include',                  // RFC6609
         'index',                    // RFC5260
-        'mime',                     // RFC5703 (except: foreverypart, break, enclose, extracttext)
+        'mime',                     // RFC5703 (except: foreverypart/break, enclose, extracttext)
         'notify',                   // RFC5435
         'regex',                    // draft-ietf-sieve-regex-01
         'reject',                   // RFC5429
@@ -1166,7 +1166,7 @@ class rcube_sieve_script
         }
 
         // multi-line string
-        if (preg_match('/[\r\n\0]/', $str) || strlen($str) > 1024) {
+        if (preg_match('/[\r\n\0]/', $str)) {
             return sprintf("text:\n%s\n.\n", self::escape_multiline_string($str));
         }
         // quoted-string

@@ -349,7 +349,10 @@ class html
     public static function parse_attrib_string($str)
     {
         $attrib = array();
-        $html   = '<html><body><div ' . rtrim($str, '/ ') . ' /></body></html>';
+        $html   = '<html>'
+            . '<head><meta http-equiv="Content-Type" content="text/html; charset=' . RCUBE_CHARSET . '" /></head>'
+            . '<body><div ' . rtrim($str, '/ ') . ' /></body>'
+            . '</html>';
 
         $document = new DOMDocument('1.0', RCUBE_CHARSET);
         @$document->loadHTML($html);
@@ -372,16 +375,7 @@ class html
      */
     public static function quote($str)
     {
-        static $flags;
-
-        if (!$flags) {
-            $flags = ENT_COMPAT;
-            if (defined('ENT_SUBSTITUTE')) {
-                $flags |= ENT_SUBSTITUTE;
-            }
-        }
-
-        return @htmlspecialchars($str, $flags, RCUBE_CHARSET);
+        return @htmlspecialchars($str, ENT_COMPAT | ENT_SUBSTITUTE, RCUBE_CHARSET);
     }
 }
 
@@ -400,7 +394,7 @@ class html_inputfield extends html
         'type','name','value','size','tabindex','autocapitalize','required',
         'autocomplete','checked','onchange','onclick','disabled','readonly',
         'spellcheck','results','maxlength','src','multiple','accept',
-        'placeholder','autofocus','pattern',
+        'placeholder','autofocus','pattern','oninput'
     );
 
     /**
@@ -566,6 +560,38 @@ class html_checkbox extends html_inputfield
 
         // set value attribute
         $this->attrib['checked'] = ((string)$value == (string)$this->attrib['value']);
+
+        return parent::show();
+    }
+}
+
+/**
+ * Class to create HTML button
+ *
+ * @package    Framework
+ * @subpackage View
+ */
+class html_button extends html_inputfield
+{
+    protected $tagname = 'button';
+    protected $type    = 'button';
+
+    /**
+     * Get HTML code for this object
+     *
+     * @param string $content Text Content of the button
+     * @param array  $attrib  Additional attributes to override
+     *
+     * @return string HTML output
+     */
+    public function show($content = '', $attrib = null)
+    {
+        // overwrite object attributes
+        if (is_array($attrib)) {
+            $this->attrib = array_merge($this->attrib, $attrib);
+        }
+
+        $this->content = $content;
 
         return parent::show();
     }
@@ -868,26 +894,35 @@ class html_table extends html
             $this->attrib = array_merge($this->attrib, $attrib);
         }
 
-        $thead = $tbody = "";
+        $thead        = '';
+        $tbody        = '';
+        $col_tagname  = $this->_col_tagname();
+        $row_tagname  = $this->_row_tagname();
+        $head_tagname = $this->_head_tagname();
 
         // include <thead>
         if (!empty($this->header)) {
             $rowcontent = '';
             foreach ($this->header as $c => $col) {
-                $rowcontent .= self::tag($this->_head_tagname(), $col->attrib, $col->content);
+                $rowcontent .= self::tag($head_tagname, $col->attrib, $col->content);
             }
             $thead = $this->tagname == 'table' ? self::tag('thead', null, self::tag('tr', null, $rowcontent, parent::$common_attrib)) :
-                self::tag($this->_row_tagname(), array('class' => 'thead'), $rowcontent, parent::$common_attrib);
+                self::tag($row_tagname, array('class' => 'thead'), $rowcontent, parent::$common_attrib);
         }
 
         foreach ($this->rows as $r => $row) {
             $rowcontent = '';
             foreach ($row->cells as $c => $col) {
-                $rowcontent .= self::tag($this->_col_tagname(), $col->attrib, $col->content);
+                if ($row_tagname == 'li' && empty($col->attrib) && count($row->cells) == 1) {
+                    $rowcontent .= $col->content;
+                }
+                else {
+                    $rowcontent .= self::tag($col_tagname, $col->attrib, $col->content);
+                }
             }
 
             if ($r < $this->rowindex || count($row->cells)) {
-                $tbody .= self::tag($this->_row_tagname(), $row->attrib, $rowcontent, parent::$common_attrib);
+                $tbody .= self::tag($row_tagname, $row->attrib, $rowcontent, parent::$common_attrib);
             }
         }
 

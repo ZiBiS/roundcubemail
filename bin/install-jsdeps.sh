@@ -33,25 +33,19 @@ if (empty($SOURCES['dependencies'])) {
   die("ERROR: Failed to read sources from " . INSTALL_PATH . "jsdeps.json\n");
 }
 
-$CURL = trim(`which curl`);
-$WGET = trim(`which wget`);
-$UNZIP = trim(`which unzip`);
+$CURL     = trim(`which curl`);
+$WGET     = trim(`which wget`);
+$UNZIP    = trim(`which unzip`);
 $FILEINFO = trim(`which file`);
 
-if (empty($UNZIP)) {
-  die("ERROR: Required program 'unzip' not found\n");
+if (($CACHEDIR = getenv("CACHEDIR")) && is_writeable($CACHEDIR)) {
+  // use $CACHEDIR
 }
-if (empty($FILEINFO)) {
-  die("ERROR: Required program 'file' not found\n");
-}
-if (empty($CURL) && empty($WGET)) {
-  die("ERROR: Required program 'wget' or 'curl' not found\n");
-}
-
-$CACHEDIR = sys_get_temp_dir();
-
-if (is_writeable(INSTALL_PATH . 'temp/js_cache') || @mkdir(INSTALL_PATH . 'temp/js_cache', 0774, true)) {
+else if (is_writeable(INSTALL_PATH . 'temp/js_cache') || @mkdir(INSTALL_PATH . 'temp/js_cache', 0774, true)) {
   $CACHEDIR = INSTALL_PATH . 'temp/js_cache';
+}
+else {
+  $CACHEDIR = sys_get_temp_dir();
 }
 
 
@@ -116,26 +110,57 @@ EOL;
  */
 function fetch_from_source($package, $useCache = true, &$filetype = null)
 {
-  global $CURL, $WGET, $FILEINFO, $CACHEDIR;
+  global $CURL, $WGET;
 
-  $filetype = pathinfo($package['url'], PATHINFO_EXTENSION) ?: 'tmp';
-  $cache_file = $CACHEDIR . '/' . $package['lib'] . '-' . $package['version'] . '.' . $filetype;
+  $cache_file = extract_filetype($package, $filetype);
 
   if (!is_readable($cache_file) || !$useCache) {
-    echo "Fetching $package[url]\n";
+    if (empty($CURL) && empty($WGET)) {
+      die("ERROR: Required program 'wget' or 'curl' not found\n");
+    }
+
+    $url = str_replace('$v', $package['version'], $package['url']);
+
+    echo "Fetching $url\n";
 
     if ($CURL)
-        exec(sprintf('%s -s %s -o %s', $CURL, escapeshellarg($package['url']), $cache_file), $out, $retval);
+        exec(sprintf('%s -L -s %s -o %s', $CURL, escapeshellarg($url), $cache_file), $out, $retval);
     else
-        exec(sprintf('%s -q %s -O %s', $WGET, escapeshellarg($package['url']), $cache_file), $out, $retval);
+        exec(sprintf('%s -q %s -O %s', $WGET, escapeshellarg($url), $cache_file), $out, $retval);
+
+    // Try Github API as a fallback (#6248)
+    if ($retval !== 0 && $package['api_url']) {
+      $url    = str_replace('$v', $package['version'], $package['api_url']);
+      $header = 'Accept:application/vnd.github.v3.raw';
+
+      echo "Fetching failed. Using Github API on $url\n";
+
+      if ($CURL)
+        exec(sprintf('%s -L -H %s -s %s -o %s', $CURL, escapeshellarg($header), escapeshellarg($url), $cache_file), $out, $retval);
+      else
+        exec(sprintf('%s --header %s -q %s -O %s', $WGET, escapeshellarg($header), escapeshellarg($url), $cache_file), $out, $retval);
+    }
 
     if ($retval !== 0) {
-      die("ERROR: Failed to download source file from " . $package['url'] . "\n");
+      die("ERROR: Failed to download source file from " . $url . "\n");
     }
   }
 
-  if (!empty($package['sha1']) && ($sum = sha1_file($cache_file)) !== $package['sha1']) {
-    die("ERROR: Incorrect sha1 sum of $cache_file. Expected: $package[sha1], got: $sum\n");
+  return $cache_file;
+}
+
+/**
+ * Returns package source file location and type
+ */
+function extract_filetype($package, &$filetype = null)
+{
+  global $FILEINFO, $CACHEDIR;
+
+  $filetype   = pathinfo($package['url'], PATHINFO_EXTENSION) ?: 'tmp';
+  $cache_file = $CACHEDIR . '/' . $package['lib'] . '-' . $package['version'] . '.' . $filetype;
+
+  if (empty($FILEINFO)) {
+    die("ERROR: Required program 'file' not found\n");
   }
 
   // detect downloaded/cached file type
@@ -157,7 +182,7 @@ function compose_destfile($package, $srcfile)
   $header = sprintf("/**\n * %s - v%s\n *\n", $package['name'], $package['version']);
 
   if (!empty($package['source'])) {
-    $header .= " * @source " . $package['source'] . "\n";
+    $header .= " * @source " . str_replace('$v', $package['version'], $package['source']) . "\n";
     $header .= " *\n";
   }
 
@@ -193,9 +218,13 @@ function extract_zipfile($package, $srcfile)
 {
   global $UNZIP, $CACHEDIR;
 
+  if (empty($UNZIP)) {
+    die("ERROR: Required program 'unzip' not found\n");
+  }
+
   $destdir = INSTALL_PATH . $package['dest'];
   if (!is_dir($destdir)) {
-    mkdir($destdir, 0774, true);
+    mkdir($destdir, 0775, true);
   }
 
   if (!is_writeable($destdir)) {
@@ -218,20 +247,22 @@ function extract_zipfile($package, $srcfile)
     if (!is_dir($extract)) {
       mkdir($extract, 0774, true);
     }
-    exec(sprintf('%s -o %s -d %s', $UNZIP, escapeshellarg($srcfile), $extract), $out, $retval);
+
+    $zip_command = '%s -' . ($package['flat'] ? 'j' : 'o') . ' %s -d %s';
+    exec(sprintf($zip_command, $UNZIP, escapeshellarg($srcfile), $extract), $out, $retval);
 
     // get the root folder of the extracted package
     $extract_tree = glob("$extract/*", GLOB_ONLYDIR);
-    $sourcedir    = $extract_tree[0];
+    $sourcedir    = count($extract_tree) ? $extract_tree[0] : $extract;
 
     foreach ($package['map'] as $src => $dest) {
-      echo "Installing files $sourcedir/$src into $destdir/$dest\n";
+      echo "Installing $sourcedir/$src into $destdir/$dest\n";
 
       // make sure the destination's parent directory exists
       if (strpos($dest, '/') !== false) {
         $parentdir = dirname($destdir . '/' . $dest);
         if (!is_dir($parentdir)) {
-          mkdir($parentdir, 0774, true);
+          mkdir($parentdir, 0775, true);
         }
       }
 
@@ -295,9 +326,14 @@ function delete_destfile($package)
 
 //////////////// Execution
 
-$args = rcube_utils::get_opt(array('f' => 'force:bool', 'd' => 'delete:bool'))
-        + array('force' => false, 'delete' => false);
+$args = rcube_utils::get_opt(array('f' => 'force:bool', 'd' => 'delete:bool', 'g' => 'get:bool', 'e' => 'extract:bool'))
+        + array('force' => false, 'delete' => false, 'get' => false, 'extract' => false);
 $WHAT = $args[0];
+$useCache = !$args['force'] && !$args['get'];
+
+if (!$args['get'] && !$args['extract'] && !$args['delete']) {
+  $args['get'] = $args['extract'] = 1;
+}
 
 foreach ($SOURCES['dependencies'] as $package) {
   if (!isset($package['name'])) {
@@ -313,16 +349,27 @@ foreach ($SOURCES['dependencies'] as $package) {
     continue;
   }
 
-  echo "Installing $package[name]...\n";
-
-  $srcfile = fetch_from_source($package, !$args['force'], $filetype);
-
-  if ($filetype === 'zip') {
-    extract_zipfile($package, $srcfile);
+  if ($args['get']) {
+    $srcfile = fetch_from_source($package, $useCache, $filetype);
   }
   else {
-    compose_destfile($package, $srcfile);
+    $srcfile = extract_filetype($package, $filetype);
   }
 
-  echo "Done.\n\n";
+  if (!empty($package['sha1']) && ($sum = sha1_file($srcfile)) !== $package['sha1']) {
+    die("ERROR: Incorrect sha1 sum of $srcfile. Expected: {$package['sha1']}, got: $sum\n");
+  }
+
+  if ($args['extract']) {
+    echo "Installing {$package['name']}...\n";
+
+    if ($filetype === 'zip') {
+      extract_zipfile($package, $srcfile);
+    }
+    else {
+      compose_destfile($package, $srcfile);
+    }
+
+    echo "Done.\n";
+  }
 }

@@ -272,7 +272,7 @@ function rcube_mail_ui()
           orientation:'v', relative:true, start:266, min:180, size:12 }).init();
       }
       else if (rcmail.env.action == 'responses') {
-        new rcube_splitter({ id:'responseviewsplitter', p1:'#identitieslist', p2:'#identity-details',
+        new rcube_splitter({ id:'responseviewsplitter', p1:'#responseslist', p2:'#response-details',
           orientation:'v', relative:true, start:266, min:180, size:12 }).init();
       }
       else if (rcmail.env.action == 'preferences' || !rcmail.env.action) {
@@ -685,7 +685,11 @@ function rcube_mail_ui()
     }
     else if (p.command == 'compose-encrypted') {
       // show the toolbar button for Mailvelope
-      $('a.button.encrypt').show();
+      $('a.button.encrypt').parent().show();
+    }
+    else if (p.command == 'compose-encrypted-signed') {
+      // enable selector for encrypt and sign
+      $('#encryptionmenulink').show();
     }
   }
 

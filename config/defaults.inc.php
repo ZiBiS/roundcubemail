@@ -118,6 +118,9 @@ $config['memcache_debug'] = false;
 // Log APC conversation to <log_dir>/apc or to syslog
 $config['apc_debug'] = false;
 
+// Log Redis conversation to <log_dir>/redis or to syslog
+$config['redis_debug'] = false;
+
 
 // ----------------------------------
 // IMAP
@@ -259,21 +262,20 @@ $config['messages_cache_threshold'] = 50;
 // For example %n = mail.domain.tld, %t = domain.tld
 $config['smtp_server'] = 'localhost';
 
-// SMTP port (default is 25; use 587 for STARTTLS or 465 for the
-// deprecated SSL over SMTP (aka SMTPS))
-$config['smtp_port'] = 25;
+// SMTP port (default is 587)
+$config['smtp_port'] = 587;
 
 // SMTP username (if required) if you use %u as the username Roundcube
 // will use the current username for login
-$config['smtp_user'] = '';
+$config['smtp_user'] = '%u';
 
 // SMTP password (if required) if you use %p as the password Roundcube
 // will use the current user's password for login
-$config['smtp_pass'] = '';
+$config['smtp_pass'] = '%p';
 
 // SMTP AUTH type (DIGEST-MD5, CRAM-MD5, LOGIN, PLAIN or empty to use
 // best server supported one)
-$config['smtp_auth_type'] = '';
+$config['smtp_auth_type'] = null;
 
 // Optional SMTP authentication identifier to be used as authorization proxy
 $config['smtp_auth_cid'] = null;
@@ -350,6 +352,9 @@ $config['memcache_max_allowed_packet'] = '2M';
 
 // Maximum size of an object in APC cache (in bytes). Default: 2MB
 $config['apc_max_allowed_packet'] = '2M';
+
+// Maximum size of an object in Redis cache (in bytes). Default: 2MB
+$config['redis_max_allowed_packet'] = '2M';
 
 
 // ----------------------------------
@@ -439,8 +444,9 @@ $config['login_rate_limit'] = 3;
 // Includes should be interpreted as PHP files
 $config['skin_include_php'] = false;
 
-// display software version on login screen
-$config['display_version'] = false;
+// display product name and software version on login screen
+// 0 - hide product name and version number, 1 - show product name only, 2 - show product name and version number
+$config['display_product_info'] = 1;
 
 // Session lifetime in minutes
 $config['session_lifetime'] = 10;
@@ -468,12 +474,20 @@ $config['session_path'] = null;
 // Setting this value to 'php' will use the default session save handler configured in PHP
 $config['session_storage'] = 'db';
 
-// check client IP in session authorization
-$config['ip_check'] = false;
-
 // List of trusted proxies
 // X_FORWARDED_* and X_REAL_IP headers are only accepted from these IPs
 $config['proxy_whitelist'] = array();
+
+// List of trusted host names
+// Attackers can modify Host header of the HTTP request causing $_SERVER['SERVER_NAME']
+// or $_SERVER['HTTP_HOST'] variables pointing to a different host, that could be used
+// to collect user names and passwords. Some server configurations prevent that, but not all.
+// An empty list accepts any host name. The list can contain host names
+// or PCRE patterns (without // delimiters, that will be added automatically).
+$config['trusted_host_patterns'] = array();
+
+// check client IP in session authorization
+$config['ip_check'] = false;
 
 // check referer of incoming requests
 $config['referer_check'] = false;
@@ -949,9 +963,9 @@ $config['ldap_public']['Verisign'] = array(
                                     // Used where addressbook contains aliases to objects elsewhere in the LDAP tree.
 
   // definition for contact groups (uncomment if no groups are supported)
-  // for the groups base_dn, the user replacements %fu, %u, $d and %dc work as for base_dn (see above)
+  // for the groups base_dn, the user replacements %fu, %u, %d and %dc work as for base_dn (see above)
   // if the groups base_dn is empty, the contact base_dn is used for the groups as well
-  // -> in this case, assure that groups and contacts are separated due to the concernig filters! 
+  // -> in this case, assure that groups and contacts are separated due to the concernig filters!
   'groups'  => array(
     'base_dn'           => '',
     'scope'             => 'sub',       // Search mode: sub|base|list
@@ -1065,10 +1079,10 @@ $config['timezone'] = 'auto';
 // prefer displaying HTML messages
 $config['prefer_html'] = true;
 
-// display remote inline images
+// display remote resources (inline images, styles)
 // 0 - Never, always ask
 // 1 - Ask if sender is not in address book
-// 2 - Always show inline images
+// 2 - Always allow
 $config['show_images'] = 0;
 
 // open messages in new window

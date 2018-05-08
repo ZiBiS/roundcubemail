@@ -72,8 +72,8 @@ function roundcube_browser()
     this.safari = !this.chrome && !this.opera && (this.webkit || this.agent_lc.indexOf('safari') > 0);
     this.konq = this.agent_lc.indexOf('konqueror') > 0;
     this.mz = this.dom && !this.chrome && !this.safari && !this.konq && !this.opera && this.agent.indexOf('Mozilla') >= 0;
-    this.iphone = this.safari && (this.agent_lc.indexOf('iphone') > 0 || this.agent_lc.indexOf('ipod') > 0);
-    this.ipad = this.safari && this.agent_lc.indexOf('ipad') > 0;
+    this.iphone = this.safari && (this.agent_lc.indexOf('iphone') > 0 || this.agent_lc.indexOf('ipod') > 0 || this.platform == 'ipod' || this.platform == 'iphone');
+    this.ipad = this.safari && (this.agent_lc.indexOf('ipad') > 0 || this.platform == 'ipad');
   }
 
   if (!this.vendver) {
@@ -89,8 +89,8 @@ function roundcube_browser()
   if (this.safari && (/;\s+([a-z]{2})-[a-z]{2}\)/.test(this.agent_lc)))
     this.lang = RegExp.$1;
 
-  this.tablet = /ipad|android|xoom|sch-i800|playbook|tablet|kindle/i.test(this.agent_lc);
   this.mobile = /iphone|ipod|blackberry|iemobile|opera mini|opera mobi|mobile/i.test(this.agent_lc);
+  this.tablet = !this.mobile && /ipad|android|xoom|sch-i800|playbook|tablet|kindle/i.test(this.agent_lc);
   this.touch = this.mobile || this.tablet;
   this.pointer = typeof window.PointerEvent == "function";
   this.cookies = n.cookieEnabled;
@@ -151,7 +151,7 @@ var rcube_event = {
 get_target: function(e)
 {
   e = e || window.event;
-  return e && e.target ? e.target : e.srcElement;
+  return e && e.target ? e.target : e.srcElement || document;
 },
 
 /**
@@ -283,10 +283,13 @@ cancel: function(evt)
  */
 is_keyboard: function(e)
 {
-  return e && (
-      (e.type && String(e.type).match(/^key/)) // DOM3-compatible
-      || (!e.pageX && (e.pageY || 0) <= 0 && !e.clientX && (e.clientY || 0) <= 0) // others
-    );
+  if (!e)
+    return false;
+
+  if (e.type)
+    return !!e.type.match(/^key/); // DOM3-compatible
+
+  return !e.pageX && (e.pageY || 0) <= 0 && !e.clientX && (e.clientY || 0) <= 0;
 },
 
 /**
@@ -357,7 +360,10 @@ removeEventListener: function(evt, func, obj)
  */
 triggerEvent: function(evt, e)
 {
-  var ret, h;
+  var ret, h,
+    reset_fn = function(o) {
+      try { if (o && o.event) delete o.event; } catch(err) { };
+    };
 
   if (e === undefined)
     e = this;
@@ -381,26 +387,11 @@ triggerEvent: function(evt, e)
           break;
       }
     }
-    if (ret && ret.event) {
-      try {
-        delete ret.event;
-      } catch (err) {
-        // IE6-7 doesn't support deleting HTMLFormElement attributes (#1488017)
-        $(ret).removeAttr('event');
-      }
-    }
+    reset_fn(ret);
   }
 
   delete this._event_exec[evt];
-
-  if (e.event) {
-    try {
-      delete e.event;
-    } catch (err) {
-      // IE6-7 doesn't support deleting HTMLFormElement attributes (#1488017)
-      $(e).removeAttr('event');
-    }
-  }
+  reset_fn(e);
 
   return ret;
 }

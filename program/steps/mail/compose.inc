@@ -74,14 +74,14 @@ if (!is_array($COMPOSE)) {
 
 
 // add some labels to client
-$OUTPUT->add_label('notuploadedwarning', 'savingmessage',
+$OUTPUT->add_label('notuploadedwarning', 'savingmessage', 'siginserted', 'responseinserted',
     'messagesaved', 'converting', 'editorwarning', 'uploading', 'uploadingmany',
     'fileuploaderror', 'sendmessage', 'newresponse', 'responsename', 'responsetext', 'save',
     'savingresponse', 'restoresavedcomposedata', 'restoremessage', 'delete', 'restore', 'ignore',
     'selectimportfile', 'messageissent', 'loadingdata', 'nopubkeyfor', 'nopubkeyforsender',
     'encryptnoattachments','encryptedsendialog','searchpubkeyservers', 'importpubkeys',
     'encryptpubkeysfound',  'search', 'close', 'import', 'keyid', 'keylength', 'keyexpired',
-    'keyrevoked', 'keyimportsuccess', 'keyservererror', 'attaching', 'namex', 'attachmentrename'
+    'keyrevoked', 'keyimportsuccess', 'keyservererror', 'attaching', 'namex', 'attachmentrename', 'discard'
 );
 
 $OUTPUT->set_pagetitle($RCMAIL->gettext('compose'));
@@ -619,8 +619,9 @@ function rcmail_compose_body($attrib)
     }
 
     // If desired, set this textarea to be editable by TinyMCE
+    $attrib['data-html-editor'] = true;
     if ($HTML_MODE) {
-        $attrib['class'] = 'mce_editor';
+        $attrib['class'] = trim($attrib['class'] . ' mce_editor');
     }
 
     $attrib['name'] = '_message';
@@ -711,7 +712,7 @@ function rcmail_create_reply_body($body, $bodyIsHtml)
     else {
         $prefix = rcmail_get_reply_header($MESSAGE);
         if ($bodyIsHtml) {
-            $prefix = '<p>' . rcube::Q($prefix) . '</p>';
+            $prefix = '<p id="reply-intro">' . rcube::Q($prefix) . '</p>';
         }
         else {
             $prefix .= "\n";
@@ -1184,7 +1185,7 @@ function rcmail_compose_attachment_list($attrib)
                 continue;
             }
 
-            $link_content = sprintf('%s <span class="attachment-size"> (%s)</span>',
+            $link_content = sprintf('<span class="attachment-name">%s</span> <span class="attachment-size">(%s)</span>',
                 rcube::Q($a_prop['name']), $RCMAIL->show_bytes($a_prop['size']));
 
             $content_link = html::a(array(

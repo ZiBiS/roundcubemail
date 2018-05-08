@@ -94,8 +94,6 @@ if (!empty($_GET['_thumb']) && $attachment->is_valid()) {
             $_GET['_thumb']     = 0;
             $_REQUEST['_embed'] = 1;
         }
-
-        unlink($orig_name);
     }
 
     if (!empty($_GET['_thumb'])) {
@@ -239,8 +237,8 @@ if (empty($_GET['_thumb']) && $attachment->is_valid()) {
             // insert remote objects warning into HTML body
             if ($REMOTE_OBJECTS) {
                 $OUTPUT->register_inline_warning(
-                    $RCMAIL->gettext('blockedimages'),
-                    $RCMAIL->gettext('showimages'),
+                    $RCMAIL->gettext('blockedresources'),
+                    $RCMAIL->gettext('allow'),
                     $RCMAIL->url(array_merge($_GET, array('_safe' => 1)))
                 );
             }
@@ -273,7 +271,6 @@ if (empty($_GET['_thumb']) && $attachment->is_valid()) {
                 header("Content-Length: " . filesize($file_path));
                 readfile($file_path);
             }
-            unlink($file_path);
         }
     }
     else {

@@ -40,6 +40,7 @@ $RCMAIL->register_action_map(array(
     'unsubscribe'   => 'folders.inc',
     'purge'         => 'folders.inc',
     'folder-size'   => 'folders.inc',
+    'add-folder'    => 'edit_folder.inc',
     'add-identity'  => 'edit_identity.inc',
     'add-response'  => 'edit_response.inc',
     'save-response' => 'edit_response.inc',
@@ -449,7 +450,7 @@ function rcmail_user_prefs($current = null)
                 }
 
                 $blocks['main']['options']['mail_read_time'] = array(
-                    'title'   => html::label($field_id, rcube::Q($RCMAIL->gettext('previewpanemarkread'))),
+                    'title'   => html::label($field_id, rcube::Q($RCMAIL->gettext('automarkread'))),
                     'content' => $select->show($config['mail_read_time']),
                 );
             }
@@ -607,7 +608,7 @@ function rcmail_user_prefs($current = null)
                 $input->add($RCMAIL->gettext('always'), 2);
 
                 $blocks['main']['options']['show_images'] = array(
-                    'title'   => html::label($field_id, rcube::Q($RCMAIL->gettext('showremoteimages'))),
+                    'title'   => html::label($field_id, rcube::Q($RCMAIL->gettext('allowremoteresources'))),
                     'content' => $input->show($config['prefer_html'] ? $config['show_images'] : 0),
                 );
             }
@@ -918,7 +919,7 @@ function rcmail_user_prefs($current = null)
                 $field_id = 'rcmfd_default_font_size';
                 $select_default_font_size = new html_select(array('name' => '_default_font_size', 'id' => $field_id));
 
-                $fontsizes = array('', '8pt', '10pt', '12pt', '14pt', '18pt', '24pt', '36pt');
+                $fontsizes = array('', '8pt', '9pt', '10pt', '11pt', '12pt', '14pt', '18pt', '24pt', '36pt');
                 foreach ($fontsizes as $size) {
                     $select_default_font_size->add($size, $size);
                 }
@@ -935,8 +936,8 @@ function rcmail_user_prefs($current = null)
 
                 $blocks['main']['options']['default_font'] = array(
                     'title' => html::label($field_id, rcube::Q($RCMAIL->gettext('defaultfont'))),
-                    'content' => $select_default_font->show($RCMAIL->config->get('default_font', 1)) .
-                        $select_default_font_size->show($RCMAIL->config->get('default_font_size', 1))
+                    'content' => html::div('input-group', $select_default_font->show($RCMAIL->config->get('default_font', 1)) .
+                        $select_default_font_size->show($RCMAIL->config->get('default_font_size', 1)))
                 );
             }
 
@@ -1389,10 +1390,10 @@ function rcmail_settings_tabs($attrib)
     $attrib += array('tagname' => 'span', 'idprefix' => 'settingstab', 'selclass' => 'selected');
 
     $default_actions = array(
-        array('command' => 'preferences', 'type' => 'link', 'label' => 'preferences', 'title' => 'editpreferences'),
-        array('command' => 'folders',     'type' => 'link', 'label' => 'folders',     'title' => 'managefolders'),
-        array('command' => 'identities',  'type' => 'link', 'label' => 'identities',  'title' => 'manageidentities'),
-        array('command' => 'responses',   'type' => 'link', 'label' => 'responses',   'title' => 'manageresponses'),
+        array('action' => 'preferences', 'type' => 'link', 'label' => 'preferences', 'title' => 'editpreferences'),
+        array('action' => 'folders',     'type' => 'link', 'label' => 'folders',     'title' => 'managefolders'),
+        array('action' => 'identities',  'type' => 'link', 'label' => 'identities',  'title' => 'manageidentities'),
+        array('action' => 'responses',   'type' => 'link', 'label' => 'responses',   'title' => 'manageresponses'),
     );
 
     $disabled_actions = (array) $RCMAIL->config->get('disabled_actions');
@@ -1403,25 +1404,35 @@ function rcmail_settings_tabs($attrib)
         'attrib'  => $attrib,
     ));
 
-    $attrib  = $plugin['attrib'];
-    $tagname = $attrib['tagname'];
-    $tabs    = array();
+    $selected = $RCMAIL->action ?: 'preferences';
+    $attrib   = $plugin['attrib'];
+    $tagname  = $attrib['tagname'];
+    $tabs     = array();
 
     foreach ($plugin['actions'] as $action) {
-        $task_action = $action['command'] ? $action['command'] : $action['action'];
-        if (in_array('settings.' . $task_action, $disabled_actions)) {
+        if (!$action['command'] && $action['action']) {
+            $action['prop'] = $action['action'];
+            $action['command'] = 'show';
+        }
+        else if ($action['command'] != 'show') {
+            // Backwards compatibility, show command added in 1.4
+            $action['prop'] = $action['command'];
+            $action['command'] = 'show';
+        }
+
+        $cmd = $action['prop'] ?: $action['action'];
+        $id  = $action['id'] ?: $cmd;
+
+        if (in_array('settings.' . $cmd, $disabled_actions)) {
             continue;
         }
 
-        if (!$action['command'] && !$action['href'] && $action['action']) {
-            $action['href'] = $RCMAIL->url(array('_action' => $action['action']));
+        if (!$action['href']) {
+            $action['href'] = $RCMAIL->url(array('_action' => $cmd));
         }
 
         $button = $OUTPUT->button($action + array('type' => 'link'));
         $attr   = $attrib;
-
-        $cmd = $action['action'] ?: $action['command'];
-        $id  = $action['id'] ?: $cmd;
 
         if (!empty($id)) {
             $attr['id'] = preg_replace('/[^a-z0-9]/i', '', $attrib['idprefix'] . $id);
@@ -1434,7 +1445,7 @@ function rcmail_settings_tabs($attrib)
         else if (!empty($cmd)) {
             $classnames[] = $cmd;
         }
-        if ($RCMAIL->action == $cmd) {
+        if ($cmd == $selected) {
             $classnames[] = $attrib['selclass'];
         }
 

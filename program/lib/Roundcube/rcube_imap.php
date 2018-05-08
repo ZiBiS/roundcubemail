@@ -189,8 +189,8 @@ class rcube_imap extends rcube_storage
         // write error log
         else if ($this->conn->error) {
             if ($pass && $user) {
-                $message = sprintf("Login failed for %s from %s. %s",
-                    $user, rcube_utils::remote_ip(), $this->conn->error);
+                $message = sprintf("Login failed for %s against %s from %s. %s",
+                    $user, $host, rcube_utils::remote_ip(), $this->conn->error);
 
                 rcube::raise_error(array('code' => 403, 'type' => 'imap',
                     'file' => __FILE__, 'line' => __LINE__,
@@ -1390,8 +1390,7 @@ class rcube_imap extends rcube_storage
                     $index  = new rcube_result_index($folder, '* ESEARCH ALL ' . $search);
                 }
                 else {
-                    $index = $this->index_direct($folder, $this->search_charset,
-                        $this->sort_field, $this->search_set);
+                    $index = $this->index_direct($folder, $this->sort_field, $this->sort_order, $this->search_set);
                 }
             }
 
@@ -2110,7 +2109,10 @@ class rcube_imap extends rcube_storage
 
         if (is_array($part[$di]) && count($part[$di]) == 2) {
             $struct->disposition = strtolower($part[$di][0]);
-
+            if ($struct->disposition && $struct->disposition !== 'inline' && $struct->disposition !== 'attachment') {
+                // RFC2183, Section 2.8 - unrecognized type should be treated as "attachment"
+                $struct->disposition = 'attachment';
+            }
             if (is_array($part[$di][1])) {
                 for ($n=0; $n<count($part[$di][1]); $n+=2) {
                     $struct->d_parameters[strtolower($part[$di][1][$n])] = $part[$di][1][$n+1];
@@ -2929,12 +2931,17 @@ class rcube_imap extends rcube_storage
         else {
             // unsubscribe non-existent folders, remove them from the list
             if (!empty($result) && $name == '*') {
-                $existing    = $this->list_folders($root, $name);
-                $nonexisting = array_diff($result, $existing);
-                $result      = array_diff($result, $nonexisting);
+                $existing = $this->list_folders($root, $name);
 
-                foreach ($nonexisting as $folder) {
-                    $this->conn->unsubscribe($folder);
+                // Try to make sure the list of existing folders is not malformed,
+                // we don't want to unsubscribe existing folders on error
+                if (is_array($existing) && (!empty($root) || count($existing) > 1)) {
+                    $nonexisting = array_diff($result, $existing);
+                    $result      = array_diff($result, $nonexisting);
+
+                    foreach ($nonexisting as $folder) {
+                        $this->conn->unsubscribe($folder);
+                    }
                 }
             }
         }
@@ -3730,6 +3737,35 @@ class rcube_imap extends rcube_storage
         if ($mcache = $this->get_mcache_engine()) {
             $mcache->synchronize($folder);
         }
+    }
+
+    /**
+     * Check if the folder name is valid
+     *
+     * @param string $folder Folder name (UTF-8)
+     * @param string &$char  First forbidden character found
+     *
+     * @return bool True if the name is valid, False otherwise
+     */
+    public function folder_validate($folder, &$char = null)
+    {
+        if (parent::folder_validate($folder, $char)) {
+            $vendor = $this->get_vendor();
+            $regexp = '\\x00-\\x1F\\x7F%*';
+
+            if ($vendor == 'cyrus') {
+                // List based on testing Kolab's Cyrus-IMAP 2.5
+                $regexp .= '!`@(){}|\\?<;"';
+            }
+
+            if (!preg_match("/[$regexp]/", $folder, $m)) {
+                return true;
+            }
+
+            $char = $m[0];
+        }
+
+        return false;
     }
 
     /**

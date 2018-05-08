@@ -39,7 +39,7 @@ function rcube_text_editor(config, id)
     abs_url = location.href.replace(/[?#].*$/, '').replace(/\/$/, ''),
     conf = {
       selector: '#' + ($('#' + id).is('.mce_editor') ? id : 'fake-editor-id'),
-      cache_suffix: 's=4050700',
+      cache_suffix: 's=4050800',
       theme: 'modern',
       language: config.lang,
       content_css: rcmail.assets_path('program/resources/tinymce/content.css'),
@@ -47,6 +47,8 @@ function rcube_text_editor(config, id)
       statusbar: false,
       toolbar_items_size: 'small',
       extended_valid_elements: 'font[face|size|color|style],span[id|class|align|style]',
+      fontsize_formats: '8pt 9pt 10pt 11pt 12pt 14pt 18pt 24pt 36pt',
+      valid_children: '+body[style]',
       relative_urls: false,
       remove_script_host: false,
       convert_urls: false, // #1486944
@@ -136,6 +138,14 @@ function rcube_text_editor(config, id)
     ed.on('keypress', function() {
       rcmail.compose_type_activity++;
     });
+    // make links open on shift-click
+    ed.on('click', function(e) {
+      var link = $(e.target).closest('a');
+      if (link.length && e.shiftKey) {
+        window.open(link.get(0).href, '_blank');
+        return false;
+      }
+    });
   };
 
   rcmail.triggerEvent('editor-init', {config: conf, ref: ref});
@@ -151,6 +161,8 @@ function rcube_text_editor(config, id)
   this.init_callback = function(event)
   {
     this.editor = event.target;
+
+    rcmail.triggerEvent('editor-load', {config: conf, ref: ref});
 
     if (rcmail.env.action != 'compose') {
       return;
@@ -184,7 +196,7 @@ function rcube_text_editor(config, id)
         rcmail.change_identity(elem);
 
       // Focus previously focused element
-      if (fe && fe.id != this.id) {
+      if (fe && fe.id != this.id && fe.nodeName != 'BODY') {
         window.focus(); // for WebKit (#1486674)
         fe.focus();
         rcmail.env.compose_focus_elem = null;
@@ -384,7 +396,7 @@ function rcube_text_editor(config, id)
     }
   };
 
-  // get selected (spellcheker) language
+  // get selected (spellchecker) language
   this.get_language = function()
   {
     if (this.editor) {
@@ -438,7 +450,7 @@ function rcube_text_editor(config, id)
     // replace selection in compose textarea
     else if (ed = rcube_find_object(this.id)) {
       var selection = $(ed).is(':focus') ? rcmail.get_input_selection(ed) : {start: 0, end: 0},
-        value = ed.value;
+        value = ed.value,
         pre = value.substring(0, selection.start),
         end = value.substring(selection.end, value.length);
 
@@ -454,13 +466,29 @@ function rcube_text_editor(config, id)
     }
   };
 
+  // Fill the editor with specified content
+  // TODO: support format conversion
+  this.set_content = function(content)
+  {
+    if (this.editor) {
+      this.editor.setContent(content);
+      this.editor.getWin().focus();
+    }
+    else if (ed = rcube_find_object(this.id)) {
+      $(ed).val(content).focus();
+    }
+  };
+
   // get selected text (if no selection returns all text) from the editor
   this.get_content = function(args)
   {
     var sigstart, ed = this.editor, text = '', strip = false,
       defaults = {refresh: true, selection: false, nosig: false, format: 'html'};
 
-    args = $.extend(defaults, args);
+    if (!args)
+      args = defaults;
+    else
+      args = $.extend(defaults, args);
 
     // apply spellcheck changes if spell checker is active
     if (args.refresh) {

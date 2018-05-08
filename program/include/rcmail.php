@@ -100,6 +100,9 @@ class rcmail extends rcube
         $required_plugins = array('filesystem_attachments', 'jqueryui');
         $this->plugins->load_plugins($plugins, $required_plugins);
 
+        // Remember default skin, before it's replaced by user prefs
+        $this->default_skin = $this->config->get('skin');
+
         // start session
         $this->session_init();
 
@@ -455,7 +458,8 @@ class rcmail extends rcube
 
         // add some basic labels to client
         $this->output->add_label('loading', 'servererror', 'connerror', 'requesttimedout',
-            'refreshing', 'windowopenerror', 'uploadingmany', 'close', 'save', 'cancel');
+            'refreshing', 'windowopenerror', 'uploadingmany', 'close', 'save', 'cancel',
+            'alerttitle', 'confirmationtitle', 'delete', 'continue', 'ok');
 
         return $this->output;
     }
@@ -484,11 +488,6 @@ class rcmail extends rcube
         // set initial session vars
         if (!$_SESSION['user_id']) {
             $_SESSION['temp'] = true;
-        }
-
-        // restore skin selection after logout
-        if ($_SESSION['temp'] && !empty($_SESSION['skin'])) {
-            $this->config->set('skin', $_SESSION['skin']);
         }
     }
 
@@ -606,8 +605,10 @@ class rcmail extends rcube
 
         // Here we need IDNA ASCII
         // Only rcube_contacts class is using domain names in Unicode
-        $host     = rcube_utils::idn_to_ascii($host);
-        $username = rcube_utils::idn_to_ascii($username);
+        $host = rcube_utils::idn_to_ascii($host);
+        if (strpos($username, '@')) {
+            $username = rcube_utils::idn_to_ascii($username);
+        }
 
         // user already registered -> overwrite username
         if ($user = rcube_user::query($username, $host)) {
@@ -678,8 +679,9 @@ class rcmail extends rcube
             $_SESSION['password']     = $this->encrypt($password);
             $_SESSION['login_time']   = time();
 
-            if (isset($_REQUEST['_timezone']) && $_REQUEST['_timezone'] != '_default_') {
-                $_SESSION['timezone'] = rcube_utils::get_input_value('_timezone', rcube_utils::INPUT_GPC);
+            $timezone = rcube_utils::get_input_value('_timezone', rcube_utils::INPUT_GPC);
+            if ($timezone && is_string($timezone) && $timezone != '_default_') {
+                $_SESSION['timezone'] = $timezone;
             }
 
             // fix some old settings according to namespace prefix
@@ -771,8 +773,12 @@ class rcmail extends rcube
         $this->plugins->exec_hook('session_destroy');
 
         $this->session->kill();
-        $_SESSION = array('language' => $this->user->language, 'temp' => true, 'skin' => $this->config->get('skin'));
+        $_SESSION = array('language' => $this->user->language, 'temp' => true);
         $this->user->reset();
+
+        if ($this->config->get('skin') != $this->default_skin && method_exists($this->output, 'set_skin')) {
+            $this->output->set_skin($this->default_skin);
+        }
     }
 
     /**
@@ -2401,16 +2407,17 @@ class rcmail extends rcube
      * @param string $uids           UID value to decode
      * @param string $mbox           Default mailbox value (if not encoded in UIDs)
      * @param bool   $is_multifolder Will be set to True if multi-folder request
+     * @param int    $mode           Request mode. Default: rcube_utils::INPUT_GPC.
      *
      * @return array  List of message UIDs per folder
      */
-    public static function get_uids($uids = null, $mbox = null, &$is_multifolder = false)
+    public static function get_uids($uids = null, $mbox = null, &$is_multifolder = false, $mode = null)
     {
         // message UID (or comma-separated list of IDs) is provided in
         // the form of <ID>-<MBOX>[,<ID>-<MBOX>]*
 
-        $_uid  = $uids ?: rcube_utils::get_input_value('_uid', rcube_utils::INPUT_GPC);
-        $_mbox = $mbox ?: (string) rcube_utils::get_input_value('_mbox', rcube_utils::INPUT_GPC);
+        $_uid  = $uids ?: rcube_utils::get_input_value('_uid', $mode ?: rcube_utils::INPUT_GPC);
+        $_mbox = $mbox ?: (string) rcube_utils::get_input_value('_mbox', $mode ?: rcube_utils::INPUT_GPC);
 
         // already a hash array
         if (is_array($_uid) && !isset($_uid[0])) {
@@ -2429,8 +2436,9 @@ class rcmail extends rcube
             }
         }
         else {
-            if (is_string($_uid))
+            if (is_string($_uid)) {
                 $_uid = explode(',', $_uid);
+            }
 
             // create a per-folder UIDs array
             foreach ((array)$_uid as $uid) {
@@ -2445,7 +2453,7 @@ class rcmail extends rcube
                 if ($uid == '*') {
                     $result[$mbox] = $uid;
                 }
-                else {
+                else if (preg_match('/^[0-9:.]+$/', $uid)) {
                     $result[$mbox][] = $uid;
                 }
             }

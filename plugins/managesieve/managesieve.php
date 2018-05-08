@@ -42,6 +42,7 @@ class managesieve extends rcube_plugin
         $this->register_action('plugin.managesieve', array($this, 'managesieve_actions'));
         $this->register_action('plugin.managesieve-action', array($this, 'managesieve_actions'));
         $this->register_action('plugin.managesieve-vacation', array($this, 'managesieve_actions'));
+        $this->register_action('plugin.managesieve-forward', array($this, 'managesieve_actions'));
         $this->register_action('plugin.managesieve-save', array($this, 'managesieve_save'));
         $this->register_action('plugin.managesieve-saveraw', array($this, 'managesieve_saveraw'));
 
@@ -102,9 +103,10 @@ class managesieve extends rcube_plugin
         $this->load_config();
 
         $vacation_mode = (int) $this->rc->config->get('managesieve_vacation');
+        $forward_mode = (int) $this->rc->config->get('managesieve_forward');
 
         // register Filters action
-        if ($vacation_mode != 2) {
+        if ($vacation_mode != 2 && $forward_mode != 2) {
             $args['actions'][] = array(
                 'action' => 'plugin.managesieve',
                 'class'  => 'filter',
@@ -122,6 +124,17 @@ class managesieve extends rcube_plugin
                 'label'  => 'vacation',
                 'domain' => 'managesieve',
                 'title'  => 'vacationtitle',
+            );
+        }
+
+        // register Forward action
+        if ($forward_mode > 0) {
+            $args['actions'][] = array(
+                'action' => 'plugin.managesieve-forward',
+                'class'  => 'forward',
+                'label'  => 'forward',
+                'domain' => 'managesieve',
+                'title'  => 'forwardtitle',
             );
         }
 
@@ -189,9 +202,10 @@ class managesieve extends rcube_plugin
      */
     function managesieve_actions()
     {
+        $uids = rcmail::get_uids(null, null, $multifolder, rcube_utils::INPUT_POST);
+
         // handle fetching email headers for the new filter form
-        if ($uid = rcube_utils::get_input_value('_uid', rcube_utils::INPUT_POST)) {
-            $uids    = rcmail::get_uids();
+        if (!empty($uids)) {
             $mailbox = key($uids);
             $message = new rcube_message($uids[$mailbox][0], $mailbox);
             $headers = $this->parse_headers($message->headers);
@@ -203,8 +217,9 @@ class managesieve extends rcube_plugin
 
         // handle other actions
         $engine_type = $this->rc->action == 'plugin.managesieve-vacation' ? 'vacation' : '';
-        $engine      = $this->get_engine($engine_type);
+        $engine_type = $this->rc->action == 'plugin.managesieve-forward' ? 'forward' : $engine_type;
 
+        $engine      = $this->get_engine($engine_type);
         $this->init_ui();
         $engine->actions();
     }

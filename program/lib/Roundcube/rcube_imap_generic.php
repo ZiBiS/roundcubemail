@@ -2504,7 +2504,8 @@ class rcube_imap_generic
 
                         switch ($field) {
                         case 'date';
-                            $result[$id]->date = $string;
+                            $string                 = substr($string, 0, 128);
+                            $result[$id]->date      = $string;
                             $result[$id]->timestamp = rcube_utils::strtotime($string);
                             break;
                         case 'to':
@@ -2512,6 +2513,7 @@ class rcube_imap_generic
                             break;
                         case 'from':
                         case 'subject':
+                            $string = substr($string, 0, 2048);
                         case 'cc':
                         case 'bcc':
                         case 'references':
@@ -2521,7 +2523,7 @@ class rcube_imap_generic
                             $result[$id]->replyto = $string;
                             break;
                         case 'content-transfer-encoding':
-                            $result[$id]->encoding = $string;
+                            $result[$id]->encoding = substr($string, 0, 32);
                         break;
                         case 'content-type':
                             $ctype_parts = preg_split('/[; ]+/', $string);
@@ -2536,10 +2538,10 @@ class rcube_imap_generic
                         case 'return-receipt-to':
                         case 'disposition-notification-to':
                         case 'x-confirm-reading-to':
-                            $result[$id]->mdn_to = $string;
+                            $result[$id]->mdn_to = substr($string, 0, 2048);
                             break;
                         case 'message-id':
-                            $result[$id]->messageID = $string;
+                            $result[$id]->messageID = substr($string, 0, 2048);
                             break;
                         case 'x-priority':
                             if (preg_match('/^(\d+)/', $string, $matches)) {
@@ -3128,8 +3130,9 @@ class rcube_imap_generic
                 if (preg_match('/^\* QUOTA /', $line)) {
                     list(, , $quota_root) = $this->tokenizeResponse($line, 3);
 
-                    while ($line) {
-                        list($type, $used, $total) = $this->tokenizeResponse($line, 1);
+                    $quotas = $this->tokenizeResponse($line, 1);
+                    foreach (array_chunk($quotas, 3) as $quota) {
+                        list($type, $used, $total) = $quota;
                         $type = strtolower($type);
 
                         if ($type && $total) {
@@ -3709,8 +3712,16 @@ class rcube_imap_generic
         // Parse response
         do {
             $line = $this->readLine(4096);
+
             if ($response !== null) {
                 $response .= $line;
+            }
+
+            // parse untagged response for [COPYUID 1204196876 3456:3457 123:124] (RFC6851)
+            if ($line && $command == 'UID MOVE') {
+                if (preg_match("/^\* OK \[COPYUID [0-9]+ ([0-9,:]+) ([0-9,:]+)\]/i", $line, $m)) {
+                    $this->data['COPYUID'] = array($m[1], $m[2]);
+                }
             }
         }
         while (!$this->startsWith($line, $tag . ' ', true, true));
@@ -3852,16 +3863,15 @@ class rcube_imap_generic
     {
         // given a comma delimited list of independent mid's,
         // compresses by grouping sequences together
-
         if (!is_array($messages)) {
             // if less than 255 bytes long, let's not bother
-            if (!$force && strlen($messages)<255) {
-                return $messages;
+            if (!$force && strlen($messages) < 255) {
+                return preg_match('/[^0-9:,*]/', $messages) ? 'INVALID' : $messages;
             }
 
             // see if it's already been compressed
             if (strpos($messages, ':') !== false) {
-                return $messages;
+                return preg_match('/[^0-9:,*]/', $messages) ? 'INVALID' : $messages;
             }
 
             // separate, then sort
@@ -3896,7 +3906,9 @@ class rcube_imap_generic
         }
 
         // return as comma separated string
-        return implode(',', $result);
+        $result = implode(',', $result);
+
+        return preg_match('/[^0-9:,*]/', $result) ? 'INVALID' : $result;
     }
 
     /**

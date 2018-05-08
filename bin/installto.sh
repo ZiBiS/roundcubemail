@@ -48,58 +48,47 @@ $input = trim(fgets(STDIN));
 if (strtolower($input) == 'y') {
   echo "Copying files to target location...";
 
-  // Save a copy of original .htaccess file (#1490623)
-  if (file_exists("$target_dir/.htaccess")) {
-    $htaccess_copied = copy("$target_dir/.htaccess", "$target_dir/.htaccess.orig");
-  }
-  if (file_exists("$target_dir/.user.ini")) {
-    $user_ini_copied = copy("$target_dir/.user.ini", "$target_dir/.user.ini.orig");
-  }
+  $adds = array();
+  $dirs = array('program','bin','SQL','plugins','skins');
 
-  $dirs = array('program','installer','bin','SQL','plugins','skins');
   if (is_dir(INSTALL_PATH . 'vendor') && !is_file("$target_dir/composer.json")) {
     $dirs[] = 'vendor';
   }
+  if (file_exists("$target_dir/installer")) {
+    $dirs[] = 'installer';
+  }
+
   foreach ($dirs as $dir) {
     // @FIXME: should we use --delete for all directories?
-    $delete  = in_array($dir, array('program', 'installer', 'vendor')) ? '--delete ' : '';
+    $delete  = in_array($dir, array('program', 'vendor', 'installer')) ? '--delete ' : '';
     $command = "rsync -aC --out-format=%n " . $delete . INSTALL_PATH . "$dir/ $target_dir/$dir/";
-    if (!system($command, $ret) || $ret > 0) {
+    if (system($command, $ret) === false || $ret > 0) {
       rcube::raise_error("Failed to execute command: $command", false, true);
     }
   }
-  foreach (array('index.php','.htaccess','.user.ini','config/defaults.inc.php','composer.json-dist','jsdeps.json','CHANGELOG','README.md','UPGRADING','LICENSE','INSTALL') as $file) {
+
+  foreach (array('index.php','config/defaults.inc.php','composer.json-dist','jsdeps.json','CHANGELOG','README.md','UPGRADING','LICENSE','INSTALL') as $file) {
     $command = "rsync -a --out-format=%n " . INSTALL_PATH . "$file $target_dir/$file";
-    if (file_exists(INSTALL_PATH . $file) && (!system($command, $ret) || $ret > 0)) {
+    if (file_exists(INSTALL_PATH . $file) && (system($command, $ret) === false || $ret > 0)) {
       rcube::raise_error("Failed to execute command: $command", false, true);
+    }
+  }
+
+  // Copy .htaccess or .user.ini if needed
+  foreach (array('.htaccess','.user.ini') as $file) {
+    if (file_exists(INSTALL_PATH . $file)) {
+      if (!file_exists("$target_dir/$file") || file_get_contents(INSTALL_PATH . $file) != file_get_contents("$target_dir/$file")) {
+        if (copy(INSTALL_PATH . $file, "$target_dir/$file.new")) {
+          echo "$file.new\n";
+          $adds[] = "NOTICE: New $file file saved as $file.new.";
+        }
+      }
     }
   }
 
   // remove old (<1.0) .htaccess file
   @unlink("$target_dir/program/.htaccess");
-  echo "done.";
-
-  // Inform the user about .htaccess change
-  if (!empty($htaccess_copied)) {
-    if (file_get_contents("$target_dir/.htaccess") != file_get_contents("$target_dir/.htaccess.orig")) {
-      echo "\n!! Old .htaccess file saved as .htaccess.orig !!";
-    }
-    else {
-      @unlink("$target_dir/.htaccess.orig");
-    }
-  }
-
-  // Inform the user about .user.ini change
-  if (!empty($user_ini_copied)) {
-    if (file_get_contents("$target_dir/.user.ini") != file_get_contents("$target_dir/.user.ini.orig")) {
-      echo "\n!! Old .user.ini file saved as .user.ini.orig !!";
-    }
-    else {
-      @unlink("$target_dir/.user.ini.orig");
-    }
-  }
-
-  echo "\n\n";
+  echo "done.\n\n";
 
   if (is_dir("$target_dir/skins/default")) {
       echo "Removing old default skin...";
@@ -124,7 +113,15 @@ if (strtolower($input) == 'y') {
     }
   }
   else {
-    echo "JavaScript dependencies installation skipped...\n";
+    $adds[] = "NOTICE: JavaScript dependencies installation skipped...";
+  }
+
+  if (file_exists("$target_dir/installer")) {
+    $adds[] = "NOTICE: The 'installer' directory still exists. You should remove it after the upgrade.";
+  }
+
+  if (!empty($adds)) {
+    echo implode($adds, "\n") . "\n\n";
   }
 
   echo "Running update script at target...\n";

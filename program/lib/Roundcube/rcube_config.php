@@ -110,13 +110,13 @@ class rcube_config
 
         // array requires hint to be passed.
 
-        if (preg_match('/^[-+]?(\d+(\.\d*)?|\.\d+)([eE][-+]?\d+)?$/', $value) !== false) {
+        if (preg_match('/^[-+]?(\d+(\.\d*)?|\.\d+)([eE][-+]?\d+)?$/', $value)) {
             $type = 'double';
         }
-        else if (preg_match('/^\d+$/', $value) !== false) {
+        else if (preg_match('/^\d+$/', $value)) {
             $type = 'integer';
         }
-        else if (preg_match('/(t(rue)?)|(f(alse)?)/i', $value) !== false) {
+        else if (preg_match('/^(t(rue)?)|(f(alse)?)$/i', $value)) {
             $type = 'boolean';
         }
 
@@ -246,14 +246,14 @@ class rcube_config
 
         // set PHP error logging according to config
         if ($this->prop['debug_level'] & 1) {
-            ini_set('log_errors', 1);
+            $error_log = $this->prop['log_driver'];
+            if ($error_log != 'syslog') {
+                $error_log  = $this->prop['log_dir'] . '/errors';
+                $error_log .= isset($this->prop['log_file_ext']) ? $this->prop['log_file_ext'] : '.log';
+            }
 
-            if ($this->prop['log_driver'] == 'syslog') {
-                ini_set('error_log', 'syslog');
-            }
-            else {
-                ini_set('error_log', $this->prop['log_dir'].'/errors');
-            }
+            ini_set('error_log', $error_log);
+            ini_set('log_errors', 1);
         }
 
         // enable display_errors in 'show' level, but not for ajax requests
@@ -657,6 +657,12 @@ class rcube_config
         if (isset($props['preview_pane']) && !isset($props['layout'])) {
             $props['layout'] = $props['preview_pane'] ? 'desktop' : 'list';
             unset($props['preview_pane']);
+        }
+
+        // translate old `display_version` settings to `display_product_info`
+        if (isset($props['display_version']) && !isset($props['display_product_info'])) {
+            $props['display_product_info'] = $props['display_version'] ? 2 : 1;
+            unset($props['display_version']);
         }
 
         return $props;

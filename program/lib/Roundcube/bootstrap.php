@@ -25,11 +25,13 @@
  */
 
 $config = array(
-    'error_reporting'         => E_ALL & ~E_NOTICE & ~E_STRICT,
+    'error_reporting' => E_ALL & ~E_NOTICE & ~E_STRICT,
+    'display_errors'  => false,
+    'log_errors'      => true,
     // Some users are not using Installer, so we'll check some
     // critical PHP settings here. Only these, which doesn't provide
     // an error/warning in the logs later. See (#1486307).
-    'mbstring.func_overload'  => 0,
+    'mbstring.func_overload' => 0,
 );
 
 // check these additional ini settings if not called via CLI
@@ -37,6 +39,8 @@ if (php_sapi_name() != 'cli') {
     $config += array(
         'suhosin.session.encrypt' => false,
         'file_uploads'            => true,
+        'session.auto_start'      => false,
+        'zlib.output_compression' => false,
     );
 }
 
@@ -425,6 +429,7 @@ if (!function_exists('idn_to_ascii'))
 function rcube_autoload($classname)
 {
     if (strpos($classname, 'rcube') === 0) {
+        $classname = preg_replace('/^rcube_(cache|db|session|spellchecker)_/', '\\1/', $classname);
         $classname = 'Roundcube/' . $classname;
     }
     else if (strpos($classname, 'html_') === 0 || $classname === 'html') {

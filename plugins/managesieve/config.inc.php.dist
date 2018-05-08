@@ -81,11 +81,20 @@ $config['managesieve_filename_exceptions'] = array();
 // If not empty, user will need to select domain from a list
 $config['managesieve_domains'] = array();
 
+// Default list of entries in header selector
+$config['managesieve_default_headers'] = array('Subject', 'From', 'To');
+
 // Enables separate management interface for vacation responses (out-of-office)
 // 0 - no separate section (default),
 // 1 - add Vacation section,
 // 2 - add Vacation section, but hide Filters section
 $config['managesieve_vacation'] = 0;
+
+// Enables separate management interface for setting forwards (redirect to and copy to)
+// 0 - no separate section (default),
+// 1 - add Forward section,
+// 2 - add Forward section, but hide Filters section
+$config['managesieve_forward'] = 0;
 
 // Default vacation interval (in days).
 // Note: If server supports vacation-seconds extension it is possible
@@ -106,3 +115,9 @@ $config['managesieve_notify_methods'] = array('mailto');
 
 // Enables scripts RAW editor feature
 $config['managesieve_raw_editor'] = true;
+
+// Disabled actions
+// Prevent user from performing specific actions:
+// list_sets, enable_disable_set, delete_set, new_set, download_set, new_rule, delete_rule
+// Note: disabling list_sets removes the Filter sets widget from the UI and means the set defined in managesieve_script_name will always be used (and activated)
+$config['managesieve_disabled_actions'] = array();
