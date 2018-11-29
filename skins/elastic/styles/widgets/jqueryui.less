@@ -27,6 +27,8 @@
     overflow-x: hidden;
     max-height: 400px;
     border-radius: .3rem;
+    z-index: 240;
+    position: absolute;
 
    .ui-state-active {
         border: 0 !important;
@@ -35,6 +37,7 @@
 
     .ui-menu-item {
         white-space: nowrap;
+        cursor: default;
     }
 
     .ui-menu-item-wrapper {
@@ -79,6 +82,7 @@
         position: absolute;
         height: (@layout-header-height - .7rem);
         margin: .25rem;
+        padding-bottom: .375rem;
         cursor: pointer;
 
         &:before {
@@ -116,14 +120,16 @@
                 padding-right: 0;
                 padding-left: 0;
                 text-decoration: none;
+                color: @color-font;
 
                 &:focus {
-                    background-color: @color-input-border-focus-shadow;
+                    background-color: fade(@color-btn-primary-background, 50%);
                 }
 
                 &.options {
                     order: -1;
                     padding: .375rem .25rem;
+                    margin-right: .3rem;
 
                     &:before {
                         // this icon is for mobile version
@@ -171,6 +177,7 @@
         .ui-dialog-titlebar {
             height: @layout-touch-header-height;
             text-align: center;
+            background-color: @color-layout-mobile-header-background;
         }
 
         .ui-dialog-title {
@@ -191,6 +198,7 @@
             text-align: center !important;
             border-top: 1px solid @color-dialog-header-border;
             height: @layout-header-height !important;
+            background-color: @color-layout-mobile-footer-background;
 
             .ui-dialog-buttonset {
                 justify-content: space-around;
@@ -284,6 +292,10 @@
     transform: translate(-50%, -50%);
     box-shadow: 10px 10px 10px 1000px @color-dialog-overlay-background;
 
+    &:not(.ui-datepicker-inline) {
+        z-index: 120 !important; // fixes datepicker over input-group and dialogs
+    }
+
     .ui-datepicker-header,
     .ui-datepicker-title {
         line-height: 4rem;
@@ -365,6 +377,12 @@ html.touch {
             line-height: 2.2em;
         }
     }
+}
+
+// Fixes datepicker z-index issue on input-group inputs in dialogs
+// With non-relative position the input's z-index is ignored
+.input-group > .form-control.hasDatepicker {
+    position: initial;
 }
 
 .minicolors-panel {

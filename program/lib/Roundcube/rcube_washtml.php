@@ -615,7 +615,12 @@ class rcube_washtml
             '<html>',
         );
 
-        $html = preg_replace($html_search, $html_replace, trim($html));
+        $html = preg_replace($html_search, $html_replace, $html);
+
+        $err = array('line' => __LINE__, 'file' => __FILE__, 'message' => "Could not clean up HTML!");
+        if ($html === null && rcube_utils::preg_error($err)) {
+            return '';
+        }
 
         // Replace all of those weird MS Word quotes and other high characters
         $badwordchars = array(
@@ -638,31 +643,16 @@ class rcube_washtml
 
         $html = str_replace($badwordchars, $fixedwordchars, $html);
 
-        // PCRE errors handling (#1486856), should we use something like for every preg_* use?
-        if ($html === null && ($preg_error = preg_last_error()) != PREG_NO_ERROR) {
-            $errstr = "Could not clean up HTML message! PCRE Error: $preg_error.";
-
-            if ($preg_error == PREG_BACKTRACK_LIMIT_ERROR) {
-                $errstr .= " Consider raising pcre.backtrack_limit!";
-            }
-            if ($preg_error == PREG_RECURSION_LIMIT_ERROR) {
-                $errstr .= " Consider raising pcre.recursion_limit!";
-            }
-
-            rcube::raise_error(array('code' => 620, 'type' => 'php',
-                'line' => __LINE__, 'file' => __FILE__,
-                'message' => $errstr), true, false);
-
-            return '';
-        }
+        // FIXME: HTML comments handling could be better. The code below can break comments (#6464),
+        //        we should probably do not modify content inside comments at all.
 
         // fix (unknown/malformed) HTML tags before "wash"
         $html = preg_replace_callback('/(<(?!\!)[\/]*)([^\s>]+)([^>]*)/', array($this, 'html_tag_callback'), $html);
 
         // Remove invalid HTML comments (#1487759)
-        // Don't remove valid conditional comments
-        // Don't remove MSOutlook (<!-->) conditional comments (#1489004)
-        $html = preg_replace('/<!--[^-<>\[\n]+>/', '', $html);
+        // Note: We don't want to remove valid comments, conditional comments
+        // and MSOutlook comments (<!-->)
+        $html = preg_replace('/<!--[a-zA-Z0-9]+>/', '', $html);
 
         // fix broken nested lists
         self::fix_broken_lists($html);
@@ -678,9 +668,15 @@ class rcube_washtml
      */
     public static function html_tag_callback($matches)
     {
+        // It might be an ending of a comment, ignore (#6464)
+        if (substr($matches[3], -2) == '--') {
+            $matches[0] = '';
+            return implode('', $matches);
+        }
+
         $tagname = $matches[2];
         $tagname = preg_replace(array(
-            '/:.*$/',               // Microsoft's Smart Tags <st1:xxxx>
+            '/:.*$/',                // Microsoft's Smart Tags <st1:xxxx>
             '/[^a-z0-9_\[\]\!?-]/i', // forbidden characters
         ), '', $tagname);
 

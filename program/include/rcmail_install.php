@@ -5,7 +5,7 @@
  | rcmail_install.php                                                    |
  |                                                                       |
  | This file is part of the Roundcube Webmail package                    |
- | Copyright (C) 2008-2016, The Roundcube Dev Team                       |
+ | Copyright (C) 2008-2018, The Roundcube Dev Team                       |
  |                                                                       |
  | Licensed under the GNU General Public License version 3 or            |
  | any later version with exceptions for skins & plugins.                |
@@ -33,7 +33,7 @@ class rcmail_install
     public $bool_config_props = array();
 
     public $local_config    = array('db_dsnw', 'default_host', 'support_url', 'des_key', 'plugins');
-    public $obsolete_config = array('db_backend', 'db_max_length', 'double_auth', 'preview_pane');
+    public $obsolete_config = array('db_backend', 'db_max_length', 'double_auth', 'preview_pane', 'debug_level', 'referer_check');
     public $replaced_config = array(
         'skin_path'            => 'skin',
         'locale_string'        => 'language',
@@ -206,16 +206,7 @@ class rcmail_install
             }
 
             // convert some form data
-            if ($prop == 'debug_level' && !$is_default) {
-                if (is_array($value)) {
-                    $val = 0;
-                    foreach ($value as $dbgval) {
-                        $val += intval($dbgval);
-                    }
-                    $value = $val;
-                }
-            }
-            else if ($prop == 'db_dsnw' && !empty($_POST['_dbtype'])) {
+            if ($prop == 'db_dsnw' && !empty($_POST['_dbtype'])) {
                 if ($_POST['_dbtype'] == 'sqlite') {
                     $value = sprintf('%s://%s?mode=0646', $_POST['_dbtype'],
                         $_POST['_dbname']{0} == '/' ? '/' . $_POST['_dbname'] : $_POST['_dbname']);

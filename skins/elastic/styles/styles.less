@@ -111,6 +111,10 @@ a {
         color: @color-link-hover;
     }
 
+    &.disabled {
+        pointer-events: none;
+    }
+
     &.disabled:not(.btn) {
         opacity: .5;
     }
@@ -124,9 +128,9 @@ a {
 @import "widgets/taskmenu";
 @import "widgets/messages";
 @import "widgets/toolbar";
-@import "widgets/searchbar";
 @import "widgets/lists";
 @import "widgets/forms";
+@import "widgets/editor";
 @import "widgets/mail";
 
 
@@ -135,22 +139,33 @@ a {
 .task-login #layout > .content {
     text-align: center;
     width: 100%;
-    background: url(../images/watermark.jpg) center -20px no-repeat;
-    background-size: auto 40%;
+    display: block;
+}
+
+.task-login #layout .content #logo {
+    display: inline-block;
+    position: relative;
+    top: 16vh;
+    max-height: 100px;
 }
 
 #login-form {
     margin: 0 auto;
-    top: 35vh;
+    top: 20vh;
     width: 95%;
-    max-width: 280px;
+    max-width: 320px;
     position: relative;
 
     // Fixes input width and position in IE11
     .row {
-        max-width: 280px;
         margin-right: 0;
         margin-left: 0;
+    }
+}
+
+#rcmloginsubmit {
+    &:before {
+        display: none !important;
     }
 }
 
@@ -176,6 +191,12 @@ a {
     }
 }
 
+body.task-error-login #layout {
+    & > .menu,
+    & > .content > .header {
+        display: none;
+    }
+}
 
 /*** Addressbook UI ***/
 

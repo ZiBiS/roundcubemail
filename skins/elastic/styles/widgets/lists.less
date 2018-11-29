@@ -112,9 +112,11 @@
     span.secondary {
         color: @color-list-secondary;
     }
+}
 
-    // Focus indicator
-    @media screen and (min-width: @screen-width-large) {
+// Focus indicator
+html:not(.touch) {
+    .listing {
         li > a,
         tbody tr > td:first-child,
         &:not(.withselection) tbody tr > td.selection + td {
@@ -333,6 +335,9 @@ html.ie11 .listing.iconized li a:before {
     &.calendar > td.section:before {
         content: @fa-var-calendar;
     }
+    &.chat > td.section:before {
+        content: @fa-var-comments;
+    }
 }
 
 /* selecatable list: e.g. spellcheck language selection */
@@ -448,9 +453,9 @@ ul.treelist {
     li {
         &.mailbox {
             &.unread {
-                // TODO
                 & > a {
                     padding-right: 2.8em;
+                    font-weight: bold;
                 }
             }
 
@@ -476,10 +481,6 @@ ul.treelist {
                     line-height: 2rem;
                     margin: (@listing-touch-line-height - 2rem)/2;
                 }
-            }
-
-            &.selected .unreadcount {
-                // todo
             }
 
             &.recent > .unreadcount {
@@ -636,53 +637,51 @@ table.fixedcopy {
         cursor: pointer;
         width: 1em;
     }
+
     tr.thread.expanded td.threads div:before {
         content: @fa-var-angle-down;
     }
-    td.subject span.msgicon.status:before {
-        &:extend(.font-icon-class);
-        content: @fa-var-circle;
-        cursor: pointer;
-        font-size: .4em;
-        width: 3em;
-        height: 2rem;
-    }
-    td.subject span.msgicon.status.unread:before {
-        content: @fa-var-star;
-        font-size: 1.1em;
-        width: 1.1em;
-        line-height: 1.75;
-        color: @color-warning;
-    }
-    td.subject span.msgicon.status.unreadchildren:before {
-        .font-icon-regular(@fa-var-star);
-        font-size: 1.1em;
-        width: 1.1em;
-        line-height: 1.75;
-    }
-    td.subject span.msgicon.status.replied:before {
-        content: @fa-var-reply;
-        font-size: 1.1em;
-        line-height: 1.75;
-        width: 1.1em;
-    }
-    td.subject span.msgicon.status.forwarded:before {
-        .font-icon-solid(@fa-var-share);
-        font-size: 1.1em;
-        line-height: 1.75;
-        width: 1.1em;
-    }
-    td.subject span.msgicon.status.replied.forwarded:before {
-        content: @fa-var-reply; // TODO
-        font-size: 1.1em;
-        line-height: 1.75;
-        width: 1.1em;
-    }
-    tr.deleted td.subject span.msgicon.status:before {
-        content: @fa-var-ban;
-        font-size: 1.1em;
-        line-height: 1.75;
-        width: 1.1em;
+
+    td.subject span.msgicon.status {
+        &:before {
+            &:extend(.font-icon-class);
+            content: @fa-var-circle;
+            cursor: pointer;
+            font-size: .4rem;
+            width: 1.1rem;
+            height: 2rem;
+        }
+
+        &.unread:before {
+            content: @fa-var-circle;
+            color: @color-list-unread-status;
+            font-size: .5rem;
+        }
+
+        &.unreadchildren:before {
+            .font-icon-regular(@fa-var-circle);
+            font-size: .5rem;
+        }
+
+        &.replied:before {
+            .font-icon-solid(@fa-var-reply);
+            font-size: 1rem;
+        }
+
+        &.forwarded:before {
+            .font-icon-solid(@fa-var-share);
+            font-size: 1rem;
+        }
+
+        &.replied.forwarded:before {
+            .font-icon-solid(@fa-var-reply); // TODO
+            font-size: 1rem;
+        }
+
+        tr.deleted &:before {
+            .font-icon-solid(@fa-var-ban);
+            font-size: 1rem;
+        }
     }
 
     span.attachment span {
@@ -713,17 +712,31 @@ table.fixedcopy {
         &:extend(.font-icon-class);
         .font-icon-regular(@fa-var-flag);
     }
-
 }
 
+// On touch devices hide flag icon, but do it in a way
+// that saves as much room as possible, keeping the attachment icon
 html.layout-phone,
 html.touch {
     .messagelist {
+        tr {
+            position: relative;
+        }
         td.flags {
-            display: none;
+            top: .25rem;
+            right: 0;
+            bottom: 0;
+
+            .flag {
+                visibility: hidden;
+            }
         }
         td.subject {
             padding-right: .5em;
+
+            .subject {
+                padding-right: 1.5rem;
+            }
         }
     }
 }
@@ -919,6 +932,21 @@ html.touch {
         .attachment-size {
             color: @color-list-secondary;
             padding: 0 .25em;
+        }
+    }
+}
+
+.keylist {
+    padding: 0;
+    list-style: none;
+
+    li {
+        line-height: 2;
+
+        &:before {
+            &:extend(.font-icon-class);
+            content: @fa-var-key;
+            line-height: 1.5;
         }
     }
 }

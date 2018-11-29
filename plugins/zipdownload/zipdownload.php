@@ -17,7 +17,7 @@ class zipdownload extends rcube_plugin
     public $task = 'mail';
 
     private $charset       = 'ASCII';
-    private $names         = [];
+    private $names         = array();
     private $default_limit = '50MB';
 
     // RFC4155: mbox date format
@@ -134,8 +134,7 @@ class zipdownload extends rcube_plugin
         $rcmail->request_security_check(rcube_utils::INPUT_GET);
 
         $imap      = $rcmail->get_storage();
-        $temp_dir  = $rcmail->config->get('temp_dir');
-        $tmpfname  = tempnam($temp_dir, 'zipdownload');
+        $tmpfname  = rcube_utils::temp_filename('zipdownload');
         $tempfiles = array($tmpfname);
         $message   = new rcube_message(rcube_utils::get_input_value('_uid', rcube_utils::INPUT_GET));
 
@@ -148,7 +147,7 @@ class zipdownload extends rcube_plugin
             $part     = $message->mime_parts[$pid];
             $disp_name = $this->_create_displayname($part);
 
-            $tmpfn       = tempnam($temp_dir, 'zipattach');
+            $tmpfn       = rcube_utils::temp_filename('zipattach');
             $tmpfp       = fopen($tmpfn, 'w');
             $tempfiles[] = $tmpfn;
 
@@ -213,7 +212,7 @@ class zipdownload extends rcube_plugin
          * Adding a number before dot of extension on a name of file with same name on zip
          * Ext: attach(1).txt on attach filename that has a attach.txt filename on same zip
          */
-        if (isset($this->name[$displayname])) {
+        if (isset($this->names[$displayname])) {
             list($filename, $ext) = preg_split("/\.(?=[^\.]*$)/", $displayname);
             $displayname = $filename . '(' . ($this->names[$displayname]++) . ').' . $ext;
             $this->names[$displayname] = 1;
@@ -237,11 +236,10 @@ class zipdownload extends rcube_plugin
         $rcmail    = rcmail::get_instance();
         $imap      = $rcmail->get_storage();
         $mode      = rcube_utils::get_input_value('_mode', rcube_utils::INPUT_POST);
-        $temp_dir  = $rcmail->config->get('temp_dir');
         $limit     = $rcmail->config->get('zipdownload_selection', $this->default_limit);
         $limit     = $limit !== true ? parse_bytes($limit) : -1;
         $delimiter = $imap->get_hierarchy_delimiter();
-        $tmpfname  = tempnam($temp_dir, 'zipdownload');
+        $tmpfname  = rcube_utils::temp_filename('zipdownload');
         $tempfiles = array($tmpfname);
         $folders   = count($messageset) > 1;
         $timezone  = new DateTimeZone('UTC');
@@ -331,7 +329,7 @@ class zipdownload extends rcube_plugin
                 fwrite($tmpfp, "\r\n");
             }
             else { // maildir
-                $tmpfn = tempnam($temp_dir, 'zipmessage');
+                $tmpfn = rcube_utils::temp_filename('zipmessage');
                 $tmpfp = fopen($tmpfn, 'w');
                 $imap->get_raw_body($uid, $tmpfp);
                 $tempfiles[] = $tmpfn;

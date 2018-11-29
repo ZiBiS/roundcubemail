@@ -15,6 +15,7 @@
     display: none;
     padding: 0;
     min-width: 180px;
+    height: 100%;
 
     li > a {
         width: 100%;
@@ -22,7 +23,6 @@
 
     &.propform {
         overflow: hidden;
-        margin-top: 1rem;
         padding: .25rem; // so overflow do not truncate focus outline on inputs
     }
 
@@ -47,30 +47,51 @@
 
 .popover {
     box-shadow: 3px 3px 5px @color-popover-shadow;
+    border-color: @color-layout-border;
     padding: 0;
 
     .popover-header {
         // On mobile don't display popup arrows and titles
         display: none;
     }
+
+    .listing {
+        li:first-child {
+            border-radius: .25rem .25rem 0 0;
+        }
+
+        li:last-child {
+            border-radius: 0 0 .25rem .25rem;
+        }
+    }
 }
 
 #rcmKSearchpane {
     width: auto;
-    max-width: none;
-    overflow: hidden;
+    height: auto;
 
     li {
         padding-right: .5rem;
+    }
+
+    html.layout-small &,
+    html.layout-phone & {
+        bottom: auto;
+        border: 1px solid @color-input-border;
+    }
+
+    html.layout-phone & {
+        max-width: 100% !important;
     }
 }
 
 html.layout-small,
 html.layout-phone {
-    .popover {
+    .popover:not(.select-menu) {
         margin: 0 !important;
         padding: 0;
         right: 0;
+        left: initial !important;
         bottom: 0;
         top: 0;
         width: @layout-mobile-menu-width;
@@ -79,6 +100,7 @@ html.layout-phone {
         border: 0;
         display: flex;
         flex-direction: column;
+        box-shadow: none;
 
         div.arrow {
             display: none;
@@ -89,8 +111,8 @@ html.layout-phone {
         }
     }
 
-    .popover:not(#rcmKSearchpane) {
-        left: initial !important;
+    .popover.menu {
+        left: 0 !important;
     }
 
     .popover-overlay {
@@ -102,18 +124,13 @@ html.layout-phone {
         width: 100%;
     }
 
-    #rcmKSearchpane {
-        bottom: auto;
-        border: 1px solid @color-input-border;
-        box-shadow: none;
-    }
-
     .popover-header {
         display: block;
         border-radius: 0;
         border: 0;
         padding: 0 .5em;
         height: @layout-touch-header-height;
+        min-height: @layout-touch-header-height; // for when it's a flex item
         line-height: @layout-touch-header-height;
         font-size: @layout-touch-header-font-size;
         color: @color-popover-mobile-header;
@@ -145,6 +162,20 @@ html.touch .popover {
                 float: left; // overwrite icon float to have unified element height
             }
         }
+    }
+}
+
+.select-menu {
+    max-width: initial;
+    margin: 0;
+
+    .listing li a {
+        padding-left: .25rem;
+        outline: 0; // for Android browser
+    }
+
+    .popover-header {
+        border-radius: .25rem .25rem 0 0 !important;
     }
 }
 

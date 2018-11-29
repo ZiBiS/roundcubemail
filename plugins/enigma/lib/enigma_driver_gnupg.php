@@ -167,6 +167,16 @@ class enigma_driver_gnupg extends enigma_driver
                 $signature = $this->parse_signature($result['signatures'][0]);
             }
 
+            // EFAIL vulnerability mitigation (#6289)
+            // Handle MDC warning as an exception, this is the default for gpg 2.3.
+            if (method_exists($this->gpg, 'getWarnings')) {
+                foreach ($this->gpg->getWarnings() as $warning_msg) {
+                    if (strpos($warning_msg, 'not integrity protected') !== false) {
+                        return new enigma_error(enigma_error::NOMDC, ucfirst($warning_msg));
+                    }
+                }
+            }
+
             return $result['data'];
         }
         catch (Exception $e) {
@@ -378,13 +388,10 @@ class enigma_driver_gnupg extends enigma_driver
             }
             // need to delete private key first
             else if ($code == enigma_error::DELKEY) {
-                $key = $this->get_key($keyid);
-                for ($i = count($key->subkeys) - 1; $i >= 0; $i--) {
-                    $type = ($key->subkeys[$i]->usage & enigma_key::CAN_ENCRYPT) ? 'priv' : 'pub';
-                    $result = $this->{'delete_' . $type . 'key'}($key->subkeys[$i]->id);
-                    if ($result !== true) {
-                        break;
-                    }
+                $result = $this->delete_privkey($keyid);
+
+                if ($result === true) {
+                    $result = $this->delete_pubkey($keyid);
                 }
             }
         }

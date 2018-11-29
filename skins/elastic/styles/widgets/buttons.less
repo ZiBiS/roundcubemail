@@ -36,8 +36,11 @@ button.btn {
     &:before {
         &:extend(.font-icon-class);
     }
-    &.toolbar-menu-button:before {
+    &.sidebar-menu:before,
+    &.toolbar-menu-button:before,
+    &.toolbar-list-button:before {
         content: @fa-var-ellipsis-v;
+        width: 1em;
     }
     &.menu-button:before {
         content: @fa-var-bars;
@@ -46,6 +49,9 @@ button.btn {
     &.back-content-button:before,
     &.back-list-button:before {
         content: @fa-var-chevron-left;
+    }
+    &.refresh:before {
+        content: @fa-var-sync;
     }
     &.generate:before,
     &.yes:before,
@@ -93,6 +99,9 @@ button.btn {
     &.attach:before {
         content: @fa-var-paperclip;
     }
+    &.attach.vcard:before {
+        content: @fa-var-user;
+    }
     &.no:before,
     &.close:before,
     &.cancel:before {
@@ -113,9 +122,6 @@ button.btn {
     &.help:before {
         .font-icon-regular(@fa-var-life-ring);
     }
-    &.toggleselect:before {
-        .font-icon-regular(@fa-var-check-square);
-    }
     &.folders:before {
         content: @fa-var-folder-open;
     }
@@ -123,9 +129,23 @@ button.btn {
     &.settings:before {
         content: @fa-var-wrench;
     }
-
     &.properties:before {
         content: @fa-var-info-circle;
+    }
+    &.select:before {
+        .font-icon-regular(@fa-var-check-circle);
+    }
+    &.insert.recipient:before {
+        content: @fa-var-user-plus;
+    }
+    &.encrypt:before {
+        content: @fa-var-lock;
+    }
+    &.sign:before {
+        content: @fa-var-signature;
+    }
+    &.sso:before {
+        content: @fa-var-sign-in-alt;
     }
 }
 
@@ -164,7 +184,7 @@ html.touch {
     bottom: 0;
 
     .footer:not(:empty) + & {
-        bottom: @layout-touch-header-height;
+        bottom: @layout-footer-small-height;
     }
 
     a.button {
@@ -205,8 +225,8 @@ html.touch {
     }
 
     &:hover {
-        background: darken(@color-btn-secondary-background, 8%);
-        border-color: darken(@color-btn-secondary-background, 10%);
+        background: darken(@color-btn-secondary-background, 5%);
+        border-color: darken(@color-btn-secondary-background, 7%);
     }
 
     &.disabled,
@@ -216,15 +236,16 @@ html.touch {
         opacity: 1;
     }
 
-    &:not(:disabled):not(.disabled):active {
-        background: darken(@color-btn-secondary-background, 11%);
-        border-color: darken(@color-btn-secondary-background, 13%);
-        box-shadow: 0 0 0 .2rem fade(@color-btn-secondary-background, 53%);
-    }
+    &:not(:disabled):not(.disabled) {
+        &:active,
+        &.active {
+            background: darken(@color-btn-secondary-background, 10%);
+            border-color: darken(@color-btn-secondary-background, 12%);
 
-    &:not(:disabled):not(.disabled).active {
-        background: darken(@color-btn-secondary-background, 20%);
-        border-color: darken(@color-btn-secondary-background, 22%);
+            &:focus {
+                box-shadow: 0 0 0 .2rem fade(@color-btn-secondary-background, 53%);
+            }
+        }
     }
 }
 
@@ -238,8 +259,8 @@ html.touch {
     }
 
     &:hover {
-        background: darken(@color-btn-primary-background, 8%);
-        border-color: darken(@color-btn-primary-background, 10%);
+        background: darken(@color-btn-primary-background, 5%);
+        border-color: darken(@color-btn-primary-background, 7%);
     }
 
     &.disabled,
@@ -249,15 +270,16 @@ html.touch {
         opacity: 1;
     }
 
-    &:not(:disabled):not(.disabled):active {
-        background: darken(@color-btn-primary-background, 11%);
-        border-color: darken(@color-btn-primary-background, 13%);
-        box-shadow: 0 0 0 .2rem fade(@color-btn-primary-background, 53%);
-    }
+    &:not(:disabled):not(.disabled) {
+        &:active,
+        &.active {
+            background: darken(@color-btn-primary-background, 10%);
+            border-color: darken(@color-btn-primary-background, 12%);
 
-    &:not(:disabled):not(.disabled).active {
-        background: darken(@color-btn-primary-background, 20%);
-        border-color: darken(@color-btn-primary-background, 22%);
+            &:focus {
+                box-shadow: 0 0 0 .2rem fade(@color-btn-primary-background, 53%);
+            }
+        }
     }
 }
 
@@ -271,8 +293,8 @@ html.touch {
     }
 
     &:hover {
-        background: darken(@color-btn-danger-background, 8%);
-        border-color: darken(@color-btn-danger-background, 10%);
+        background: darken(@color-btn-danger-background, 5%);
+        border-color: darken(@color-btn-danger-background, 7%);
     }
 
     &.disabled,
@@ -282,14 +304,15 @@ html.touch {
         opacity: 1;
     }
 
-    &:not(:disabled):not(.disabled):active {
-        background: darken(@color-btn-danger-background, 11%);
-        border-color: darken(@color-btn-danger-background, 13%);
-        box-shadow: 0 0 0 .2rem fade(@color-btn-danger-background, 53%);
-    }
+    &:not(:disabled):not(.disabled) {
+        &:active,
+        &.active {
+            background: darken(@color-btn-danger-background, 10%);
+            border-color: darken(@color-btn-danger-background, 12%);
 
-    &:not(:disabled):not(.disabled).active {
-        background: darken(@color-btn-danger-background, 20%);
-        border-color: darken(@color-btn-danger-background, 22%);
+            &:focus {
+                box-shadow: 0 0 0 .2rem fade(@color-btn-danger-background, 53%);
+            }
+        }
     }
 }

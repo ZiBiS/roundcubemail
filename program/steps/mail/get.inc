@@ -76,13 +76,12 @@ if (!empty($_GET['_frame'])) {
 // render thumbnail of an image attachment
 if (!empty($_GET['_thumb']) && $attachment->is_valid()) {
     $thumbnail_size = $RCMAIL->config->get('image_thumbnail_size', 240);
-    $temp_dir       = $RCMAIL->config->get('temp_dir');
     $file_ident     = $attachment->ident;
-    $cache_basename = $temp_dir . '/' . md5($file_ident . ':' . $RCMAIL->user->ID . ':' . $thumbnail_size);
-    $cache_file     = $cache_basename . '.thumb';
+    $thumb_name     = 'thumb' . md5($file_ident . ':' . $RCMAIL->user->ID . ':' . $thumbnail_size);
+    $cache_file     = rcube_utils::temp_filename($thumb_name, false, false);
 
     // render thumbnail image if not done yet
-    if (!is_file($cache_file) && $attachment->body_to_file($orig_name = $cache_basename . '.tmp')) {
+    if (!is_file($cache_file) && $attachment->body_to_file($orig_name = $cache_file . '.tmp')) {
         $image = new rcube_image($orig_name);
 
         if ($imgtype = $image->resize($thumbnail_size, $cache_file, true)) {
@@ -261,8 +260,7 @@ if (empty($_GET['_thumb']) && $attachment->is_valid()) {
 
     // handle tiff to jpeg conversion
     if (!empty($convert2jpeg)) {
-        $temp_dir  = unslashify($RCMAIL->config->get('temp_dir'));
-        $file_path = tempnam($temp_dir, 'rcmAttmnt');
+        $file_path = rcube_utils::temp_filename('attmnt');
 
         // convert image to jpeg and send it to the browser
         if ($attachment->body_to_file($file_path)) {

@@ -37,11 +37,12 @@ class rcube_utils
     /**
      * Helper method to set a cookie with the current path and host settings
      *
-     * @param string Cookie name
-     * @param string Cookie value
-     * @param string Expiration time
+     * @param string $name      Cookie name
+     * @param string $value     Cookie value
+     * @param int    $exp       Expiration time
+     * @param bool   $http_only HTTP Only
      */
-    public static function setcookie($name, $value, $exp = 0)
+    public static function setcookie($name, $value, $exp = 0, $http_only = true)
     {
         if (headers_sent()) {
             return;
@@ -50,13 +51,13 @@ class rcube_utils
         $cookie = session_get_cookie_params();
         $secure = $cookie['secure'] || self::https_check();
 
-        setcookie($name, $value, $exp, $cookie['path'], $cookie['domain'], $secure, true);
+        setcookie($name, $value, $exp, $cookie['path'], $cookie['domain'], $secure, $http_only);
     }
 
     /**
      * E-mail address validation.
      *
-     * @param string $email Email address
+     * @param string  $email     Email address
      * @param boolean $dns_check True to check dns
      *
      * @return boolean True on success, False if address is invalid
@@ -150,19 +151,6 @@ class rcube_utils
     public static function check_ip($ip)
     {
         return filter_var($ip, FILTER_VALIDATE_IP) !== false;
-    }
-
-    /**
-     * Check whether the HTTP referer matches the current request
-     *
-     * @return boolean True if referer is the same host+path, false if not
-     */
-    public static function check_referer()
-    {
-        $uri     = parse_url($_SERVER['REQUEST_URI']);
-        $referer = parse_url(self::request_header('Referer'));
-
-        return $referer['host'] == self::request_header('Host') && $referer['path'] == $uri['path'];
     }
 
     /**
@@ -1362,5 +1350,78 @@ class rcube_utils
         }
 
         return $max_filesize;
+    }
+
+    /**
+     * Detect and log last PREG operation error
+     *
+     * @param array $error     Error data (line, file, code, message)
+     * @param bool  $terminate Stop script execution
+     *
+     * @return bool True on error, False otherwise
+     */
+    public static function preg_error($error = array(), $terminate = false)
+    {
+        if (($preg_error = preg_last_error()) != PREG_NO_ERROR) {
+            $errstr = "PCRE Error: $preg_error.";
+
+            if ($preg_error == PREG_BACKTRACK_LIMIT_ERROR) {
+                $errstr .= " Consider raising pcre.backtrack_limit!";
+            }
+            if ($preg_error == PREG_RECURSION_LIMIT_ERROR) {
+                $errstr .= " Consider raising pcre.recursion_limit!";
+            }
+
+            $error = array_merge(array('code' => 620, 'line' => __LINE__, 'file' => __FILE__), $error);
+
+            if (!empty($error['message'])) {
+                $error['message'] .= ' ' . $errstr;
+            }
+            else {
+                $error['message'] = $errstr;
+            }
+
+            rcube::raise_error($error, true, $terminate);
+
+            return true;
+        }
+
+        return false;
+    }
+
+    /**
+     * Generate a temporary file path in the Roundcube temp directory
+     *
+     * @param string $file_name String identifier for the type of temp file
+     * @param bool   $unique    Generate unique file names based on $file_name
+     * @param bool   $create    Create the temp file or not
+     *
+     * @return string temporary file path
+     */
+    public static function temp_filename($file_name, $unique = true, $create = true)
+    {
+        $temp_dir = rcube::get_instance()->config->get('temp_dir');
+
+        // Fall back to system temp dir if configured dir is not writable
+        if (!is_writable($temp_dir)) {
+            $temp_dir = sys_get_temp_dir();
+        }
+
+        // On Windows tempnam() uses only the first three characters of prefix so use uniqid() and manually add the prefix
+        // Full prefix is required for garbage collection to recognise the file
+        $temp_file = $unique ? str_replace('.', '', uniqid($file_name, true)) : $file_name;
+        $temp_path = unslashify($temp_dir) . '/' . RCUBE_TEMP_FILE_PREFIX . $temp_file;
+
+        // Sanity check for unique file name
+        if ($unique && file_exists($temp_path)) {
+            return self::temp_filename($file_name, $unique, $create);
+        }
+
+        // Create the file to prevent possible race condition like tempnam() does
+        if ($create) {
+            touch($temp_path);
+        }
+
+        return $temp_path;
     }
 }

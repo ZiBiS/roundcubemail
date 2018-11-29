@@ -1,6 +1,51 @@
 CHANGELOG Roundcube Webmail
 ===========================
 
+- Changed 'password_charset' default to 'UTF-8' (#6522)
+- Add skins_allowed option (#6483)
+- SMTP GSSAPI support via krb_authentication plugin (#6417)
+- Avoid Referer leaking by using Referrer-Policy:same-origin header (#6385)
+- Removed 'referer_check' option (#6440)
+- Use constant prefix for temp file names, don't remove temp files from other apps (#6511)
+- Ignore 'Sender' header on Reply-All action (#6506)
+- deluser.sh: Add option to delete users who have not logged in for more than X days (#6340)
+- Update to TinyMCE 4.8.2
+- Plugin API: Added 'raise_error' hook (#6199)
+- Plugin API: Added 'common_headers' hook (#6385)
+- Plugin API: Added 'ldap_connected' hook
+- Enigma: Update to OpenPGPjs 4.2.1 - fixes user name encoding issues in key generation (#6524)
+- Managesieve: Added support for 'editheader' extension - RFC5293 (#5954)
+- Markasjunk: Integrate markasjunk2 features into markasjunk - marking as non-junk + learning engine (#6504)
+- Password: Added 'modoboa' driver (#6361)
+- Password: Fix bug where password_dovecotpw_with_method setting could be ignored (#6436)
+- Password: Fix bug where new users could skip forced password change (#6434)
+- Password: Allow drivers to override default password comparisons (eg new is not same as current) (#6473)
+- Password: Allow drivers to override default strength checks (eg allow for 'not the same as last x passwords') (#246)
+- Passowrd: Allow drivers to define password strength rules displayed to the user
+- Password: Allow separate password saving and strength drivers for use of strength checking services (#5040)
+- Password: Add zxcvbn driver for checking password strength (#6479)
+- Elastic: On touch devices display attachment icons on messages list (#6296)
+- Elastic: Make menu button inactive if all subactions are inactive (#6444)
+- Elastic: On mobile/tablet jump to the list on folder selection (#6415)
+- Elastic: Various improvements on mail compose screen (#6413)
+- Elastic: Support new-line char as a separator for pasted recipients (#6460)
+- Elastic: Improved UX of search dialogs (#6416)
+- Elastic: Fix unwanted thread expanding when selecting a collapsed thread in non-mobile mode (#6445)
+- Elastic: Add "status bar" for mobile in mail composer
+- Log errors caused by low pcre.backtrack_limit when sending a mail message (#6433)
+- Fix malformed message saved into Sent folder when using big attachments and low memory limit (#6498)
+- Fix incorrect IMAP SASL GSSAPI negotiation (#6308)
+- Fix so unicode in local part of the email address is also supported in recipient inputs (#6490)
+- Fix bug where autocomplete list could be displayed out of screen (#6469)
+- Fix style/navigation on error page depending on authentication state (#6362)
+- Fix so invalid smtp_helo_host is never used, fallback to localhost (#6408)
+- Fix custom logo size in Elastic (#6424)
+- Fix listing the same attachment multiple times on forwarded messages
+- Fix bug where a message/rfc822 part without a filename wasn't listed on the attachments list (#6494)
+- Fix inconsistent offset for various time zones - always display Standard Time offset (#6531)
+
+RELEASE 1.4-beta
+----------------
 - Added new skin with mobile support - the Elastic
 - Support Redis cache
 - Email Resent (Bounce) feature (#4985)
@@ -12,7 +57,9 @@ CHANGELOG Roundcube Webmail
 - Support for IMAP folders that cannot contain both folders and messages (#5057)
 - Update to jQuery-3.3.1
 - Update to jQuery-minicolors 2.2.6
+- Update to TinyMCE 4.7.13
 - Remove sample PHP configuration from .htaccess and .user.ini files (#5850)
+- Extend skin_logo setting to allow per skin logos (#6272)
 - Use Masterminds/HTML5 parser for better HTML5 support (#5761)
 - Add More actions button in Contacts toolbar with Copy/Move actions (#6081)
 - Display an error when clicking disabled link to register protocol handler (#6079)
@@ -20,11 +67,13 @@ CHANGELOG Roundcube Webmail
 - Support additional connect parameters in PostgreSQL database wrapper
 - Use UI dialogs instead of confirm() and alert() where possible
 - Display value of the SMTP message size limit in the error message (#6032)
+- Show message flagged status in message view (#5080)
 - Skip redundant INSERT query on successful logon when using PHP7
 - Replace display_version with display_product_version (#5904)
 - Extend disabled_actions config so it accepts also button names (#5903)
 - Handle remote stylesheets the same as remote images, ask the user to allow them (#5994)
 - Add Message-ID to the sendmail log (#5871)
+- Add option to hide folders in share/other-user namespace or outside of the personal namespace root (#5073)
 - Archive: Fix archiving by sender address on cyrus-imap
 - Archive: Style Archive folder also on folder selector and folder manager lists
 - Archive: Add Thunderbird compatible Month option (#5623)
@@ -37,6 +86,7 @@ CHANGELOG Roundcube Webmail
 - Managesieve: Support filter action with custom IMAP flags (#6011)
 - Managesieve: Support 'mime' extension tests - RFC5703 (#5832)
 - Managesieve: Support GSSAPI authentication with krb_authentication plugin (#5779)
+- Managesieve: Support enabling the plugin for specified hosts only (#6292)
 - Password: Support host variables in password_db_dsn option (#5955)
 - Password: Automatic virtualmin domain setting, removed password_virtualmin_format option (#5759)
 - Password: Added password_username_format option (#5766)
@@ -52,9 +102,11 @@ CHANGELOG Roundcube Webmail
   - Support for 'link' objects
   - Support including files with path relative to templates directory
   - Use <button> instead of <input> for submit button on logon screen
+- Support skin localization (#5853)
 - Reset onerror on images if placeholder does not exist to prevent from requests storm
 - Unified and simplified code for loading content frame for responses and identities
 - Display contact import and advanced search in popup dialogs
+- Display a dialog for mail import with supported format description and upload size hint
 - Make possible to set (some) config options from a skin
 - Added optional checkbox selection for the list widget
 - Make 'compose' command always enabled
@@ -64,6 +116,7 @@ CHANGELOG Roundcube Webmail
 - Plugin API: Added 'show_bytes' hook (#5001)
 - Add option to not indent quoted text on top-posting reply (#5105)
 - Removed global $CONFIG variable
+- Removed debug_level setting
 - Support AUTHENTICATE LOGIN for IMAP connections (#5563)
 - Support LDAP GSSAPI authentication (#5703)
 - Localized timezone selector (#4983)
@@ -71,6 +124,7 @@ CHANGELOG Roundcube Webmail
 - Handle inline images also inside multipart/mixed messages (#5905)
 - Allow style tags in HTML editor on composed/reply messages (#5751)
 - Use Github API as a fallback to fetch js dependencies to workaround throttling issues (#6248)
+- Show confirm dialog when moving folders using drag and drop (#6119)
 - Fix bug where new_user_dialog email check could have been circumvented by deleting / abandoning session (#5929)
 - Fix skin extending for assets (#5115)
 - Fix handling of forwarded messages inside of a TNEF message (#5632)
@@ -81,10 +135,34 @@ CHANGELOG Roundcube Webmail
 - Fix touch event issue on messages list in IE/Edge (#5781)
 - Fix so links over images are not removed in plain text signatures converted from HTML (#4473)
 - Fix various issues when downloading files with names containing non-ascii chars, use RFC 2231 (#5772)
+
+RELEASE 1.3.8
+-------------
+- Fix PHP warnings on dummy QUOTA responses in Courier-IMAP 4.17.1 (#6374)
+- Fix so fallback from BINARY to BODY FETCH is used also on [PARSE] errors in dovecot 2.3 (#6383)
+- Enigma: Fix deleting keys with authentication subkeys (#6381)
+- Fix invalid regular expressions that throw warnings on PHP 7.3 (#6398)
+- Fix so Classic skin splitter does not escape out of window (#6397)
+- Fix XSS issue in handling invalid style tag content [CVE-2018-19206] (#6410)
+- Fix compatibility with MySQL 8 - error on 'system' table use
+- Managesieve: Fix bug where show_real_foldernames setting wasn't respected (#6422)
+- New_user_identity: Fix %fu/%u vars substitution in user specific LDAP params (#6419)
+- Fix support for "allow-from <uri>" in "x_frame_options" config option (#6449)
+- Fix bug where valid content between HTML comments could have been skipped in some cases (#6464)
+- Fix multiple VCard field search (#6466)
+- Fix session issue on long running requests (#6470)
+
+RELEASE 1.3.7
+-------------
 - Fix PHP Warning: Use of undefined constant IDNA_DEFAULT on systems without php-intl (#6244)
 - Fix bug where some parts of quota information could have been ignored (#6280)
 - Fix bug where some escape sequences in html styles could bypass security checks
 - Fix bug where some forbidden characters on Cyrus-IMAP were not prevented from use in folder names
+- Fix bug where only attachments with the same name would be ignored on zip download (#6301)
+- Fix bug where unicode contact names could have been broken/emptied or caused DB errors (#6299)
+- Fix bug where after "mark all folders as read" action message counters were not reset (#6307)
+- Enigma: [EFAIL] Don't decrypt PGP messages with no MDC protection (#6289)
+- Fix bug where some HTML comments could have been malformed by HTML parser (#6333)
 
 RELEASE 1.3.6
 -------------

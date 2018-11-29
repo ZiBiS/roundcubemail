@@ -5,18 +5,17 @@
     "repositories": [
         {
             "type": "composer",
-            "url": "https://plugins.roundcube.net/"
+            "url": "https://plugins.roundcube.net"
         }
     ],
     "require": {
         "php": ">=5.4.0",
         "pear/pear-core-minimal": "~1.10.1",
-        "pear/net_socket": "~1.2.1",
         "pear/auth_sasl": "~1.1.0",
         "pear/net_idna2": "~0.2.0",
         "pear/mail_mime": "~1.10.0",
-        "pear/net_smtp": "~1.7.1",
-        "pear/crypt_gpg": "~1.6.2",
+        "pear/net_smtp": "~1.8.1",
+        "pear/crypt_gpg": "~1.6.3",
         "pear/net_sieve": "~1.4.3",
         "roundcube/plugin-installer": "~0.1.6",
         "masterminds/html5": "~2.3.0",
@@ -27,6 +26,7 @@
     },
     "suggest": {
         "pear/net_ldap2": "~2.2.0 required for connecting to LDAP",
-        "kolab/net_ldap3": "~1.0.6 required for connecting to LDAP"
+        "kolab/net_ldap3": "~1.0.6 required for connecting to LDAP",
+        "mkopinsky/zxcvbn-php": "^4.4.2 required for Zxcvbn password strength driver"
     }
 }

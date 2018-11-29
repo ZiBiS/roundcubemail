@@ -91,6 +91,10 @@
         content: @fa-var-lock; // enigma plugin
     }
 
+    &.chat > i.icon:before {
+        content: @fa-var-comment;
+    }
+
     // This works with following structure: <i> <span> [button].
     // <span> here is a one-line text, and button can be anything but <span>.
     &.aligned-buttons {
@@ -103,7 +107,7 @@
 
     a:not(.btn) {
         color: @color-message-link;
-        font-weight: normal;
+        font-weight: @color-message-link-font-weight;
     }
 
     h3 {
@@ -135,19 +139,23 @@
     }
 
     &.boxerror {
-        background-color: @color-message-error-background;
+        background-color: @color-message-error-box-background;
+        & when not(@color-message-error-box = @color-message) { color: @color-message-error-box; }
     }
 
     &.boxinformation {
-        background-color: @color-message-information-background;
+        background-color: @color-message-information-box-background;
+        & when not(@color-message-information-box = @color-message) { color: @color-message-information-box; }
     }
 
     &.boxconfirmation {
-        background-color: @color-message-success-background;
+        background-color: @color-message-success-box-background;
+        & when not(@color-message-error-box = @color-message) { color: @color-message-error-box; }
     }
 
     &.boxwarning {
-        background-color: @color-message-warning-background;
+        background-color: @color-message-warning-box-background;
+        & when not(@color-message-warning-box = @color-message) { color: @color-message-warning-box; }
     }
 
     & + table {
@@ -173,6 +181,8 @@
 
     div {
         border-color: transparent;
+        background-color: @color-message;
+        color: #fff;
 
         &.voice {
             position: absolute;
@@ -182,60 +192,30 @@
         i.icon {
             font-size: 1.5em !important;
         }
+
+        & > i.icon:before {
+            color: #fff;
+        }
     }
 
     .loading {
-        background-color: @color-list-selected-background;
-        border-color: @color-main;
-        color: @color-main;
-
-        & > i.icon:before {
-            color: @color-main;
-        }
+        background-color: @color-message-loading;
     }
 
     .alert-info.information {
-        color: #fff;
         background-color: @color-message-information;
-
-        & > i.icon:before {
-            color: #fff;
-        }
-    }
-
-    .alert-info.notice {
-        color: #fff;
-        background-color: @color-taskmenu-background;
-
-        & > i.icon:before {
-            color: #fff;
-        }
     }
 
     .alert-success {
-        color: #fff;
         background-color: @color-message-success;
-
-        & > i.icon:before {
-            color: #fff;
-        }
     }
 
     .alert-warning {
         background-color: @color-message-warning;
-
-        & > i.icon:before {
-            color: #fff;
-        }
     }
 
     .alert-danger {
-        color: #fff;
         background-color: @color-message-error;
-
-        & > i.icon:before {
-            color: #fff;
-        }
     }
 
     a {

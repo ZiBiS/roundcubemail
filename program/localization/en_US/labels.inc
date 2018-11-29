@@ -173,6 +173,7 @@ $labels['last'] = 'Last';
 $labels['previous'] = 'Previous';
 $labels['next'] = 'Next';
 $labels['select'] = 'Select';
+$labels['selection'] = 'Selection';
 $labels['all'] = 'All';
 $labels['none'] = 'None';
 $labels['currpage'] = 'Current page';
@@ -223,6 +224,8 @@ $labels['folderactions'] = 'Folder actions...';
 $labels['compact'] = 'Compact';
 $labels['empty'] = 'Empty';
 $labels['importmessages'] = 'Import messages';
+$labels['mailimportdesc'] = 'You can upload mail using files in <a href="https://en.wikipedia.org/wiki/Email#Message_format">MIME</a> or <a href="https://en.wikipedia.org/wiki/Mbox">Mbox</a> format.';
+$labels['mailimportzip'] = 'Multiple files can be compressed into zip archives.';
 
 $labels['quota'] = 'Disk usage';
 $labels['unknown'] = 'unknown';
@@ -288,6 +291,8 @@ $labels['keyexpired'] = 'Expired';
 $labels['keyrevoked'] = 'Revoked';
 $labels['bccinstead'] = 'Use Bcc';
 $labels['addheader'] = 'Add recipient (header)';
+$labels['insert'] = 'Insert';
+$labels['insertcontact'] = 'Insert contact(s)';
 $labels['recipient'] = 'Recipient';
 $labels['recipientedit'] = 'Recipient edit';
 
@@ -333,8 +338,9 @@ $labels['alwaysshow'] = 'Always show images from $sender';
 $labels['alwaysallow'] = 'Always allow from $sender';
 $labels['isdraft'] = 'This is a draft message.';
 $labels['andnmore'] = '$nr more...';
+$labels['details'] = 'Details';
 $labels['headers'] = 'Headers';
-$labels['envelope'] = 'Envelope';
+$labels['allheaders'] = 'All headers...';
 $labels['togglemoreheaders'] = 'Show more message headers';
 $labels['togglefullheaders'] = 'Toggle raw message headers';
 
@@ -479,7 +485,7 @@ $labels['importreplace'] = 'Replace the entire address book';
 $labels['importgroups'] = 'Import group assignments';
 $labels['importgroupsall'] = 'All (create groups if necessary)';
 $labels['importgroupsexisting'] = 'Only for existing groups';
-$labels['importdesc'] = 'You can upload contacts from an existing address book.<br/>We currently support importing addresses from the <a href="http://en.wikipedia.org/wiki/VCard">vCard</a> or CSV (comma-separated) data format.';
+$labels['importdesc'] = 'You can upload contacts from an existing address book.<br/>We currently support importing addresses from the <a href="https://en.wikipedia.org/wiki/VCard">vCard</a> or CSV (comma-separated) data format.';
 $labels['done'] = 'Done';
 
 // settings

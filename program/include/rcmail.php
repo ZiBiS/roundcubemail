@@ -458,7 +458,7 @@ class rcmail extends rcube
 
         // add some basic labels to client
         $this->output->add_label('loading', 'servererror', 'connerror', 'requesttimedout',
-            'refreshing', 'windowopenerror', 'uploadingmany', 'close', 'save', 'cancel',
+            'refreshing', 'windowopenerror', 'uploadingmany', 'uploading', 'close', 'save', 'cancel',
             'alerttitle', 'confirmationtitle', 'delete', 'continue', 'ok');
 
         return $this->output;
@@ -925,12 +925,6 @@ class rcmail extends rcube
         if (!$this->check_request($mode)) {
             $error = array('code' => 403, 'message' => "Request security check failed");
             self::raise_error($error, false, true);
-        }
-
-        // check referer if configured
-        if ($this->config->get('referer_check') && !rcube_utils::check_referer()) {
-            $error = array('code' => 403, 'message' => "Referer check failed");
-            self::raise_error($error, true, true);
         }
     }
 
@@ -1812,7 +1806,7 @@ class rcmail extends rcube
                 $quota_result['percent'] = min(100, round(($quota['used']/max(1,$quota['total']))*100));
             }
 
-            $title = sprintf('%s / %s (%.0f%%)',
+            $title = $this->gettext('quota') . ': ' . sprintf('%s / %s (%.0f%%)',
                 $this->show_bytes($quota['used'] * 1024),
                 $this->show_bytes($quota['total'] * 1024),
                 $quota_result['percent']
@@ -1937,6 +1931,22 @@ class rcmail extends rcube
     }
 
     /**
+     * Displays an error message on storage fatal errors
+     */
+    public function storage_fatal_error()
+    {
+        $err_code = $this->storage->get_error_code();
+        switch ($err_code) {
+        // Not all are really fatal, but these should catch
+        // connection/authentication errors the best we can
+        case rcube_imap_generic::ERROR_NO:
+        case rcube_imap_generic::ERROR_BAD:
+        case rcube_imap_generic::ERROR_BYE:
+            $this->display_server_error();
+        }
+    }
+
+    /**
      * Output HTML editor scripts
      *
      * @param string $mode Editor mode
@@ -1998,7 +2008,13 @@ class rcmail extends rcube
 
         $this->output->add_label('selectimage', 'addimage', 'selectmedia', 'addmedia');
         $this->output->set_env('editor_config', $config);
-        $this->output->include_css('program/resources/tinymce/browser.css');
+
+        if ($path = $this->config->get('media_browser_css_location', 'program/resources/tinymce/browser.css')) {
+            if ($path != 'none') {
+                $this->output->include_css($path);
+            }
+        }
+
         $this->output->include_script('tinymce/tinymce.min.js');
         $this->output->include_script('editor.js');
     }
@@ -2219,17 +2235,16 @@ class rcmail extends rcube
 
             // generate image thumbnail for file browser in HTML editor
             if (!empty($_GET['_thumbnail'])) {
-                $temp_dir       = $this->config->get('temp_dir');
                 $thumbnail_size = 80;
                 $mimetype       = $file['mimetype'];
                 $file_ident     = $file['id'] . ':' . $file['mimetype'] . ':' . $file['size'];
-                $cache_basename = $temp_dir . '/' . md5($file_ident . ':' . $this->user->ID . ':' . $thumbnail_size);
-                $cache_file     = $cache_basename . '.thumb';
+                $thumb_name     = 'thumb' . md5($file_ident . ':' . $this->user->ID . ':' . $thumbnail_size);
+                $cache_file     = rcube_utils::temp_filename($thumb_name, false, false);
 
                 // render thumbnail image if not done yet
                 if (!is_file($cache_file)) {
                     if (!$file['path']) {
-                        $orig_name = $filename = $cache_basename . '.tmp';
+                        $orig_name = $filename = $cache_file . '.tmp';
                         file_put_contents($orig_name, $file['data']);
                     }
                     else {

@@ -54,6 +54,8 @@ else {
 $plugin      = $RCMAIL->plugins->exec_hook('check_recent', array('folders' => $a_mailboxes, 'all' => $check_all));
 $a_mailboxes = $plugin['folders'];
 
+$RCMAIL->storage_fatal_error();
+
 // check recent/unseen counts
 foreach ($a_mailboxes as $mbox_name) {
     $is_current = $mbox_name == $current || ($search_request && is_object($_SESSION['search'][1]) && in_array($mbox_name, (array)$_SESSION['search'][1]->get_parameters('MAILBOX')));
@@ -65,14 +67,17 @@ foreach ($a_mailboxes as $mbox_name) {
     // Get mailbox status
     $status = $RCMAIL->storage->folder_status($mbox_name, $diff);
 
+    if ($is_current) {
+        $RCMAIL->storage_fatal_error();
+    }
+
     if ($status & 1) {
         // trigger plugin hook
         $RCMAIL->plugins->exec_hook('new_messages',
             array('mailbox' => $mbox_name, 'is_current' => $is_current, 'diff' => $diff));
     }
 
-    rcmail_send_unread_count($mbox_name, true, null,
-      (!$is_current && ($status & 1)) ? 'recent' : '');
+    rcmail_send_unread_count($mbox_name, true, null, (!$is_current && ($status & 1)) ? 'recent' : '');
 
     if ($status && $is_current) {
         // refresh saved search set

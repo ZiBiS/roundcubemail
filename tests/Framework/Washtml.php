@@ -93,6 +93,16 @@ class Framework_Washtml extends PHPUnit_Framework_TestCase
         $washed = $this->cleanupResult($washer->wash($html));
 
         $this->assertEquals('<p>para1</p><p>para2</p>', $washed, "HTML comments - tags inside (#1489904)");
+
+        $html   = "<p>para1</p><!-- comment => comment --><p>para2</p>";
+        $washed = $this->cleanupResult($washer->wash($html));
+
+        $this->assertEquals('<p>para1</p><p>para2</p>', $washed, "HTML comments - bracket inside");
+
+        $html   = "<p><!-- span>1</span -->\n<span>2</span>\n<!-- >3</span --><span>4</span></p>";
+        $washed = $this->cleanupResult($washer->wash($html));
+
+        $this->assertEquals("<p>\n<span>2</span>\n<span>4</span></p>", $washed, "HTML comments (#6464)");
     }
 
     /**

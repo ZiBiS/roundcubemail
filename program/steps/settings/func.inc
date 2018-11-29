@@ -26,7 +26,6 @@ if (!$OUTPUT->ajax_call) {
 // register UI objects
 $OUTPUT->add_handlers(array(
     'settingstabs'   => 'rcmail_settings_tabs',
-    'prefsframe'     => 'rcmail_preferences_frame',
     'sectionslist'   => 'rcmail_sections_list',
     'identitieslist' => 'rcmail_identities_list',
 ));
@@ -48,19 +47,6 @@ $RCMAIL->register_action_map(array(
     'delete-identity' => 'identities.inc',
     'upload-display'  => 'upload.inc',
 ));
-
-
-// similar function as /steps/settings/identities.inc::rcmail_identity_frame()
-function rcmail_preferences_frame($attrib)
-{
-    global $OUTPUT;
-
-    if (!$attrib['id']) {
-        $attrib['id'] = 'rcmprefsframe';
-    }
-
-    return $OUTPUT->frame($attrib, true);
-}
 
 
 function rcmail_sections_list($attrib)
@@ -171,7 +157,7 @@ function rcmail_user_prefs($current = null)
     $no_override = array_flip((array)$RCMAIL->config->get('dont_override'));
 
     foreach ($sections as $idx => $sect) {
-        $sections[$idx]['class'] = $idx;
+        $sections[$idx]['class'] = $sect['class'] ?: $idx;
 
         if ($current && $sect['id'] != $current) {
             continue;
@@ -221,14 +207,9 @@ function rcmail_user_prefs($current = null)
 
                 $zones = array();
                 foreach (DateTimeZone::listIdentifiers() as $i => $tzs) {
-                    try {
-                        $tz      = new DateTimeZone($tzs);
-                        $date    = new DateTime(date('Y') . '-12-21', $tz);
-                        $offset  = $date->format('Z') + 45000;
-                        $sortkey = sprintf('%06d.%s', $offset, $tzs);
-                        $zones[$sortkey] = array($tzs, $date->format('P'));
+                    if ($data = rcmail_timezone_standard_time_data($tzs)) {
+                        $zones[$data['key']] = array($tzs, $data['offset']);
                     }
-                    catch (Exception $e) {}
                 }
 
                 ksort($zones);
@@ -1315,17 +1296,20 @@ function rcmail_user_prefs($current = null)
 
 function rcmail_get_skins()
 {
+    global $RCMAIL;
+
     $path  = RCUBE_INSTALL_PATH . 'skins';
     $skins = array();
     $dir   = opendir($path);
+    $limit = (array) $RCMAIL->config->get('skins_allowed');
 
     if (!$dir) {
         return false;
     }
 
     while (($file = readdir($dir)) !== false) {
-        $filename = $path.'/'.$file;
-        if (!preg_match('/^\./', $file) && is_dir($filename) && is_readable($filename)) {
+        $filename = $path . '/' . $file;
+        if ($file[0] != '.' && (empty($limit) || in_array($file, $limit) && is_dir($filename) && is_readable($filename))) {
             $skins[] = $file;
         }
     }
@@ -1489,4 +1473,31 @@ function rcmail_timezone_label($tz)
     }
 
     return implode('/', $tokens);
+}
+
+/**
+ * Returns timezone offset in standard time
+ */
+function rcmail_timezone_standard_time_data($tzname)
+{
+    try {
+        $tz    = new DateTimeZone($tzname);
+        $date  = new DateTime(null, $tz);
+        $count = 12;
+
+        // Move back for a month (up to 12 times) until non-DST date is found
+        while ($count > 0 && $date->format('I')) {
+            $date->sub(new DateInterval('P1M'));
+            $count--;
+        }
+
+        $offset  = $date->format('Z') + 45000;
+        $sortkey = sprintf('%06d.%s', $offset, $tzname);
+
+        return array(
+            'key'    => $sortkey,
+            'offset' => $date->format('P'),
+        );
+    }
+    catch (Exception $e) {}
 }

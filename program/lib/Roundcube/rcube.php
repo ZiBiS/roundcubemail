@@ -523,7 +523,7 @@ class rcube
 
         if ($tmp && ($dir = opendir($tmp))) {
             while (($fname = readdir($dir)) !== false) {
-                if ($fname[0] == '.') {
+                if (strpos($fname, RCUBE_TEMP_FILE_PREFIX) !== 0) {
                     continue;
                 }
 
@@ -648,9 +648,9 @@ class rcube
             }
         }
         // specified domain
-        else if ($domain) {
+        else if ($domain && isset($this->texts[$domain.'.'.$name])) {
             $ref_domain = $domain;
-            return isset($this->texts[$domain.'.'.$name]);
+            return true;
         }
 
         return false;
@@ -708,6 +708,65 @@ class rcube
         if (is_array($merge) && !empty($merge)) {
             $this->texts = array_merge($this->texts, $merge);
         }
+    }
+
+    /**
+     * Read localized texts from an additional location (plugins, skins).
+     * Then you can use the result as 2nd arg to load_language().
+     *
+     * @param string $dir Directory to search in
+     *
+     * @return array Localization texts
+     */
+    public function read_localization($dir)
+    {
+        $lang   = $_SESSION['language'];
+        $langs  = array_unique(array('en_US', $lang));
+        $locdir = slashify($dir);
+        $texts  = array();
+
+        // Language aliases used to find localization in similar lang, see below
+        $aliases = array(
+            'de_CH' => 'de_DE',
+            'es_AR' => 'es_ES',
+            'fa_AF' => 'fa_IR',
+            'nl_BE' => 'nl_NL',
+            'pt_BR' => 'pt_PT',
+            'zh_CN' => 'zh_TW',
+        );
+
+        // use buffering to handle empty lines/spaces after closing PHP tag
+        ob_start();
+
+        foreach ($langs as $lng) {
+            $fpath = $locdir . $lng . '.inc';
+            if (is_file($fpath) && is_readable($fpath)) {
+                include $fpath;
+                $texts = (array) $labels + (array) $messages + (array) $texts;
+            }
+            else if ($lng != 'en_US') {
+                // Find localization in similar language (#1488401)
+                $alias = null;
+                if (!empty($aliases[$lng])) {
+                    $alias = $aliases[$lng];
+                }
+                else if ($key = array_search($lng, $aliases)) {
+                    $alias = $key;
+                }
+
+                if (!empty($alias)) {
+                    $fpath = $locdir . $alias . '.inc';
+                    if (is_file($fpath) && is_readable($fpath)) {
+                        include $fpath;
+                        $texts = (array) $labels + (array) $messages + (array) $texts;
+                    }
+                }
+            }
+        }
+
+        ob_end_clean();
+
+        return $texts;
     }
 
     /**
@@ -1245,12 +1304,19 @@ class rcube
     public static function raise_error($arg = array(), $log = false, $terminate = false)
     {
         // handle PHP exceptions
-        if (is_object($arg) && is_a($arg, 'Exception')) {
+        if ($arg instanceof Exception) {
             $arg = array(
                 'code' => $arg->getCode(),
                 'line' => $arg->getLine(),
                 'file' => $arg->getFile(),
                 'message' => $arg->getMessage(),
+            );
+        }
+        else if ($arg instanceof PEAR_Error) {
+            $info = $arg->getUserInfo();
+            $arg  = array(
+                'code'    => $arg->getCode(),
+                'message' => $arg->getMessage() . ($info ? ': ' . $info : ''),
             );
         }
         else if (is_string($arg)) {
@@ -1262,6 +1328,13 @@ class rcube
         }
 
         $cli = php_sapi_name() == 'cli';
+
+        $arg['cli'] = $cli;
+        $arg['log'] = $log;
+        $arg['terminate'] = $terminate;
+
+        // send error to external error tracking tool
+        $arg = self::$instance->plugins->exec_hook('raise_error', $arg);
 
         // installer
         if (!$cli && class_exists('rcmail_install', false)) {
@@ -1293,7 +1366,7 @@ class rcube
     }
 
     /**
-     * Report error according to configured debug_level
+     * Log an error
      *
      * @param array $arg_arr Named parameters
      * @see self::raise_error()
@@ -1301,58 +1374,31 @@ class rcube
     public static function log_bug($arg_arr)
     {
         $program = strtoupper($arg_arr['type'] ?: 'php');
-        $level   = self::get_instance()->config->get('debug_level');
-
-        // disable errors for ajax requests, write to log instead (#1487831)
-        if (($level & 4) && !empty($_REQUEST['_remote'])) {
-            $level = ($level ^ 4) | 1;
-        }
 
         // write error to local log file
-        if (($level & 1) || !empty($arg_arr['fatal'])) {
-            if ($_SERVER['REQUEST_METHOD'] == 'POST') {
-                foreach (array('_task', '_action') as $arg) {
-                    if ($_POST[$arg] && !$_GET[$arg]) {
-                        $post_query[$arg] = $_POST[$arg];
-                    }
-                }
-
-                if (!empty($post_query)) {
-                    $post_query = (strpos($_SERVER['REQUEST_URI'], '?') != false ? '&' : '?')
-                        . http_build_query($post_query, '', '&');
+        if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+            foreach (array('_task', '_action') as $arg) {
+                if ($_POST[$arg] && !$_GET[$arg]) {
+                    $post_query[$arg] = $_POST[$arg];
                 }
             }
 
-            $log_entry = sprintf("%s Error: %s%s (%s %s)",
-                $program,
-                $arg_arr['message'],
-                $arg_arr['file'] ? sprintf(' in %s on line %d', $arg_arr['file'], $arg_arr['line']) : '',
-                $_SERVER['REQUEST_METHOD'],
-                $_SERVER['REQUEST_URI'] . $post_query);
-
-            if (!self::write_log('errors', $log_entry)) {
-                // send error to PHPs error handler if write_log didn't succeed
-                trigger_error($arg_arr['message'], E_USER_WARNING);
+            if (!empty($post_query)) {
+                $post_query = (strpos($_SERVER['REQUEST_URI'], '?') != false ? '&' : '?')
+                    . http_build_query($post_query, '', '&');
             }
         }
 
-        // report the bug to the global bug reporting system
-        if ($level & 2) {
-            // TODO: Send error via HTTP
-        }
+        $log_entry = sprintf("%s Error: %s%s (%s %s)",
+            $program,
+            $arg_arr['message'],
+            $arg_arr['file'] ? sprintf(' in %s on line %d', $arg_arr['file'], $arg_arr['line']) : '',
+            $_SERVER['REQUEST_METHOD'],
+            $_SERVER['REQUEST_URI'] . $post_query);
 
-        // show error if debug_mode is on
-        if ($level & 4) {
-            print "<b>$program Error";
-
-            if (!empty($arg_arr['file']) && !empty($arg_arr['line'])) {
-                print " in $arg_arr[file] ($arg_arr[line])";
-            }
-
-            print ':</b>&nbsp;';
-            print nl2br($arg_arr['message']);
-            print '<br />';
-            flush();
+        if (!self::write_log('errors', $log_entry)) {
+            // send error to PHPs error handler if write_log didn't succeed
+            trigger_error($arg_arr['message'], E_USER_WARNING);
         }
     }
 
@@ -1552,14 +1598,15 @@ class rcube
     /**
      * Send the given message using the configured method.
      *
-     * @param object $message   Reference to Mail_MIME object
-     * @param string $from      Sender address string
-     * @param array  $mailto    Array of recipient address strings
-     * @param array  $error     SMTP error array (reference)
-     * @param string $body_file Location of file with saved message body (reference),
-     *                          used when delay_file_io is enabled
-     * @param array  $options   SMTP options (e.g. DSN request)
-     * @param bool   $disconnect Close SMTP connection ASAP
+     * @param object       $message    Reference to Mail_MIME object
+     * @param string       $from       Sender address string
+     * @param array|string $mailto     Either a comma-separated list of recipients (RFC822 compliant),
+     *                                 or an array of recipients, each RFC822 valid
+     * @param array        $error      SMTP error array (reference)
+     * @param string       $body_file  Location of file with saved message body (reference),
+     *                                 used when delay_file_io is enabled
+     * @param array        $options    SMTP options (e.g. DSN request)
+     * @param bool         $disconnect Close SMTP connection ASAP
      *
      * @return boolean Send status.
      */
@@ -1605,8 +1652,7 @@ class rcube
 
         if ($message->getParam('delay_file_io')) {
             // use common temp dir
-            $temp_dir    = $this->config->get('temp_dir');
-            $body_file   = tempnam($temp_dir, 'rcmMsg');
+            $body_file   = rcube_utils::temp_filename('msg');
             $mime_result = $message->saveMessageBody($body_file);
 
             if (is_a($mime_result, 'PEAR_Error')) {
@@ -1669,7 +1715,10 @@ class rcube
             $this->smtp->disconnect();
         }
 
-        $message->headers($headers, true);
+        // Add Bcc header back
+        if (!empty($headers['Bcc'])) {
+            $message->headers(array('Bcc' => $headers['Bcc']), true);
+        }
 
         return $sent;
     }

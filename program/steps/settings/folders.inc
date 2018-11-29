@@ -182,13 +182,13 @@ $OUTPUT->set_env('quota', (bool) $STORAGE->get_capability('QUOTA'));
 $OUTPUT->include_script('treelist.js');
 
 // add some labels to client
-$OUTPUT->add_label('deletefolderconfirm', 'purgefolderconfirm', 'folderdeleting',
-    'foldermoving', 'foldersubscribing', 'folderunsubscribing', 'quota');
+$OUTPUT->add_label('deletefolderconfirm', 'purgefolderconfirm', 'movefolderconfirm',
+    'folderdeleting', 'foldermoving', 'foldersubscribing', 'folderunsubscribing',
+    'move', 'quota');
 
 // register UI objects
 $OUTPUT->add_handlers(array(
     'foldersubscription' => 'rcmail_folder_subscriptions',
-    'folderframe'        => 'rcmail_folder_frame',
     'folderfilter'       => 'rcmail_folder_filter',
     'quotadisplay'       => array($RCMAIL, 'quota_display'),
     'searchform'         => array($OUTPUT, 'search_form'),
@@ -418,17 +418,6 @@ function rcmail_folder_tree_element($folders, &$key, &$js_folders)
     return html::tag('li', $attribs, $content);
 }
 
-function rcmail_folder_frame($attrib)
-{
-    global $OUTPUT;
-
-    if (!$attrib['id']) {
-        $attrib['id'] = 'rcmfolderframe';
-    }
-
-    return $OUTPUT->frame($attrib, true);
-}
-
 function rcmail_folder_filter($attrib)
 {
     global $RCMAIL;
@@ -444,7 +433,9 @@ function rcmail_folder_filter($attrib)
         $attrib['id'] = 'rcmfolderfilter';
     }
 
-    $attrib['onchange'] = rcmail_output::JS_OBJECT_NAME . '.folder_filter(this.value)';
+    if (!rcube_utils::get_boolean($attrib['noevent'])) {
+        $attrib['onchange'] = rcmail_output::JS_OBJECT_NAME . '.folder_filter(this.value)';
+    }
 
     $roots  = array();
     $select = new html_select($attrib);

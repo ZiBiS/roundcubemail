@@ -98,6 +98,22 @@ input.smart-upload {
     }
 
     td.rowtargets {
+        .composite {
+            input, textarea, select, .multi-input, .input-group {
+                margin-bottom: .5rem;
+            }
+
+            .input-group {
+                input, textarea, select, .multi-input {
+                    margin-bottom: 0;
+                }
+            }
+
+            br {
+                display: block;
+            }
+        }
+
         .input-group {
             margin-bottom: .25rem;
 
@@ -336,7 +352,7 @@ input.smart-upload {
 
 .propform,
 .formcontent {
-    fieldset:nth-of-type(n+2) {
+    fieldset:not(.tab-pane):nth-of-type(n+2) {
         margin-top: 1em;
     }
 
@@ -382,11 +398,6 @@ html.ms .propform {
     @media screen and (min-width: @screen-width-bs-phone) {
         .row.form-check > td {
             display: flex;
-        }
-    }
-    @media screen and (max-width: (@screen-width-bs-phone - 1px)) {
-        .row {
-            display: block;
         }
     }
 }
@@ -575,6 +586,10 @@ html.ms .propform {
     text-decoration: none;
     padding: .375rem .5rem;
 
+    &.input-group-text {
+        min-width: 2.4rem;
+    }
+
     &:before {
         &:extend(.font-icon-class);
         margin: 0 !important;
@@ -602,6 +617,9 @@ html.ms .propform {
     &.add:before {
         content: @fa-var-plus;
     }
+    &.add.recipient:before {
+        content: @fa-var-users;
+    }
     &.search:before {
         content: @fa-var-search;
     }
@@ -617,21 +635,27 @@ html.ms .propform {
     }
 }
 
-td.editfield { width: 99%;  /* TODO */ }
-
-
-ul.proplist {
-    margin-bottom: 0;
-
-    @media screen and (min-width: (@screen-width-bs-phone + 1px)) {
-        padding-left: 0;
+.input-group a {
+    &:focus {
+        background-color: @color-input-border-focus-shadow;
+        outline: 0;
     }
+}
+
+@proplist-record-height: 2rem;
+.proplist {
+    margin-bottom: 0;
+    padding: 0;
 
     li {
         list-style-type: none;
-        line-height: 2.4rem;
+        line-height: @proplist-record-height;
         margin-bottom: .25rem;
         display: flex;
+
+        &:last-child {
+            margin-bottom: 0;
+        }
 
         input[type=radio] {
             vertical-align: middle;
@@ -642,18 +666,24 @@ ul.proplist {
             }
         }
 
-        label {
+        label:not(.input-group-text) {
             margin: 0;
+            line-height: @proplist-record-height;
         }
 
         .icon-checkbox {
-            height: 2.4rem !important;
+            height: @proplist-record-height;
             margin-left: -1.2em;
 
             & + label {
-                height: 2rem;
+                height: @proplist-record-height;
                 margin-right: .5rem;
-                padding: 0;
+                padding: 0 !important;
+                line-height: 1.25;
+
+                html.touch &:before {
+                    line-height: 1.1;
+                }
             }
         }
 
@@ -663,7 +693,6 @@ ul.proplist {
         }
     }
 }
-
 
 .checklist {
     .form-check-input + label {
@@ -757,6 +786,7 @@ html.touch .popupmenu.form {
 
     input.form-control {
         padding-left: .75rem;
+        height: auto; // fixes input height
     }
 
     input,
@@ -817,8 +847,6 @@ html.touch .popupmenu.form {
         margin: 0;
     }
 
-    // TODO background image
-
     .upload-form {
         text-align: center;
         padding-bottom: 1em;
@@ -832,6 +860,7 @@ html.touch .popupmenu.form {
    .hint {
         margin-bottom: .5rem;
         color: @color-form-hint;
+        text-align: center;
     }
 
     .attachmentslist {
@@ -862,6 +891,15 @@ html.touch .popupmenu.form {
     }
 
     &.droptarget {
+        padding-bottom: .5rem !important;
+
+        &:after {
+            content: @icon-file-drop;
+            width: 10rem;
+            margin: 5rem auto 0 auto;
+            display: block;
+        }
+
         &.active {
             border-color: darken(@color-toolbar-button-background-hover, 20%);
         }
@@ -884,6 +922,7 @@ html.touch .popupmenu.form {
     padding: 0 .75rem @recipient-input-margin-fix .75rem;
     list-style-type: none;
     cursor: text;
+    height: auto; // reset .form-control height
 
     &.focus {
         .style-input-focus;
@@ -943,8 +982,13 @@ html.touch .popupmenu.form {
         }
     }
 
+    li {
+        max-width: 100%;
+    }
+
     input {
-        width: 15px;
+        width: 40px;
+        max-width: 100%;
         background: transparent !important;
         border: 0 !important;
         margin-top: @recipient-input-margin-fix;
@@ -1082,7 +1126,6 @@ html.touch .popupmenu.form {
 
 /*** Percent input with jQuery-UI slider ***/
 
-
 // Structure: <input><span.label><div.ui-slider>
 .input-percent-slider {
     display: flex;
@@ -1102,6 +1145,7 @@ html.touch .popupmenu.form {
         margin: 0 .5em;
     }
 }
+
 
 /*** Image upload widget ***/
 
@@ -1147,6 +1191,10 @@ input.icon-checkbox {
         font-size: 1.2rem;
         cursor: pointer;
         width: 1.5em;
+
+        html.touch & {
+            font-size: 1.5rem;
+        }
 
         &:before {
             &:extend(.font-icon-class);
@@ -1198,120 +1246,27 @@ input.icon-checkbox {
     }
 }
 
-html.touch input.icon-checkbox + label {
-    font-size: 1.5rem;
-}
-
-
-/*** HTML editor widget (and TinyMCE editor) ***/
-
-.mce-tinymce {
-    &.mce-container.mce-panel {
-        border-radius: .25rem;
-        border-color: @color-input-border;
-        overflow: hidden;
-    }
-
-    .mce-btn,
-    .mce-panel {
-        background-color: @color-input-addon-background;
-    }
-}
-
-.html-editor {
-    position: relative;
-    display: flex;
-    margin-bottom: .25rem;
-
-    & > .nav {
-        border-color: transparent;
-        z-index: 1;
-        position: absolute;
-        top: 1px;
-        right: 1rem;
-
-        a.active {
-            border-color: @color-input-border !important;
-
-            &.mode-html {
-                background-color: @color-input-addon-background;
-                border-bottom-color: @color-input-addon-background !important;
-            }
-
-            &.mode-plain {
-                border-bottom-color: #fff !important;
-            }
+.input-group-combo {
+    select:first-of-type {
+        &.alone {
+            border-radius: .25rem !important;
         }
 
-        a:hover {
-            border-bottom-color: transparent;
+        &:not(.alone) {
+            flex: unset;
+            width: auto;
         }
     }
 
-    & > iframe, // e.g. mailvelope frame
-    & > .googie_edit_layer,
-    & > .mce-tinymce,
-    & > textarea {
-        margin-top: 2.55rem;
-        font-family: monospace;
-        width: 100% !important;
+    .input-group {
+        padding: 0 !important;
+        flex: 2;
     }
 
-    & > iframe { // e.g. mailvelope frame
-        border-radius: .3rem;
-        border: 1px solid @color-input-border;
-        min-height: 35em;
-    }
-}
-
-
-/*** GoogieSpell widget ***/
-
-.googie_window {
-    width: 16rem;
-}
-
-.googie_edit_layer {
-    font-family: monospace;
-
-    // from Bootstrap's textarea
-    padding: .5rem .75rem;
-    border: 1px solid @color-input-border;
-    border-radius: .3rem;
-    line-height: 1.25;
-}
-
-.googie_link {
-    color: @color-spellcheck-link;
-    text-decoration: underline;
-    cursor: pointer;
-}
-
-.googie_list {
-    td {
-        min-width: 8rem;
-        width: auto;
-
-        &.googie_list_onhover {
-            color: @color-toolbarmenu-hover;
-            background-color: @color-toolbarmenu-hover-background;
-        }
-
-        .googie_list_revert:before {
-            &:extend(.font-icon-class);
-            content: @fa-var-plus-square;
-        }
-
-        .googie_add_to_dict:before {
-            &:extend(.font-icon-class);
-            content: @fa-var-plus-square;
-        }
-    }
-
-    input {
-        display: inline-block;
-        margin: .5rem .5rem .5rem 0 !important;
-        padding: .5rem .75rem !important;
+    select + select,
+    .input-group :first-child {
+        border-top-left-radius: 0;
+        border-bottom-left-radius: 0;
     }
 }
 
@@ -1328,14 +1283,6 @@ html.touch input.icon-checkbox + label {
 
 
 /*** Bootstrap style overrides ***/
-
-// Fixes height of some text inputs
-// FIXME: Really? See managesieve's vacation form for all of these
-td.input-group .input-group-append,
-td.datetime input,
-td.input-group input {
-    height: ~"calc(2.25rem + 2px)";
-}
 
 .form-control {
     color: @color-font;
@@ -1371,4 +1318,9 @@ td.input-group input {
 .input-group-text {
     color: @color-input;
     background-color: @color-input-addon-background;
+
+    input:focus {
+        z-index: 1;
+        border-color: @color-input-border-focus !important;
+    }
 }
