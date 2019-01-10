@@ -227,7 +227,9 @@ if (!empty($msg_uid) && empty($COMPOSE['as_attachment'])) {
                 }
             }
 
-            $COMPOSE['param']['message-id'] = $MESSAGE->headers->get('message-id');
+            if (($msgid = $MESSAGE->headers->get('message-id')) && !preg_match('/^mid:[0-9]+$/', $msgid)) {
+                $COMPOSE['param']['message-id'] = $msgid;
+            }
 
             // use message UID as draft_id
             $OUTPUT->set_env('draft_id', $msg_uid);
@@ -1031,17 +1033,21 @@ function rcmail_write_forward_attachments()
 {
     global $RCMAIL, $COMPOSE, $MESSAGE;
 
-    $storage = $RCMAIL->get_storage();
-    $names   = array();
-    $refs    = array();
-
     if ($MESSAGE->pgp_mime) {
         return;
     }
 
+    $storage     = $RCMAIL->get_storage();
+    $names       = array();
+    $refs        = array();
+    $size_errors = 0;
+    $size_limit  = parse_bytes($RCMAIL->config->get('max_message_size'));
+    $total_size  = 10 * 1024; // size of message body, to start with
+
     $loaded_attachments = array();
     foreach ((array)$COMPOSE['attachments'] as $attachment) {
         $loaded_attachments[$attachment['name'] . $attachment['mimetype']] = $attachment;
+        $total_size += $attachment['size'];
     }
 
     if ($COMPOSE['forward_uid'] == '*') {
@@ -1083,6 +1089,13 @@ function rcmail_write_forward_attachments()
             continue;
         }
 
+        if ($size_limit && $size_limit < $total_size + $message->headers->size) {
+            $size_errors++;
+            continue;
+        }
+
+        $total_size += $message->headers->size;
+
         rcmail_save_attachment($message, null, $COMPOSE['id'], array('filename' => $name));
 
         if ($message->headers->messageID) {
@@ -1094,8 +1107,15 @@ function rcmail_write_forward_attachments()
     if (count($refs) == 1) {
         $COMPOSE['reply_msgid'] = $refs[0];
     }
+
     if (!empty($refs)) {
         $COMPOSE['references'] = implode(' ', $refs);
+    }
+
+    if ($size_errors) {
+        $limit = $RCMAIL->show_bytes($size_limit);
+        $error = $RCMAIL->gettext(array('name' => 'msgsizeerrorfwd', 'vars' => array('num' => $size_errors, 'size' => $limit)));
+        $RCMAIL->output->add_script(sprintf("%s.display_message('%s', 'error');", rcmail_output::JS_OBJECT_NAME, rcube::JQ($error)), 'docready');
     }
 }
 
@@ -1185,7 +1205,7 @@ function rcmail_compose_attachment_list($attrib)
                 continue;
             }
 
-            $link_content = sprintf('<span class="attachment-name">%s</span> <span class="attachment-size">(%s)</span>',
+            $link_content = sprintf('<span class="attachment-name" onmouseover="rcube_webmail.long_subject_title_ex(this)">%s</span> <span class="attachment-size">(%s)</span>',
                 rcube::Q($a_prop['name']), $RCMAIL->show_bytes($a_prop['size']));
 
             $content_link = html::a(array(
@@ -1206,7 +1226,6 @@ function rcmail_compose_attachment_list($attrib)
             $out .= html::tag('li', array(
                     'id'          => 'rcmfile'.$id,
                     'class'       => rcube_utils::file2class($a_prop['mimetype'], $a_prop['name']),
-                    'onmouseover' => "rcube_webmail.long_subject_title_ex(this, 0)",
                 ),
                 $COMPOSE['icon_pos'] == 'left' ? $delete_link.$content_link : $content_link.$delete_link
             );

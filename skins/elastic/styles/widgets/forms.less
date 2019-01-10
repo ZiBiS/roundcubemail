@@ -69,9 +69,10 @@ input.smart-upload {
             &:before {
                 &:extend(.font-icon-class);
                 content: @fa-var-plus;
+                vertical-align: unset;
 
                 @media screen and (min-width: (@screen-width-bs-phone + 1px)) {
-                    margin: 0;
+                    margin: 0 !important;
                 }
             }
 
@@ -394,6 +395,7 @@ input.smart-upload {
 html.ms .propform {
     .row:not(.form-check) > td {
         display: flex;
+        flex-wrap: wrap; // puts "hint" element below the input
     }
     @media screen and (min-width: @screen-width-bs-phone) {
         .row.form-check > td {
@@ -994,6 +996,10 @@ html.touch .popupmenu.form {
         margin-top: @recipient-input-margin-fix;
         outline: 0;
         line-height: 1.5;
+
+        &::-ms-clear {
+            display: none; // removes clear icon in IE11
+        }
     }
 }
 
@@ -1293,8 +1299,12 @@ input.icon-checkbox {
         box-shadow: 0 0 0 .2rem @color-input-border-focus-shadow;
     }
 
+    // FIXME: This fixes style of required inputs in Firefox/Edge, but
+    // makes inputs on login form red-bordered, commented for now
+    // &:invalid,
     &.is-invalid {
         border-color: @color-input-border-invalid;
+        box-shadow: none;
 
         &:focus {
             border-color: @color-input-border-invalid;

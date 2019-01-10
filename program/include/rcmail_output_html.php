@@ -249,6 +249,14 @@ EOF;
     }
 
     /**
+     * Getter for the current skin path property
+     */
+    public function get_skin_path()
+    {
+        return $this->skin_paths[0];
+    }
+
+    /**
      * Set skin
      *
      * @param string $skin Skin name
@@ -651,12 +659,6 @@ EOF;
                 $plugin_skin_paths[] = $this->app->plugins->url . $plugin . '/' . $skin_path;
             }
 
-            // add fallback to default skin
-            if (is_dir($this->app->plugins->dir . $plugin . '/skins/default')) {
-                $skin_dir = $plugin . '/skins/default';
-                $plugin_skin_paths[] = $this->app->plugins->url . $skin_dir;
-            }
-
             // prepend plugin skin paths to search list
             $this->skin_paths = array_merge($plugin_skin_paths, $this->skin_paths);
         }
@@ -664,6 +666,11 @@ EOF;
         // find skin template
         $path = false;
         foreach ($this->skin_paths as $skin_path) {
+            // when requesting a plugin template ignore global skin path(s)
+            if ($plugin && strpos($skin_path, $this->app->plugins->url) !== 0) {
+                continue;
+            }
+
             $path = RCUBE_INSTALL_PATH . "$skin_path/templates/$name.html";
 
             // fallback to deprecated template names
@@ -1699,7 +1706,7 @@ EOF;
      * Add inline javascript code
      *
      * @param string $script   JS code snippet
-     * @param string $position Target position [head|head_top|foot]
+     * @param string $position Target position [head|head_top|foot|docready]
      */
     public function add_script($script, $position = 'head')
     {

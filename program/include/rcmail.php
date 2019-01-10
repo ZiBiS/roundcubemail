@@ -893,14 +893,17 @@ class rcmail extends rcube
 
         // write performance stats to logs/console
         if ($this->config->get('devel_mode') || $this->config->get('performance_stats')) {
+            // we have to disable per_user_logging to make sure stats end up in the main console log
+            $this->config->set('per_user_logging', false);
+
             // make sure logged numbers use unified format
             setlocale(LC_NUMERIC, 'en_US.utf8', 'en_US.UTF-8', 'en_US', 'C');
 
             if (function_exists('memory_get_usage')) {
-                $mem = $this->show_bytes(memory_get_usage());
+                $mem = round(memory_get_usage() / 1024 /1024, 1);
             }
             if (function_exists('memory_get_peak_usage')) {
-                $mem .= '/'.$this->show_bytes(memory_get_peak_usage());
+                $mem .= '/'. round(memory_get_peak_usage() / 1024 / 1024, 1);
             }
 
             $log = $this->task . ($this->action ? '/'.$this->action : '') . ($mem ? " [$mem]" : '');
@@ -1978,6 +1981,7 @@ class rcmail extends rcube
 
         $lang_codes = array($_SESSION['language']);
         $assets_dir = $this->config->get('assets_dir') ?: INSTALL_PATH;
+        $skin_path  = $this->output->get_skin_path();
 
         if ($pos = strpos($_SESSION['language'], '_')) {
             $lang_codes[] = substr($_SESSION['language'], 0, $pos);
@@ -1997,14 +2001,19 @@ class rcmail extends rcube
         $config = array(
             'mode'       => $mode,
             'lang'       => $lang,
-            'skin_path'  => $this->output->get_skin_path(),
+            'skin_path'  => $skin_path,
             'spellcheck' => $spellcheck, // deprecated
             'spelldict'  => $spelldict,
+            'content_css'      => 'program/resources/tinymce/content.css',
             'disabled_plugins' => $hook['disabled_plugins'],
             'disabled_buttons' => $hook['disabled_buttons'],
             'extra_plugins'    => $hook['extra_plugins'],
             'extra_buttons'    => $hook['extra_buttons'],
         );
+
+        if ($path = $this->config->get('editor_css_location')) {
+            $config['content_css'] = $skin_path . $path;
+        }
 
         $this->output->add_label('selectimage', 'addimage', 'selectmedia', 'addmedia');
         $this->output->set_env('editor_config', $config);

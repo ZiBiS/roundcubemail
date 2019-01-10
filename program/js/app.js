@@ -1403,8 +1403,7 @@ function rcube_webmail()
         break;
 
       case 'import':
-        var reload = false,
-          dialog = $('<iframe>').attr('src', this.url('import', {_framed: 1, _target: this.env.source})),
+        var dialog = $('<iframe>').attr('src', this.url('import', {_framed: 1, _target: this.env.source})),
           import_func = function(e) {
             var win = dialog[0].contentWindow,
               form = win.rcmail.gui_objects.importform;
@@ -1421,17 +1420,17 @@ function rcube_webmail()
               form.submit();
               win.rcmail.lock_form(form, true);
               // disable Import button
-              $(e.target).attr('disabled', true);
-              reload = true;
+              $(e.target).attr('disabled', true).next().focus();
             }
           },
           close_func = function(event, ui) {
             $(this).remove();
-            if (reload)
+            if (ref.import_state == 'reload')
               ref.command('list');
           };
 
-        this.simple_dialog(dialog, this.gettext('importcontacts'), import_func, {
+        this.import_state = null;
+        this.import_dialog = this.simple_dialog(dialog, this.gettext('importcontacts'), import_func, {
           close: close_func,
           button: 'import',
           width: 500,
@@ -5417,10 +5416,8 @@ function rcube_webmail()
         + (this.env.cancelicon ? '<img src="'+this.env.cancelicon+'" alt="'+label+'" />' : '<span class="inner">' + label + '</span>') + '</a>' + att.html;
     }
 
-    li.attr('id', name)
-      .addClass(att.classname)
-      .html(att.html)
-      .on('mouseover', function() { rcube_webmail.long_subject_title_ex(this); });
+    li.attr('id', name).addClass(att.classname).html(att.html)
+      .find('.attachment-name').on('mouseover', function() { rcube_webmail.long_subject_title_ex(this); });
 
     // replace indicator's li
     if (upload_id && (indicator = document.getElementById(upload_id))) {
@@ -5509,24 +5506,14 @@ function rcube_webmail()
   // update attachments list with the new name
   this.rename_attachment_handler = function(id, name)
   {
-    var attachment = this.env.attachments ? this.env.attachments[id] : null,
-      item = $('#' + id + ' > a.filename'),
-      link = $('<a>');
+    var attachment = this.env.attachments ? this.env.attachments[id] : null;
 
     if (!attachment || !name)
       return;
 
     attachment.name = name;
 
-    // update attachments list
-    if (item.length == 1) {
-      // create a new element with new attachment name and cloned size
-      link.text(name).append($('span', item).clone());
-      // update attachment name element
-      item.html(link.html());
-      // reset parent's title which may contain the old name
-      item.parent().attr('title', '');
-    }
+    $('#' + id + ' .attachment-name').text(name).attr('title', '');
   };
 
   // send remote request to add a new contact
@@ -5770,6 +5757,17 @@ function rcube_webmail()
     if (style)
       head.append($('<style id="image-style">').text('img { transform: ' + style.join(' ') + '}'));
   };
+
+  // Update import dialog state
+  this.import_state_set = function(state)
+  {
+    if (this.import_dialog) {
+      this.import_state = state;
+      // activate Import button depending on state
+      $(this.import_dialog).parent().find('.ui-dialog-buttonset > button:first').attr('disabled', state != 'error');
+    }
+  };
+
 
   /*********************************************************/
   /*********     keyboard live-search methods      *********/
@@ -10112,6 +10110,7 @@ rcube_webmail.long_subject_title_ex = function(elem)
   if (!elem.title) {
     var $elem = $(elem),
       txt = $.trim($elem.text()),
+      indent = $('span.branch', $elem).width() || 0,
       tmp = $('<span>').text(txt)
         .css({position: 'absolute', 'float': 'left', visibility: 'hidden',
           'font-size': $elem.css('font-size'), 'font-weight': $elem.css('font-weight')})
@@ -10119,7 +10118,7 @@ rcube_webmail.long_subject_title_ex = function(elem)
       w = tmp.width();
 
     tmp.remove();
-    if (w + $('span.branch', $elem).width() * 15 > $elem.width())
+    if (w + indent * 15 > $elem.width())
       elem.title = rcube_webmail.subject_text(elem);
   }
 };
