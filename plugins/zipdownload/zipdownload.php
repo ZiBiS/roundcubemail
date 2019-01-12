@@ -20,6 +20,8 @@ class zipdownload extends rcube_plugin
     private $names         = array();
     private $default_limit = '50MB';
 
+    private $names = array();
+
     // RFC4155: mbox date format
     const MBOX_DATE_FORMAT = 'D M d H:i:s Y';
 
@@ -147,7 +149,7 @@ class zipdownload extends rcube_plugin
             $part     = $message->mime_parts[$pid];
             $disp_name = $this->_create_displayname($part);
 
-            $tmpfn       = rcube_utils::temp_filename('zipattach');
+            $tmpfn       = tempnam($temp_dir, 'zipattach');
             $tmpfp       = fopen($tmpfn, 'w');
             $tempfiles[] = $tmpfn;
 
@@ -177,7 +179,7 @@ class zipdownload extends rcube_plugin
     {
         $rcmail = rcmail::get_instance();
 
-        if ($rcmail->config->get('zipdownload_selection', $this->default_limit)) {
+        if ($rcmail->config->get('zipdownload_selection')) {
             $messageset = rcmail::get_uids(null, null, $multi, rcube_utils::INPUT_POST);
             if (count($messageset)) {
                 $this->_download_messages($messageset);

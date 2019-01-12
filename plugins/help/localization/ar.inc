@@ -15,8 +15,6 @@
 
  For translation see https://www.transifex.com/projects/p/roundcube-webmail/resource/plugin-help/
 */
-$labels['help'] = 'المساعدة';
-$labels['about'] = 'نبذة عن البرنامج';
+$labels['about'] = 'نبذة';
 $labels['license'] = 'الترخيص';
-$labels['csrfinfo'] = 'إطّلع على المزيد حول CSRF و كيف  نقوم بحمايتكم';
 ?>

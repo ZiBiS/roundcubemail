@@ -16,9 +16,9 @@
  For translation see https://www.transifex.com/projects/p/roundcube-webmail/resource/labels/
 */
 $labels['isread'] = 'Ɣeṛ';
-$labels['unknown'] = 'arussin';
+$labels['unknown']  = 'arussin';
 $labels['other'] = 'Ayen-nniḍen';
-$labels['typeother'] = 'Ayen-nniḍen';
+$labels['typeother']  = 'Ayen-nniḍen';
 $labels['delete'] = 'Kkes';
 $labels['create'] = 'Rnu';
 ?>

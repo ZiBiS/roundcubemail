@@ -200,7 +200,6 @@ $messages['invalidimageformat'] = 'Irudi formatua ez da baliozkoa.';
 $messages['mispellingsfound'] = 'Ortografia akatsak detektatu dira mezuan.';
 $messages['parentnotwritable'] = 'Ezin da karpeta sortu/mugi hautatutako goragoko karpetan. Sartzeko baimenik ez.';
 $messages['messagetoobig'] = 'Mezu-zatia handiegia da prozesatzeko.';
-$messages['attachmentvalidationerror'] = 'Eranskina ez da fidagarria bere motak ez duelako bat egiten mezuan aitortzen duen motarekin. Ez baduzu konfiantza bidaltzailearekin ez zenuke ireki behar zeren eta kode maltzurra gorde dezake.<br/><br/><em>Iradokita: $expected; topatuta: $detected</em>';
 $messages['noscriptwarning'] = 'Kontuz: web-posta zerbitzu honek Javascript behar du! Erabili nahi baduzu gaitu Javascript zure nabigatzailearen ezarpenetan.';
 $messages['messageissent'] = 'Mezua bidali da baina oraindik ez da gorde. Nahi duzu orain gorde?';
 $messages['errnotfound'] = 'Fitxategia ez da aurkitu';

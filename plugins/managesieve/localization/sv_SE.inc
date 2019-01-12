@@ -272,5 +272,4 @@ $messages['forwardsaved'] = 'Information för skicka vidare har sparats.';
 $messages['emptyvacationbody'] = 'Text för frånvaromeddelande saknas!';
 $messages['duplicate.conflict.err'] = 'Både huvud och unik identifikation är inte tillåtet.';
 $messages['disabledaction'] = 'Otillåten åtgärd.';
-$messages['lastindexempty'] = 'Index är nödvändigt för att räkna från slutet';
 ?>

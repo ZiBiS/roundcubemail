@@ -36,7 +36,7 @@ class rcube_sasl_password
     function save($currpass, $newpass, $username)
     {
         $curdir   = RCUBE_PLUGINS_DIR . 'password/helpers';
-        $username = escapeshellarg($username);
+        $username = escapeshellarg($_SESSION['username']);
         $args     = rcmail::get_instance()->config->get('password_saslpasswd_args', '');
 
         if ($fh = popen("$curdir/chgsaslpasswd -p $args $username", 'w')) {

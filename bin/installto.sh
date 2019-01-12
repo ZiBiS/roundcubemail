@@ -51,6 +51,7 @@ if (strtolower($input) == 'y') {
   $adds = array();
   $dirs = array('program','bin','SQL','plugins','skins');
 
+  $dirs = array('program','installer','bin','SQL','plugins','skins');
   if (is_dir(INSTALL_PATH . 'vendor') && !is_file("$target_dir/composer.json")) {
     $dirs[] = 'vendor';
   }
@@ -60,14 +61,13 @@ if (strtolower($input) == 'y') {
 
   foreach ($dirs as $dir) {
     // @FIXME: should we use --delete for all directories?
-    $delete  = in_array($dir, array('program', 'vendor', 'installer')) ? '--delete ' : '';
+    $delete  = in_array($dir, array('program', 'installer', 'vendor')) ? '--delete ' : '';
     $command = "rsync -aC --out-format=%n " . $delete . INSTALL_PATH . "$dir/ $target_dir/$dir/";
     if (system($command, $ret) === false || $ret > 0) {
       rcube::raise_error("Failed to execute command: $command", false, true);
     }
   }
-
-  foreach (array('index.php','config/defaults.inc.php','composer.json-dist','jsdeps.json','CHANGELOG','README.md','UPGRADING','LICENSE','INSTALL') as $file) {
+  foreach (array('index.php','.htaccess','config/defaults.inc.php','composer.json-dist','jsdeps.json','CHANGELOG','README.md','UPGRADING','LICENSE','INSTALL') as $file) {
     $command = "rsync -a --out-format=%n " . INSTALL_PATH . "$file $target_dir/$file";
     if (file_exists(INSTALL_PATH . $file) && (system($command, $ret) === false || $ret > 0)) {
       rcube::raise_error("Failed to execute command: $command", false, true);
@@ -113,15 +113,7 @@ if (strtolower($input) == 'y') {
     }
   }
   else {
-    $adds[] = "NOTICE: JavaScript dependencies installation skipped...";
-  }
-
-  if (file_exists("$target_dir/installer")) {
-    $adds[] = "NOTICE: The 'installer' directory still exists. You should remove it after the upgrade.";
-  }
-
-  if (!empty($adds)) {
-    echo implode($adds, "\n") . "\n\n";
+    echo "JavaScript dependencies installation skipped...\n";
   }
 
   echo "Running update script at target...\n";

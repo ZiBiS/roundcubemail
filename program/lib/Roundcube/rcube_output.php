@@ -358,6 +358,12 @@ abstract class rcube_output
             $options |= JSON_UNESCAPED_UNICODE;
         }
 
+        // JSON_HEX_TAG is needed for inlining JSON inside of the <script> tag
+        // if input contains a html tag it will cause issues (#6207)
+        if ($inline) {
+            $options |= JSON_HEX_TAG;
+        }
+
         if ($pretty) {
             $options |= JSON_PRETTY_PRINT;
         }

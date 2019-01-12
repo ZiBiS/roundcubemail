@@ -267,10 +267,9 @@ $messages['setexist'] = 'Súprava už existuje.';
 $messages['nodata'] = 'Aspoň jedna pozícia musí byť zvolená!';
 $messages['invaliddateformat'] = 'Neplatný formát dátumu alebo časti dátumu';
 $messages['saveerror'] = 'Údaje nemožno uložiť. Nastala chyba servera.';
-$messages['vacationsaved'] = 'Údaje pre čas mimo kancelárie boli úspešne uložené.';
+$messages['vacationsaved'] = 'Údaje o dovolenke boli úspešne uložené.';
 $messages['forwardsaved'] = 'Údaje o preposlaní boli úspešne uložené.';
 $messages['emptyvacationbody'] = 'Musíte zadať telo správy, zobrazovanej v čase neprítomnosti!';
 $messages['duplicate.conflict.err'] = 'Hlavička a aj unikátny identifikátor nie sú povolené.';
 $messages['disabledaction'] = 'Akcia nie je povolená.';
-$messages['lastindexempty'] = 'Index sa vyžaduje pri počítaní od konca';
 ?>

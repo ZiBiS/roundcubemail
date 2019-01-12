@@ -167,6 +167,8 @@ $labels['vacation.advanced'] = 'Setari avansate';
 $labels['vacation.from'] = 'Adresa expeditorului răspunsului';
 $labels['vacation.subject'] = 'Subiect';
 $labels['vacation.body'] = 'Corp';
+$labels['vacation.start'] = 'Începere vacanță';
+$labels['vacation.end'] = 'Sfârșit vacanță';
 $labels['vacation.status'] = 'Statut';
 $labels['vacation.on'] = 'Pe';
 $labels['vacation.off'] = 'De pe';
@@ -233,6 +235,7 @@ $messages['setexist'] = 'Setul există deja.';
 $messages['nodata'] = 'Trebuie selectată cel putin o poziţie!';
 $messages['invaliddateformat'] = 'Data sau parte din data in format invalid';
 $messages['saveerror'] = 'Nu am putut salva datele. A aparut o eroare de server.';
+$messages['vacationsaved'] = 'Data de vacanta salvata cu succes';
 $messages['emptyvacationbody'] = 'Corpul mesajului de vacanță este obligatoriu!';
 $messages['duplicate.conflict.err'] = 'Atât antetul, cât și identificatorul unic nu sunt permise.';
 ?>

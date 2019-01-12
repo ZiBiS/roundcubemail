@@ -267,10 +267,9 @@ $messages['setexist'] = 'Rinkinys jau yra sukurtas.';
 $messages['nodata'] = 'Būtina pasirinkti bent vieną poziciją!';
 $messages['invaliddateformat'] = 'Neteisingas datos ar jos dalies formatas';
 $messages['saveerror'] = 'Nepavyksta išsaugoti duomenų. Įvyko serverio klaida.';
-$messages['vacationsaved'] = 'Ne-biure duomenys sėkmingai įrašyti.';
+$messages['vacationsaved'] = 'Sėkmingai išsaugoti atostogų duomenys.';
 $messages['forwardsaved'] = 'Persiuntimo duomenys sėkmingai įrašyti.';
 $messages['emptyvacationbody'] = 'Atostogų pranešimui turinys būtinas!';
 $messages['duplicate.conflict.err'] = 'Naudojimas antraštės ir identifikatoriaus kartu yra draudžiamas, negalimas.';
 $messages['disabledaction'] = 'Veiksmas neleistinas.';
-$messages['lastindexempty'] = 'Skaičiuojant nuo pabaigos yra reikalingas turinys';
 ?>

@@ -15,11 +15,7 @@
 
  For translation see https://www.transifex.com/roundcube/roundcube-webmail/plugin-enigma/
 */
-$labels['encryption'] = 'التشفير';
-$labels['keyname'] = 'الإسم';
-$labels['typeencrypt'] = 'تعمية';
 $labels['expiresnever'] = 'أبداً';
 $labels['unknown'] = 'مجهول';
-$labels['keychpass'] = 'تغيير كلمة المرور';
 $labels['newkeypass'] = 'كلمة المرور';
 ?>

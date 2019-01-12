@@ -41,8 +41,10 @@ class rcube_cpanel_webmail_password
     {
         $url     = self::url();
         $userpwd = "$user:$curpas";
-        $data    = array(
-            'email'    => password::username('%l'),
+        list($login) = explode('@', $user);
+
+        $data = array(
+            'email'    => $login,
             'password' => $newpass
         );
 

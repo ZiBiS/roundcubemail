@@ -15,11 +15,7 @@
 
  For translation see https://www.transifex.com/projects/p/roundcube-webmail/resource/plugin-acl/
 */
-$labels['username'] = 'المستخدم :';
 $labels['add'] = 'إضافة';
-$labels['acld'] = 'حذف الرسائل';
-$labels['aclt'] = 'حذف الرسائل';
-$labels['aclx'] = 'حذف المجلد';
 $labels['aclother'] = 'آخر';
 $labels['acldelete'] = 'حذف';
 $labels['shortaclc'] = 'أنشئ';

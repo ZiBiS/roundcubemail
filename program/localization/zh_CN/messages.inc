@@ -164,7 +164,6 @@ $messages['smtpautherror'] = 'SMTP 错误 ($code): 认证失败。';
 $messages['smtpfromerror'] = 'SMTP 错误 ($code):添加发件人失败 "$from" ($msg)。';
 $messages['smtptoerror'] = 'SMTP 错误 ($code): 添加收件人失败 "$to" ($msg)。';
 $messages['smtprecipientserror'] = 'SMTP 错误: 无法解析收件人列表。';
-$messages['smtputf8error'] = 'SMTP 错误：服务器不支持带 Unicode 字符的邮件地址';
 $messages['smtpsizeerror'] = 'SMTP 错误：消息长度超过服务器能接受的长度 ($limit)';
 $messages['smtperror'] = 'SMTP 错误: $msg';
 $messages['emailformaterror'] = '无效的电子邮件地址：$email';

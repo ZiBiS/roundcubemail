@@ -200,7 +200,6 @@ $messages['invalidimageformat'] = '圖片格式錯誤';
 $messages['mispellingsfound'] = '郵件中偵測到拼字錯誤';
 $messages['parentnotwritable'] = '無法建立/移動資料夾至指定的上層目錄，因為無存取權限';
 $messages['messagetoobig'] = '郵件太大，無法處理';
-$messages['attachmentvalidationerror'] = '附件有可疑，因其類型不符合在郵件宣稱的。如不信任寄件者，不應在瀏覽器開啟，因可能有惡意內容。<br/><br/><em>預期的是：$expected；收到的是：$detected</em>';
 $messages['noscriptwarning'] = '警告：使用 Webmail 要有 Javascript 支援！請確定您瀏覽器已啟用 Javascript';
 $messages['messageissent'] = '此郵件已經寄出，但尚未儲存。是否立即儲存？';
 $messages['errnotfound'] = '找不到檔案';

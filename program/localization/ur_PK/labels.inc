@@ -106,5 +106,4 @@ $labels['expand-all'] = 'تمام کھولیں';
 $labels['attachment'] = 'مُنسلَک شُدہ';
 $labels['nonesort'] = 'کوئی نہیں';
 $labels['layoutlist'] = 'لِسٹ';
-$labels['folders'] = 'فولڈرز';
 ?>

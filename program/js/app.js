@@ -2704,10 +2704,6 @@ function rcube_webmail()
     if (typeof url != 'object')
       url = {};
 
-    url._layout = this.env.layout
-    url._mbox = mbox;
-    url._page = page;
-
     this.http_request('list', url, lock);
     this.update_state({ _mbox: mbox, _page: (page && page > 1 ? page : null) });
   };
@@ -4524,7 +4520,8 @@ function rcube_webmail()
     else if (input_message)
       elem = input_message;
 
-    this.env.compose_focus_elem = this.init_messageform_inputs(elem);
+    // focus first empty element (need to be visible on IE8)
+    this.env.compose_focus_elem = $(elem).filter(':visible').focus().get(0);
 
     // get summary of all field values
     this.compose_field_hash(true);
@@ -4839,9 +4836,8 @@ function rcube_webmail()
 
     // check for empty recipient
     if (!rcube_check_email(get_recipients([input_to, input_cc, input_bcc]), true)) {
-      this.alert_dialog(this.get_label('norecipientwarning'), function() {
-        input_to.focus();
-      });
+      alert(this.get_label('norecipientwarning'));
+      input_to.focus();
       return false;
     }
 
@@ -4858,10 +4854,7 @@ function rcube_webmail()
           }
 
           dialog.dialog('close');
-
-          if (typeof cmd == 'function')
-            cmd();
-          else if (cmd)
+          if (ref.check_compose_input(cmd))
             ref.command(cmd, { nocheck:true });  // repeat command which triggered this
         };
 
@@ -4886,6 +4879,53 @@ function rcube_webmail()
       this.env.disclosed_recipients_warned = true;
       return false;
     }
+
+    // display localized warning for missing subject
+    if (!this.env.nosubject_warned && input_subject.val() == '') {
+      var prompt_value = $('<input>').attr({type: 'text', size: 40}),
+        myprompt = $('<div class="prompt">')
+          .append($('<div class="message">').text(this.get_label('nosubjectwarning')))
+          .append(prompt_value),
+        save_func = function() {
+          input_subject.val(prompt_value.val());
+          dialog.dialog('close');
+          if (ref.check_compose_input(cmd))
+            ref.command(cmd, { nocheck:true });  // repeat command which triggered this
+        };
+
+      dialog = this.show_popup_dialog(
+        myprompt,
+        this.get_label('nosubjecttitle'),
+        [{
+            text: this.get_label('sendmessage'),
+            click: function() { save_func(); },
+            'class': 'mainaction'
+          }, {
+            text: this.get_label('cancel'),
+            click: function() {
+              input_subject.focus();
+              dialog.dialog('close');
+            }
+          }],
+        {dialogClass: 'warning'}
+      );
+
+      prompt_value.select().keydown(function(e) {
+        if (e.which == 13) save_func();
+      });
+
+      this.env.nosubject_warned = true;
+      return false;
+    }
+
+    // check for empty body (only possible if not mailvelope encrypted)
+    if (!this.mailvelope_editor && !this.editor.get_content() && !confirm(this.get_label('nobodywarning'))) {
+      this.editor.focus();
+      return false;
+    }
+
+    // move body from html editor to textarea (just to be sure, #1485860)
+    this.editor.save();
 
     return true;
   };

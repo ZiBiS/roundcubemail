@@ -251,6 +251,7 @@ $messages['setexist'] = '设置已存在。';
 $messages['nodata'] = '至少选择一个位置！';
 $messages['invaliddateformat'] = '无效的日期或日期格式';
 $messages['saveerror'] = '无法保存数据。发生服务器错误。';
+$messages['vacationsaved'] = '假期数据保存成功。';
 $messages['forwardsaved'] = '转发数据保存成功';
 $messages['emptyvacationbody'] = '假期消息必须有正文！';
 $messages['duplicate.conflict.err'] = '不允许头和唯一标识符。';

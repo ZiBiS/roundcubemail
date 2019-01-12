@@ -105,7 +105,7 @@ class enigma_ui
             ));
 
             $this->rc->output->set_pagetitle($this->enigma->gettext('enigmacerts'));
-            $this->rc->output->send('enigma.certs'); 
+            $this->rc->output->send('enigma.certs');
         }
 */
         // Message composing UI
@@ -747,7 +747,7 @@ class enigma_ui
         foreach ($identities as $idx => $ident) {
             $name = empty($ident['name']) ? ($ident['email']) : $ident['ident'];
             $attr = array('value' => $idx, 'data-name' => $ident['name'], 'data-email' => $ident['email']);
-            $identities[$idx] = html::tag('li', null, html::label(null, $checkbox->show($idx, $attr) . rcube::Q($name)));
+            $identities[$idx] = html::label(null, $checkbox->show($idx, $attr) . rcube::Q($name));
         }
 
         $table->add('title', html::label('key-name', rcube::Q($this->enigma->gettext('newkeyident'))));
@@ -996,7 +996,7 @@ class enigma_ui
                     $msg = rcube::Q(str_replace('$sender', $sender, $this->enigma->gettext($label)));
                 }
                 else {
-                    $attrib['class'] = 'boxwarning enigmawarning signed';
+                    $attrib['class'] = 'enigmawarning';
                     if ($sender) {
                         $msg = rcube::Q(str_replace('$sender', $sender, $this->enigma->gettext('siginvalid')));
                     }

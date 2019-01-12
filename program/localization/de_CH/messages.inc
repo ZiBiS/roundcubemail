@@ -198,7 +198,6 @@ $messages['invalidimageformat'] = 'Kein gültiges Bildformat.';
 $messages['mispellingsfound'] = 'Es wurden noch Rechtschreibfehler in der Nachricht gefunden.';
 $messages['parentnotwritable'] = 'Konnte den Ordner nicht erstellen/verschieben. Keine Berechtigung.';
 $messages['messagetoobig'] = 'Die Nachricht ist zu gross und kann nicht verarbeitet werden.';
-$messages['attachmentvalidationerror'] = 'Dieser Anhang ist verdächtig, weil sein Dateityp nicht mit dem in der Nachricht angegebenen Dateityp übereinstimmt. Wenn Sie dem Absender nicht vertrauen, sollten Sie ihn nicht im Browser öffnen, da er bösartige Inhalte enthalten kann. Erwartet: $expected; gefunden: $detected</em>';
 $messages['noscriptwarning'] = 'Achtung! Dieser Webmail-Service erfordert Javascript. Um ihn zu benutzten aktivieren Sie Javascript in ihren Browser-Einstellungen.';
 $messages['messageissent'] = 'Die Nachricht wurde bereits gesendet, aber noch nicht gespeichert. Jetzt speichern?';
 $messages['errnotfound'] = 'Datei nicht gefunden';

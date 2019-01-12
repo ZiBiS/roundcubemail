@@ -15,14 +15,14 @@
 
  For translation see https://www.transifex.com/projects/p/roundcube-webmail/resource/labels/
 */
-$labels['welcome'] = 'Ласкаво просимо до $product';
-$labels['username'] = 'Ім\'я користувача';
-$labels['password'] = 'Пароль';
-$labels['server'] = 'Сервер';
-$labels['login'] = 'Увійти';
-$labels['menu'] = 'Меню';
-$labels['logout'] = 'Вийти';
-$labels['mail'] = 'Пошта';
+$labels['welcome']   = 'Ласкаво просимо до $product';
+$labels['username']  = 'Ім\'я користувача';
+$labels['password']  = 'Пароль';
+$labels['server']    = 'Сервер';
+$labels['login']     = 'Увійти';
+$labels['menu']     = 'Меню';
+$labels['logout']   = 'Вийти';
+$labels['mail']     = 'Пошта';
 $labels['settings'] = 'Налаштування';
 $labels['addressbook'] = 'Контакти';
 $labels['inbox'] = 'Вхідні';
@@ -481,7 +481,7 @@ $labels['replyandforwardonly'] = 'тільки при відповідях та 
 $labels['insertsignature'] = 'Додати підпис';
 $labels['sigbelow'] = 'Поставити підпис під цитованим повідомленням';
 $labels['sigseparator'] = 'Ставити стандартний розділювач підписів';
-$labels['afternseconds'] = 'через $n секунд';
+$labels['afternseconds']  = 'через $n секунд';
 $labels['reqmdn'] = 'Завжди вимагати повідомлення про доставку';
 $labels['reqdsn'] = 'Завжди вимагати повідомлення про статус доставки';
 $labels['replysamefolder'] = 'Розмістити відповіді у тій же теці, де знаходиться оригінал';

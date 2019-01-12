@@ -164,6 +164,7 @@ $messages['smtpautherror'] = 'SMTP kļūda ($code): Neizdevās autorizēties.';
 $messages['smtpfromerror'] = 'SMTP kļūda ($code): Neizdevās iestatīt sūtītāju "$from" ($msg).';
 $messages['smtptoerror'] = 'SMTP kļūda ($code): Neizdevās pievienot saņēmēju "$to" ($msg).';
 $messages['smtprecipientserror'] = 'SMTP kļūda: Nav iespējams aptrādāt saņēmēju sarakstu.';
+$messages['smtputf8error'] = 'SMTP kļūda: Serveris neatbalsta unikodu epasta adresē.';
 $messages['smtpsizeerror'] = 'SMTP kļūda: Vēstules izmērs pārsniedz serverī noteikto limitu ($limit)';
 $messages['smtperror'] = 'SMTP kļūda: $msg';
 $messages['emailformaterror'] = 'Nepareiza e-pasta adrese: $email';

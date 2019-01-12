@@ -39,7 +39,7 @@ function rcube_text_editor(config, id)
     abs_url = location.href.replace(/[?#].*$/, '').replace(/\/$/, ''),
     conf = {
       selector: '#' + ($('#' + id).is('.mce_editor') ? id : 'fake-editor-id'),
-      cache_suffix: 's=4080200',
+      cache_suffix: 's=4050800',
       theme: 'modern',
       language: config.lang,
       content_css: rcmail.assets_path('program/resources/tinymce/content.css'),
@@ -48,7 +48,6 @@ function rcube_text_editor(config, id)
       toolbar_items_size: 'small',
       extended_valid_elements: 'font[face|size|color|style],span[id|class|align|style]',
       fontsize_formats: '8pt 9pt 10pt 11pt 12pt 14pt 18pt 24pt 36pt',
-      valid_children: '+body[style]',
       relative_urls: false,
       remove_script_host: false,
       convert_urls: false, // #1486944
@@ -200,12 +199,11 @@ function rcube_text_editor(config, id)
         if (!rcmail.env.identities_initialized)
           rcmail.change_identity(elem);
 
-        // Focus previously focused element
-        if (fe && fe.id != this.id && fe.nodeName != 'BODY') {
-          window.focus(); // for WebKit (#1486674)
-          fe.focus();
-          rcmail.env.compose_focus_elem = null;
-        }
+      // Focus previously focused element
+      if (fe && fe.id != this.id && fe.nodeName != 'BODY') {
+        window.focus(); // for WebKit (#1486674)
+        fe.focus();
+        rcmail.env.compose_focus_elem = null;
       }
     }
 

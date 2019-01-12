@@ -200,9 +200,6 @@ $messages['invalidimageformat'] = 'פורמט תמונה לא חוקי';
 $messages['mispellingsfound'] = 'התגלו שגיאות כתיב בהודעה';
 $messages['parentnotwritable'] = 'לא ניתן ליצור/להעביר תיקיה לתוך תיקית האב שנבחרה. אין הרשאה לגישה.';
 $messages['messagetoobig'] = 'ההודעה גדולה מעבר ליכולת העיבוד של התוכנה';
-$messages['attachmentvalidationerror'] = 'הצרופה הזו חשודה כי הסוג שלה לא תואם את הסוג שהוכרז בהודעה. אם אינך בוטח/ת
-בשולח/ת, לא לפתוח אותה בדפדפן כי היא עלולה להכיל נוזקה.
-הסוג שהוכרז:  $expected, הסוג שנמצא:  $detected';
 $messages['noscriptwarning'] = 'זהירות! תוכנה זו דורשת שימוש בג\'אווהסקריפט! כדי להשתמש בכלי, יש לבחור באפשרות זו בהגדרות הדפדפן.';
 $messages['messageissent'] = 'ההודעה נשלחה אבל לא נשמרה עדיין. האם לשמור אותה כעת?';
 $messages['errnotfound'] = 'הקובץ לא נמצא';
@@ -213,7 +210,7 @@ $messages['errunauthorizedexplain'] = 'לא ניתו לאשר את הרשאתך 
 $messages['errrequestcheckfailed'] = 'בדיקת הבקשה נכשלה';
 $messages['errcsrfprotectionexplain'] = "להגנתך, הגישה למשאב זה מאובטחת כנגד CRSF.
 אם הודעה זו מופיעה, זה משום שקרוב לודאי לא היתה יציאה מסודרת לפני
-סגירת היישום בדפדפן. 
+סגירת היישום בדפדפן.
 כעת נדרשת פעולה ידנית כדי להמשיך.";
 $messages['errcontactserveradmin'] = 'נא לפנות למנהל השרת';
 $messages['clicktoresumesession'] = 'יש ללחוץ כאן כדי להמשיך מהמצב הקודם';

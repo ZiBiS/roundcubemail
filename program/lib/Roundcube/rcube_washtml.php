@@ -466,17 +466,6 @@ class rcube_washtml
             switch ($node->nodeType) {
             case XML_ELEMENT_NODE: //Check element
                 $tagName = strtolower($node->nodeName);
-
-                if ($tagName == 'link') {
-                    $uri = $this->wash_uri($node->getAttribute('href'), false, false);
-                    if (!$uri) {
-                        $dump .= '<!-- link ignored -->';
-                        break;
-                    }
-
-                    $node->setAttribute('href', (string) $uri);
-                }
-
                 if ($callback = $this->handlers[$tagName]) {
                     $dump .= call_user_func($callback, $tagName,
                         $this->wash_attribs($node), $this->dumpHtml($node, $level), $this);
@@ -494,7 +483,7 @@ class rcube_washtml
                         }
                     }
                     else if ($tagName == 'textarea' && strpos($content, '<') !== false) {
-                        $content = htmlspecialchars($content, ENT_QUOTES | ENT_SUBSTITUTE, $this->config['charset']);
+                        $content = htmlspecialchars($content, ENT_QUOTES);
                     }
 
                     $dump .= $this->wash_attribs($node);
@@ -507,10 +496,10 @@ class rcube_washtml
                     }
                 }
                 else if (isset($this->_ignore_elements[$tagName])) {
-                    $dump .= '<!-- ' . htmlspecialchars($node->nodeName, ENT_QUOTES, $this->config['charset']) . ' not allowed -->';
+                    $dump .= '<!-- ' . htmlspecialchars($node->nodeName, ENT_QUOTES) . ' not allowed -->';
                 }
                 else {
-                    $dump .= '<!-- ' . htmlspecialchars($node->nodeName, ENT_QUOTES, $this->config['charset']) . ' ignored -->';
+                    $dump .= '<!-- ' . htmlspecialchars($node->nodeName, ENT_QUOTES) . ' ignored -->';
                     $dump .= $this->dumpHtml($node, $level); // ignore tags not its content
                 }
                 break;
@@ -642,6 +631,9 @@ class rcube_washtml
         );
 
         $html = str_replace($badwordchars, $fixedwordchars, $html);
+
+        // FIXME: HTML comments handling could be better. The code below can break comments (#6464),
+        //        we should probably do not modify content inside comments at all.
 
         // FIXME: HTML comments handling could be better. The code below can break comments (#6464),
         //        we should probably do not modify content inside comments at all.

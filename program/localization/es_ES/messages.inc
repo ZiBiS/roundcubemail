@@ -200,7 +200,6 @@ $messages['invalidimageformat'] = 'No es un formato de imagen válido.';
 $messages['mispellingsfound'] = 'Se han detectado errores ortográficos en el mensaje.';
 $messages['parentnotwritable'] = 'No se pudo crear/mover la carpeta a la carpeta superior seleccionada. No tiene permisos de acceso.';
 $messages['messagetoobig'] = 'Esta parte del mensaje es demasiado grande para ser procesado.';
-$messages['attachmentvalidationerror'] = '¡ATENCIÓN! Este adjunto es sospechoso porque su tipo no coincide con el tipo declarado en el mensaje. Si no confía en su remitente, no debería abrirlo en su navegador porque podría tener contenido malicioso.<br/<br/> <em>Esperado: $expected; encontrado: $detected</em>';
 $messages['noscriptwarning'] = 'Advertencia: ¡Este servicio de webmail necesita Javascript! Para poder usarlo habilite el soporte de Javascript en su navegador, por favor.';
 $messages['messageissent'] = 'El mensaje se ha enviado, pero aún no se ha guardado. ¿Quieres guardarlo ahora?';
 $messages['errnotfound'] = 'Archivo no encontrado';

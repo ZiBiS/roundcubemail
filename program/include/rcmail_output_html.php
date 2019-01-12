@@ -113,7 +113,7 @@ class rcmail_output_html extends rcmail_output
 
         $lic = <<<EOF
 /*
-        @licstart  The following is the entire license notice for the 
+        @licstart  The following is the entire license notice for the
         JavaScript code in this page.
 
         Copyright (C) 2005-2014 The Roundcube Dev Team
@@ -1279,8 +1279,6 @@ EOF;
                 // we are calling a class/method
                 if (($handler = $this->object_handlers[$object]) && is_array($handler)) {
                     if (is_callable($handler)) {
-                        $this->prepare_object_attribs($attrib);
-
                         // We assume that objects with src attribute are internal (in most
                         // cases this is a watermark frame). We need this to make sure assets_path
                         // is added to the internal assets paths

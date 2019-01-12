@@ -34,54 +34,31 @@ class rcube_tnef_decoder
     const LVL_MESSAGE       = 0x01;
     const LVL_ATTACHMENT    = 0x02;
 
-    const AFROM             = 0x08000;
-    const ASUBJECT          = 0x18004;
-    const AMESSAGEID        = 0x18009;
-    const AFILENAME         = 0x18010;
-    const APARENTID         = 0x1800a;
-    const ACONVERSATIONID   = 0x1800b;
-    const ABODY             = 0x2800c;
-    const ADATESENT         = 0x38005;
-    const ADATERECEIVED     = 0x38006;
-    const ADATEMODIFIED     = 0x38020;
-    const APRIORITY         = 0x4800d;
-    const AOWNER            = 0x60000;
-    const ASENTFOR          = 0x60001;
-    const ASTATUS           = 0x68007;
+    const ASUBJECT          = 0x88004;
+    const AMCLASS           = 0x78008;
     const ATTACHDATA        = 0x6800f;
-    const ATTACHMETAFILE    = 0x68011;
-    const ATTACHCREATEDATE  = 0x38012;
+    const AFILENAME         = 0x18010;
     const ARENDDATA         = 0x69002;
-    const AMAPIPROPS        = 0x69003;
-    const ARECIPIENTTABLE   = 0x69004;
     const AMAPIATTRS        = 0x69005;
     const AOEMCODEPAGE      = 0x69007;
-    const AORIGINALMCLASS   = 0x70006;
-    const AMCLASS           = 0x78008;
     const AVERSION          = 0x89006;
 
-    const MAPI_TYPE_UNSET     = 0x0000;
-    const MAPI_NULL           = 0x0001;
-    const MAPI_SHORT          = 0x0002;
-    const MAPI_INT            = 0x0003;
-    const MAPI_FLOAT          = 0x0004;
-    const MAPI_DOUBLE         = 0x0005;
-    const MAPI_CURRENCY       = 0x0006;
-    const MAPI_APPTIME        = 0x0007;
-    const MAPI_ERROR          = 0x000a;
-    const MAPI_BOOLEAN        = 0x000b;
-    const MAPI_OBJECT         = 0x000d;
-    const MAPI_INT8BYTE       = 0x0014;
-    const MAPI_STRING         = 0x001e;
+    const MAPI_NULL     = 0x0001;
+    const MAPI_SHORT    = 0x0002;
+    const MAPI_INT      = 0x0003;
+    const MAPI_FLOAT    = 0x0004;
+    const MAPI_DOUBLE   = 0x0005;
+    const MAPI_CURRENCY = 0x0006;
+    const MAPI_APPTIME  = 0x0007;
+    const MAPI_ERROR    = 0x000a;
+    const MAPI_BOOLEAN  = 0x000b;
+    const MAPI_OBJECT   = 0x000d;
+    const MAPI_INT8BYTE = 0x0014;
+    const MAPI_STRING   = 0x001e;
     const MAPI_UNICODE_STRING = 0x001f;
-    const MAPI_SYSTIME        = 0x0040;
-    const MAPI_CLSID          = 0x0048;
-    const MAPI_BINARY         = 0x0102;
-
-    const MAPI_BODY                     = 0x1000;
-    const MAPI_RTF_COMPRESSED           = 0x1009;
-    const MAPI_BODY_HTML                = 0x1013;
-    const MAPI_NATIVE_BODY              = 0x1016;
+    const MAPI_SYSTIME  = 0x0040;
+    const MAPI_CLSID    = 0x0048;
+    const MAPI_BINARY   = 0x0102;
 
     const MAPI_DISPLAY_NAME             = 0x3001;
     const MAPI_ADDRTYPE                 = 0x3002;
@@ -95,7 +72,7 @@ class rcube_tnef_decoder
     const MAPI_PROVIDER_DLL_NAME        = 0x300A;
     const MAPI_SEARCH_KEY               = 0x300B;
     const MAPI_ATTACHMENT_X400_PARAMETERS = 0x3700;
-    const MAPI_ATTACH_DATA              = 0x3701;
+    const MAPI_ATTACH_DATA_OBJ          = 0x3701;
     const MAPI_ATTACH_ENCODING          = 0x3702;
     const MAPI_ATTACH_EXTENSION         = 0x3703;
     const MAPI_ATTACH_FILENAME          = 0x3704;
@@ -116,12 +93,7 @@ class rcube_tnef_decoder
 
     const MAPI_NAMED_TYPE_ID        = 0x0000;
     const MAPI_NAMED_TYPE_STRING    = 0x0001;
-    const MAPI_NAMED_TYPE_NONE      = 0xff;
     const MAPI_MV_FLAG              = 0x1000;
-
-    const RTF_UNCOMPRESSED = 0x414c454d;
-    const RTF_COMPRESSED   = 0x75465a4c;
-
 
     /**
      * Decompress the data.
@@ -218,7 +190,7 @@ class rcube_tnef_decoder
      */
     protected function _decodeAttribute(&$data)
     {
-        // Data.
+        /* Data. */
         $value = $this->_getx($data, $this->_geti($data, 32));
 
         // Checksum.
@@ -348,22 +320,16 @@ class rcube_tnef_decoder
                 break;
 
             case self::MAPI_ATTACH_LONG_FILENAME:
-                // Used in preference to AFILENAME value.
-                $result['name'] = trim(preg_replace('/.*[\/](.*)$/', '\1', $value));
+                $value = $this->convertString($value);
+                /* Used in preference to AFILENAME value. */
+                $attachment_data[0]['name'] = preg_replace('/.*[\/](.*)$/', '\1', $value);
                 break;
 
             case self::MAPI_ATTACH_MIME_TAG:
-                // Is this ever set, and what is format?
-                $value = explode('/', $value);
-                $result['type']    = $value[0];
-                $result['subtype'] = $value[1];
-                break;
-
-            case self::MAPI_ATTACH_DATA:
-                $this->_getx($value, 16);
-                $att = new rcube_tnef_decoder;
-                $res = $att->decompress($value);
-                $result = array_merge($result, $res['message']);
+                $value = $this->convertString($value);
+                /* Is this ever set, and what is format? */
+                $attachment_data[0]['type']    = preg_replace('/^(.*)\/.*/', '\1', $value);
+                $attachment_data[0]['subtype'] = preg_replace('/.*\/(.*)$/', '\1', $value);
                 break;
             }
         }
@@ -378,7 +344,7 @@ class rcube_tnef_decoder
     protected function _decodeMessage(&$data, &$message)
     {
         $attribute = $this->_geti($data, 32);
-        $value     = $this->_decodeAttribute($data);
+        $value     = $this->_decodeAttribute($data, $attribute);
 
         switch ($attribute) {
         case self::AOEMCODEPAGE:
@@ -387,18 +353,7 @@ class rcube_tnef_decoder
             $this->codepage = $value[1];
             break;
 
-        case self::AMCLASS:
-            $value = trim(str_replace('Microsoft Mail v3.0 ', '', $value));
-            // Normal message will be that with prefix 'IPM.Microsoft Mail.
-            break;
-
-        case self::ASUBJECT:
-            $message['name'] = $value;
-            break;
-
-        case self::AMAPIPROPS:
-            $this->_extractMapiAttributes($value, $message);
-            break;
+        default:
         }
     }
 
@@ -430,19 +385,32 @@ class rcube_tnef_decoder
             break;
 
         case self::AFILENAME:
+            $value = $this->_getx($data, $this->_geti($data, 32));
             $value = $this->convertString($value, true);
-            // Strip path
-            $attachment[0]['name'] = trim(preg_replace('/.*[\/](.*)$/', '\1', $value));
+
+            /* Strip path. */
+            $attachment_data[0]['name'] = preg_replace('/.*[\/](.*)$/', '\1', $value);
+
+            /* Checksum */
+            $this->_geti($data, 16);
             break;
 
         case self::ATTACHDATA:
-            // The attachment itself
-            $attachment[0]['size']   = $size;
-            $attachment[0]['stream'] = $value;
+            /* The attachment itself. */
+            $length = $this->_geti($data, 32);
+            $attachment_data[0]['size']   = $length;
+            $attachment_data[0]['stream'] = $this->_getx($data, $length);
+
+            /* Checksum */
+            $this->_geti($data, 16);
             break;
 
         case self::AMAPIATTRS:
-            $this->_extractMapiAttributes($value, $attachment[0]);
+            $value = $this->_getx($data, $this->_geti($data, 32));
+
+            /* Checksum */
+            $this->_geti($data, 16);
+            $this->_extractMapiAttributes($value, $attachment_data);
             break;
         }
     }
@@ -748,5 +716,24 @@ class rcube_tnef_decoder
         }
 
         return true;
+    }
+
+    /**
+     * Convert string value to system charset according to defined codepage
+     */
+    protected function convertString($str, $use_codepage = false)
+    {
+        if ($convert && $this->codepage
+            && ($charset = rcube_charset::$windows_codepages[$this->codepage])
+        ) {
+            $str = rcube_charset::convert($str, $charset);
+        }
+        else if (strpos($str, "\0") !== false) {
+            $str = rcube_charset::convert($str, 'UTF-16LE');
+        }
+
+        $str = rtrim($str, "\0");
+
+        return $str;
     }
 }

@@ -53,8 +53,10 @@ class rcube_virtualmin_password
             return PASSWORD_ERROR;
         }
 
-        $domain  = escapeshellarg($domain);
-        $newpass = escapeshellarg($newpass);
+        $username = escapeshellarg($username);
+        $domain   = escapeshellarg($domain);
+        $newpass  = escapeshellarg($newpass);
+        $curdir   = RCUBE_PLUGINS_DIR . 'password/helpers';
 
         exec("$curdir/chgvirtualminpasswd modify-user --domain $domain --user $username --pass $newpass", $output, $returnvalue);
 

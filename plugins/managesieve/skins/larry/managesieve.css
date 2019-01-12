@@ -464,7 +464,7 @@ body.iframe.mail #filter-form
 
 /* vacation form */
 #settings-sections .vacation a {
-  background-image: url(images/vacation_icons.png);
+  background-image: url(images/vacation_icons.png?v=e738.767);
   background-repeat: no-repeat;
   background-position: 7px 1px;
 }

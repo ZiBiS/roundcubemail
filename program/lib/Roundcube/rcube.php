@@ -1329,13 +1329,6 @@ class rcube
 
         $cli = php_sapi_name() == 'cli';
 
-        $arg['cli'] = $cli;
-        $arg['log'] = $log;
-        $arg['terminate'] = $terminate;
-
-        // send error to external error tracking tool
-        $arg = self::$instance->plugins->exec_hook('raise_error', $arg);
-
         // installer
         if (!$cli && class_exists('rcmail_install', false)) {
             $rci = rcmail_install::get_instance();

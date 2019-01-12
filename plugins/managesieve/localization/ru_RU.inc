@@ -267,10 +267,9 @@ $messages['setexist'] = 'Набор уже существует.';
 $messages['nodata'] = 'Нужно выбрать хотя бы одну позицию!';
 $messages['invaliddateformat'] = 'Неверная дата или формат части даты';
 $messages['saveerror'] = 'Невозможно сохранить данные. Ошибка сервера.';
-$messages['vacationsaved'] = 'Данные об отсутствии успешно сохранены.';
+$messages['vacationsaved'] = 'Данные об отпуске успешно сохранены.';
 $messages['forwardsaved'] = 'Данные о пересылке успешно сохранены.';
 $messages['emptyvacationbody'] = 'Сообщение о причине отсутствия не может быть пустым!';
 $messages['duplicate.conflict.err'] = 'Не разрешено использовать заголовок и уникальный идентификатор вместе.';
 $messages['disabledaction'] = 'Действие не разрешено.';
-$messages['lastindexempty'] = 'Индекс необходим при подсчете с конца';
 ?>

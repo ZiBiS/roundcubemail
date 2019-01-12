@@ -74,8 +74,8 @@ function rcube_list_widget(list, p)
   this.dblclick_time = 500; // default value on MS Windows is 500
   this.row_init = function(){};  // @deprecated; use list.addEventListener('initrow') instead
 
-  this.touch_start_time = 0; // start time of the touch event
-  this.touch_event_time = 500; // maximum time a touch should be considered a left mouse button event, after this its something else (eg contextmenu event)
+  this.pointer_touch_start = 0; // start time of the touch event
+  this.pointer_touch_time = 500; // maximum time a touch should be considered a left mouse button event, after this its something else (eg contextmenu event)
 
   // overwrite default paramaters
   if (p && typeof p === 'object')
@@ -171,14 +171,14 @@ init_row: function(row)
     if ((bw.ie || bw.edge) && bw.pointer) {
       $(row).on('pointerdown', function(e) {
           if (e.pointerType == 'touch') {
-            self.touch_start_time = new Date().getTime();
+            self.pointer_touch_start = new Date().getTime();
             return false;
           }
         })
         .on('pointerup', function(e) {
           if (e.pointerType == 'touch') {
-            var duration = (new Date().getTime() - self.touch_start_time);
-            if (duration <= self.touch_event_time) {
+            var duration = (new Date().getTime() - self.pointer_touch_start);
+            if (duration <= self.pointer_touch_time) {
               self.drag_row(e, this.uid);
               return self.click_row(e, this.uid);
             }
@@ -840,7 +840,7 @@ collapse_all: function(row)
     this.update_expando(row.id);
     this.triggerEvent('expandcollapse', { uid:row.uid, expanded:row.expanded, obj:row.obj });
 
-    // don't collapse sub-root tree in multiexpand mode 
+    // don't collapse sub-root tree in multiexpand mode
     if (depth && this.multiexpand)
       return false;
   }
@@ -1120,7 +1120,7 @@ select_next: function()
 
 
 /**
- * Select first row 
+ * Select first row
  */
 select_first: function(mod_key)
 {
@@ -1753,7 +1753,7 @@ column_drag_mouse_move: function(e)
         .appendTo(document.body)
         // ... and column position indicator
        .append($('<div>').attr('id', 'rcmcolumnindicator')
-          .css({ position:'absolute', 'border-right':'2px dotted #555', 
+          .css({ position:'absolute', 'border-right':'2px dotted #555',
           'z-index':2002, height: (this.frame.offsetHeight-2)+'px' }));
 
       this.cols = [];

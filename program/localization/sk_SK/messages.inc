@@ -166,7 +166,6 @@ $messages['smtpautherror'] = 'Chyba SMTP ($code): Neúspešná autentifikácia.'
 $messages['smtpfromerror'] = 'Chyba SMTP ($code): Nemožno nastaviť odosielateľa "$from" ($msg).';
 $messages['smtptoerror'] = 'Chyba SMTP ($code): Nemožno pridať príjemcu "$to" ($msg).';
 $messages['smtprecipientserror'] = 'Chyba SMTP: Nemožno spracovať zoznam príjemcov.';
-$messages['smtputf8error'] = 'Chyba SMTP: server nepodporuje Unicode v e-mailovej adrese.';
 $messages['smtpsizeerror'] = 'Chyba SMTP: veľkosť správy presahuje limit servera ($limit)';
 $messages['smtperror'] = 'Chyba SMTP: $msg';
 $messages['emailformaterror'] = 'Neplatná e-mailová adresa: $email';

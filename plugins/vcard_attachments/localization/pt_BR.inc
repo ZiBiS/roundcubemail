@@ -18,7 +18,5 @@
 $labels['addvcardmsg'] = 'Adicionar o vCard ao Catálogo de Endereços';
 $labels['vcardsavefailed'] = 'Impossível salvar o vCard';
 $labels['attachvcard'] = 'Anexar vCard';
-$labels['vcardattached'] = 'vCard anexado.';
 $labels['vcard'] = 'vCard';
-$labels['forwardvcard'] = 'Encaminhar vCard';
 ?>

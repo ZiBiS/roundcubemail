@@ -41,7 +41,13 @@ $FILEINFO = trim(`which file`);
 if (($CACHEDIR = getenv("CACHEDIR")) && is_writeable($CACHEDIR)) {
   // use $CACHEDIR
 }
-else if (is_writeable(INSTALL_PATH . 'temp/js_cache') || @mkdir(INSTALL_PATH . 'temp/js_cache', 0774, true)) {
+if (empty($CURL) && empty($WGET)) {
+  die("ERROR: Required program 'wget' or 'curl' not found\n");
+}
+
+$CACHEDIR = sys_get_temp_dir();
+
+if (is_writeable(INSTALL_PATH . 'temp/js_cache') || @mkdir(INSTALL_PATH . 'temp/js_cache', 0774, true)) {
   $CACHEDIR = INSTALL_PATH . 'temp/js_cache';
 }
 else {
@@ -247,9 +253,7 @@ function extract_zipfile($package, $srcfile)
     if (!is_dir($extract)) {
       mkdir($extract, 0774, true);
     }
-
-    $zip_command = '%s -' . ($package['flat'] ? 'j' : 'o') . ' %s -d %s';
-    exec(sprintf($zip_command, $UNZIP, escapeshellarg($srcfile), $extract), $out, $retval);
+    exec(sprintf('%s -o %s -d %s', $UNZIP, escapeshellarg($srcfile), $extract), $out, $retval);
 
     // get the root folder of the extracted package
     $extract_tree = glob("$extract/*", GLOB_ONLYDIR);
@@ -356,20 +360,5 @@ foreach ($SOURCES['dependencies'] as $package) {
     $srcfile = extract_filetype($package, $filetype);
   }
 
-  if (!empty($package['sha1']) && ($sum = sha1_file($srcfile)) !== $package['sha1']) {
-    die("ERROR: Incorrect sha1 sum of $srcfile. Expected: {$package['sha1']}, got: $sum\n");
-  }
-
-  if ($args['extract']) {
-    echo "Installing {$package['name']}...\n";
-
-    if ($filetype === 'zip') {
-      extract_zipfile($package, $srcfile);
-    }
-    else {
-      compose_destfile($package, $srcfile);
-    }
-
-    echo "Done.\n";
-  }
+  echo "Done.\n\n";
 }

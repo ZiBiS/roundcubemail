@@ -15,7 +15,6 @@
 
  For translation see https://www.transifex.com/roundcube/roundcube-webmail/plugin-enigma/
 */
-$labels['encryption'] = 'Krüpteerimine';
 $labels['enigmacerts'] = 'S/MIME sertifikaadid';
 $labels['enigmakeys'] = 'PGP võtmed';
 $labels['keyname'] = 'Nimi';

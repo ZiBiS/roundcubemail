@@ -267,10 +267,9 @@ $messages['setexist'] = 'O conjunto já existe.';
 $messages['nodata'] = 'Deve selecionar pelo menos uma posição.';
 $messages['invaliddateformat'] = 'Data ou formato de data inválido.';
 $messages['saveerror'] = 'Não foi possível guardar os dados. Ocorreu um erro no servidor.';
-$messages['vacationsaved'] = 'Regra Ausente-do-Escritório guardada com sucesso.';
+$messages['vacationsaved'] = 'Dados de férias guardados com sucesso.';
 $messages['forwardsaved'] = 'Dados de reencaminhamento guardados com sucesso.';
 $messages['emptyvacationbody'] = 'É necessário o corpo da mensagem de férias!';
 $messages['duplicate.conflict.err'] = 'Ambos, cabeçalho e identificador único, não são permitidos.';
 $messages['disabledaction'] = 'Ação não permitida.';
-$messages['lastindexempty'] = 'É necessário o índice quando se conta a partir do fim';
 ?>

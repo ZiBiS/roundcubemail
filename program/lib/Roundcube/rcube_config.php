@@ -655,12 +655,6 @@ class rcube_config
             unset($props['preview_pane']);
         }
 
-        // translate old `display_version` settings to `display_product_info`
-        if (isset($props['display_version']) && !isset($props['display_product_info'])) {
-            $props['display_product_info'] = $props['display_version'] ? 2 : 1;
-            unset($props['display_version']);
-        }
-
         return $props;
     }
 

@@ -251,6 +251,7 @@ $messages['setexist'] = 'Kumpulan sudah ada.';
 $messages['nodata'] = 'Setidaknya satu posisi harus dipilih!';
 $messages['invaliddateformat'] = 'Format tanggal atau bagian dari tanggal salah';
 $messages['saveerror'] = 'Tidak dapat menyimpan data. Terjadi kesalahan pada server.';
+$messages['vacationsaved'] = 'Data untuk cuti berhasil disimpan.';
 $messages['forwardsaved'] = 'Meneruskan data sukses tersimpan';
 $messages['emptyvacationbody'] = 'Tubuh pesan liburan diperlukan!';
 $messages['duplicate.conflict.err'] = 'Header dan identifier unik keduanya tidak diijinkan.';

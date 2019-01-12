@@ -230,17 +230,9 @@ class markasjunk extends rcube_plugin
             return true;
         }
 
-        $driver = $this->home . "/drivers/$driver_name.php";
-        $class  = "markasjunk_$driver_name";
-
-        if (!is_readable($driver)) {
-            rcube::raise_error(array(
-                'code' => 600,
-                'type' => 'php',
-                'file' => __FILE__,
-                'line' => __LINE__,
-                'message' => "markasjunk plugin: Unable to open driver file $driver"
-            ), true, false);
+        foreach (rcmail::get_uids(null, null, $multifolder, rcube_utils::INPUT_POST) as $mbox => $uids) {
+            $storage->unset_flag($uids, 'NONJUNK', $mbox);
+            $storage->set_flag($uids, 'JUNK', $mbox);
         }
 
         include_once $driver;

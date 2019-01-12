@@ -219,5 +219,6 @@ $messages['setexist'] = 'مجموعه در حال حاضر موجود است.';
 $messages['nodata'] = 'حداقل باید یک موقعیت باید انتخاب شود.';
 $messages['invaliddateformat'] = 'قالب تاریخ اشتباه';
 $messages['saveerror'] = 'ناتوانی در ذخیره اطلاعات. خطای سرور رخ داد.';
+$messages['vacationsaved'] = 'اطلاعات مسافرت با کام‌یابی ذخیره شد.';
 $messages['emptyvacationbody'] = 'متن پیام تعطیلی لازم است!';
 ?>

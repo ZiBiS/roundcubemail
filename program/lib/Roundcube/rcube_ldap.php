@@ -97,7 +97,7 @@ class rcube_ldap extends rcube_addressbook
                 $this->prop['user_attr'] = strtolower($p['groups']['user_attr']);
             else if (empty($p['user_attr']))
                 $this->prop['user_attr'] = 'uid';
-            $this->fieldmap['user_attr'] = $this->prop['user_attr'];            
+            $this->fieldmap['user_attr'] = $this->prop['user_attr'];
             // set default name attribute to cn
             if (empty($this->prop['groups']['name_attr']))
                 $this->prop['groups']['name_attr'] = 'cn';
@@ -311,7 +311,7 @@ class rcube_ldap extends rcube_addressbook
                 }
 
                 // Get the pieces needed for variable replacement.
-                if ($fu = ($rcube->get_user_email() ?: $conf['username'])) {
+                if ($fu = ($rcube->get_user_email() ?: $this->prop['username'])) {
                     list($u, $d) = explode('@', $fu);
                 }
                 else {
@@ -751,9 +751,9 @@ class rcube_ldap extends rcube_addressbook
     private function _list_group_memberuid($dn, $entry, $count)
     {
     	$group_members = array();
-    
+
     	for ($i=0; $i < $entry['memberuid']['count']; $i++) {
-    
+
     		// add search filter if any
     		$filter = '(&(objectClass=posixAccount)(uid=' . $entry['memberuid'][$i]. '))';
     		$attrs = $count ? array('dn','cn') : $this->prop['list_attributes'];
@@ -767,10 +767,10 @@ class rcube_ldap extends rcube_addressbook
     			}
     		}
     	}
-    
+
     	return $group_members;
     }
-    
+
     /**
      * Callback for sorting entries
      */
@@ -2134,7 +2134,7 @@ class rcube_ldap extends rcube_addressbook
         		$add_filter  = "($member_attr=$contact_dn)";
         	}
         $filter = strtr($add_filter, array('\\' => '\\\\'));
-        	 
+
         $ldap_data = $this->ldap->search($base_dn, $filter, 'sub', array('dn', $name_attr));
         if ($ldap_data === false) {
             return array();

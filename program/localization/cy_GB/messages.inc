@@ -63,7 +63,8 @@ $messages['nopubkeyfor'] = 'Ni chafwyd hyd i allwedd cyhoeddus dilys ar gyfer $e
 $messages['nopubkeyforsender'] = 'Ni chafwyd hyd i allwedd cyhoeddus dilys ar gyfer eich personoliaeth anfon. Ydych am amgryptio y neges ar gyfer y derbynwyr yn unig?';
 $messages['encryptnoattachments'] = 'Nid yw\'n bosib amgryptio atodiadau wedi uwchlwytho yn barod. Ychwanegwch nhw eto yn y golygydd amgryptio.';
 $messages['searchpubkeyservers'] = 'Hoffech chi chwilio y gweinyddwyr allweddi cyhoeddus ar gyfer yr allweddi sy ar goll?';
-$messages['encryptpubkeysfound'] = 'Cafwyd hyd i\'r allweddi cyhoeddus canlynol:';
+$messages['encryptpubkeysfound'] = 'Cafwyd hyd i\'r aCONFLICT (add/add): Merge conflict in plugins/acl/localization/ar.inc
+llweddi cyhoeddus canlynol:';
 $messages['keyservererror'] = 'Methwyd cael yr allwedd o\'r gweinydd allweddi';
 $messages['keyimportsuccess'] = 'Mewnforiwyd allwedd cyhoeddus $key i\'ch cylch allweddi yn llwyddiannus';
 $messages['nocontactsfound'] = 'Ni gafwyd hyd i unrhyw gysylltiadau';
@@ -166,7 +167,6 @@ $messages['smtpautherror'] = 'Gwall SMTP ($code): Methwyd dilysu\'r cyfrif';
 $messages['smtpfromerror'] = 'Gwall SMTP ($code): Methwyd gosod y danfonwr "$from" ($msg)';
 $messages['smtptoerror'] = 'Gwall SMTP ($code): Methwyd ychwanegu derbynwr "$to" ($msg)';
 $messages['smtprecipientserror'] = 'Gwall SMTP: Nid oedd yn bosib darllen y rhestr o dderbynnwyr';
-$messages['smtputf8error'] = 'Gwall SMTP: Nid yw\'r gweinydd yn cefnogi Unicode mewn cyfeiriadau ebost.';
 $messages['smtpsizeerror'] = 'Gwall SMTP: Mae maint y neges yn fwy na cyfyngiad y gweinydd ($limit)';
 $messages['smtperror'] = 'Gwall SMTP: $msg';
 $messages['emailformaterror'] = 'Cyfeiriad e-bost anghywir: $email';

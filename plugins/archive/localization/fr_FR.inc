@@ -18,11 +18,11 @@
 $labels['buttontext'] = 'Archiver';
 $labels['buttontitle'] = 'Archiver ce courriel';
 $labels['archived'] = 'Archivé avec succès';
-$labels['archivedreload'] = 'Archivé avec succès. Recharger la page pour voir les nouveaux dossiers d’archives.';
-$labels['archiveerror'] = 'Certains courriels n’ont pas pu être archivés.';
+$labels['archivedreload'] = 'Archivé avec succès. Recharger la page pour voir les nouveaux dossiers d\'archives.';
+$labels['archiveerror'] = 'Certains courriels n\'ont pas pu être archivés.';
 $labels['archivefolder'] = 'Archives';
 $labels['settingstitle'] = 'Archives';
-$labels['archivetype'] = 'Diviser l’archive par';
+$labels['archivetype'] = 'Diviser l\'archive par';
 $labels['archivetypeyear'] = 'Année (ex. Archives/2012)';
 $labels['archivetypemonth'] = 'Mois (ex. Archives/2012/06)';
 $labels['archivetypetbmonth'] = 'Mois - compatible avec Thunderbird (p.ex. Archive/2012/2012-06)';

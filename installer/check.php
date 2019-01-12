@@ -27,7 +27,6 @@ $optional_php_exts = array(
     'LDAP'      => 'ldap',
     'GD'        => 'gd',
     'Imagick'   => 'imagick',
-    'Zip'       => 'zip',
 );
 
 $required_libs = array(
@@ -72,7 +71,6 @@ $source_urls = array(
     'LDAP'      => 'http://www.php.net/manual/en/book.ldap.php',
     'GD'        => 'http://www.php.net/manual/en/book.image.php',
     'Imagick'   => 'http://www.php.net/manual/en/book.imagick.php',
-    'Zip'       => 'http://www.php.net/manual/en/book.zip.php',
     'pdo_mysql'   => 'http://www.php.net/manual/en/ref.pdo-mysql.php',
     'pdo_pgsql'   => 'http://www.php.net/manual/en/ref.pdo-pgsql.php',
     'pdo_sqlite'  => 'http://www.php.net/manual/en/ref.pdo-sqlite.php',
