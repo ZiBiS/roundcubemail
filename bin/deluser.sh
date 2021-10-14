@@ -3,10 +3,9 @@
 
 /*
  +-----------------------------------------------------------------------+
- | bin/deluser.sh                                                        |
- |                                                                       |
  | This file is part of the Roundcube Webmail client                     |
- | Copyright (C) 2014, The Roundcube Dev Team                            |
+ |                                                                       |
+ | Copyright (C) The Roundcube Dev Team                                  |
  |                                                                       |
  | Licensed under the GNU General Public License version 3 or            |
  | any later version with exceptions for skins & plugins.                |
@@ -34,7 +33,7 @@ function print_usage()
 
 function _die($msg, $usage=false)
 {
-    fputs(STDERR, $msg . "\n");
+    fwrite(STDERR, $msg . "\n");
     if ($usage) print_usage();
     exit(1);
 }
@@ -42,7 +41,7 @@ function _die($msg, $usage=false)
 $rcmail = rcube::get_instance();
 
 // get arguments
-$args = rcube_utils::get_opt(array('h' => 'host', 'a' => 'age', 'd' => 'dry-run:bool'));
+$args = rcube_utils::get_opt(['h' => 'host', 'a' => 'age', 'd' => 'dry-run:bool']);
 
 if (!empty($args['age']) && ($age = intval($args['age']))) {
     $db = $rcmail->get_dbh();
@@ -58,12 +57,12 @@ if (!empty($args['age']) && ($age = intval($args['age']))) {
             printf("%s (%s)\n", $user['username'], $user['mail_host']);
             continue;
         }
-        system(sprintf("php %s/deluser.sh --host=%s %s", INSTALL_PATH . 'bin', $user['mail_host'], $user['username']));
+        system(sprintf("php %s/deluser.sh --host=%s %s", INSTALL_PATH . 'bin', escapeshellarg($user['mail_host']), escapeshellarg($user['username'])));
     }
-    exit(1);
+    exit(0);
 }
 
-$username = trim($args[0]);
+$username = isset($args[0]) ? trim($args[0]) : null;
 if (empty($username)) {
     _die("Missing required parameters", true);
 }
@@ -104,7 +103,7 @@ if (!$user) {
 }
 
 // inform plugins about approaching user deletion
-$plugin = $rcmail->plugins->exec_hook('user_delete_prepare', array('user' => $user, 'username' => $username, 'host' => $args['host']));
+$plugin = $rcmail->plugins->exec_hook('user_delete_prepare', ['user' => $user, 'username' => $username, 'host' => $args['host']]);
 
 // let plugins cleanup their own user-related data
 if (!$plugin['abort']) {
@@ -113,17 +112,14 @@ if (!$plugin['abort']) {
 }
 
 if ($plugin['abort']) {
+    unset($plugin['abort']);
     if ($transaction) {
         $db->rollbackTransaction();
     }
     _die("User deletion aborted by plugin");
 }
 
-// deleting the user record should be sufficient due to ON DELETE CASCADE foreign key references
-// but not all database backends actually support this so let's do it by hand
-foreach (array('identities','contacts','contactgroups','dictionary','cache','cache_index','cache_messages','cache_thread','searches','users') as $table) {
-    $db->query('DELETE FROM ' . $db->table_name($table, true) . ' WHERE `user_id` = ?', $user->ID);
-}
+$db->query('DELETE FROM ' . $db->table_name('users', true) . ' WHERE `user_id` = ?', $user->ID);
 
 if ($db->is_error()) {
     $rcmail->plugins->exec_hook('user_delete_rollback', $plugin);

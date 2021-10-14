@@ -2,19 +2,19 @@
 
 /*
  +-----------------------------------------------------------------------+
- | localization/<lang>/labels.inc                                        |
- |                                                                       |
  | Localization file of the Roundcube Webmail client                     |
- | Copyright (C) 2005-2015, The Roundcube Dev Team                       |
+ |                                                                       |
+ | Copyright (C) The Roundcube Dev Team                                  |
  |                                                                       |
  | Licensed under the GNU General Public License version 3 or            |
  | any later version with exceptions for skins & plugins.                |
  | See the README file for a full license statement.                     |
- |                                                                       |
  +-----------------------------------------------------------------------+
 
  For translation see https://www.transifex.com/projects/p/roundcube-webmail/resource/labels/
 */
+
+
 $labels['welcome'] = 'Velkomin í $product';
 $labels['username'] = 'Netfang';
 $labels['password'] = 'Lykilorð';
@@ -169,6 +169,7 @@ $labels['expand-all'] = 'Þenja allt út';
 $labels['expand-unread'] = 'Þenja ólesið';
 $labels['collapse-all'] = 'Fella allt saman';
 $labels['threaded'] = 'Þrætt';
+$labels['showunread'] = 'Birta ólesin skilaboð';
 $labels['autoexpand_threads'] = 'Þenja skilaboðaþræði út';
 $labels['do_expand'] = 'allir þræðir';
 $labels['expand_only_unread'] = 'aðeins ólesin skilaboð';
@@ -259,6 +260,7 @@ $labels['keyrevoked'] = 'Afturkallaður';
 $labels['bccinstead'] = 'Nota BCC';
 $labels['addheader'] = 'Bæta við viðtakanda (haus)';
 $labels['insert'] = 'Setja inn';
+$labels['insertcontact'] = 'Setja inn tengiliði';
 $labels['recipient'] = 'Viðtakandi';
 $labels['recipientedit'] = 'Breyting á viðtakanda';
 $labels['editidents'] = 'Breyta persónuauðkennum';
@@ -395,6 +397,9 @@ $labels['rename'] = 'Endurnefna';
 $labels['addphoto'] = 'Bæta við';
 $labels['replacephoto'] = 'Skipta út';
 $labels['uploadphoto'] = 'Senda inn mynd';
+$labels['choosefile'] = 'Veldu skrá...';
+$labels['choosefiles'] = 'Veldu skrár...';
+$labels['browse'] = 'Flakka';
 $labels['newcontact'] = 'Búa til nýjan tengilið';
 $labels['deletecontact'] = 'Eyða völdum tengiliðum';
 $labels['composeto'] = 'Skrifa tölvupóst til';
@@ -506,7 +511,7 @@ $labels['advancedoptions'] = 'Ítarlegir valkostir';
 $labels['toggleadvancedoptions'] = 'Víxla ítarlegum valkostum af/á';
 $labels['focusonnewmessage'] = 'Láta vafraglugga vera virkan á nýjum skilaboðum';
 $labels['checkallfolders'] = 'Athuga með ný skilaboð í öllum möppum';
-$labels['displaynext'] = 'Að eyðingu/færslu lokinni skal birta næstu skilaboð';
+$labels['displaynext'] = 'Birta næstu færslu í lista eftir að skilaboðum er eytt/færð';
 $labels['defaultfont'] = 'Sjálfgefið letur HTML-skilaboða';
 $labels['mainoptions'] = 'Aðalstillingar';
 $labels['browseroptions'] = 'Valkostir vafra';
@@ -582,6 +587,7 @@ $labels['encryptioncreatekey'] = 'Búa til nýtt lyklapar';
 $labels['openmailvelopesettings'] = 'Opna stillingar Mailvelope';
 $labels['encryptionprivkeysinmailvelope'] = 'Þú ert með $nr samsvarandi einkalykla sem geymdir eru í Mailvelope lyklageymslunni þinni:';
 $labels['encryptionnoprivkeysinmailvelope'] = 'Auðkenni þessa sendanda er ekki ennþá með PGP-einkalykil geymdan í Mailvelope-viðbótinni. Mydirðu vilja útbúa einn slíkann til að virkja dulritun skilaboða?';
+$labels['encryption'] = 'Dulritun';
 $labels['sortby'] = 'Raða eftir';
 $labels['sortasc'] = 'Raða vaxandi';
 $labels['sortdesc'] = 'Raða minnkandi';
@@ -662,7 +668,7 @@ $labels['arialabelcontactexportoptions'] = 'Valkostir við útflutning tengilið
 $labels['arialabelabookgroupoptions'] = 'Valkostir nafnaskrár/hópa';
 $labels['arialabelpreferencesform'] = 'Kjörstillingagluggi';
 $labels['arialabelidentityeditfrom'] = 'Gluggi til stillinga auðkenna';
-$labels['arialabelresonseeditfrom'] = 'Gluggi fyrir breytingar á svari';
+$labels['arialabelresponseeditfrom'] = 'Gluggi fyrir breytingar á svari';
 $labels['arialabelsearchterms'] = 'Leitarstrengir';
 $labels['arialabeldropactionmenu'] = 'Aðgerðavalmynd fyrir draga-sleppa';
 $labels['arialabelheadersmenu'] = 'Valmynd til að bæta við viðtakanda (haus)';
@@ -676,4 +682,3 @@ $labels['helplistkeyboardnavmessages'] = "Örvar hægri/vinstri: Þenja/fella sa
 Enter: Opna valin/virk skilaboð.
 Del/Eyða: Færa valin skilaboð í ruslið.";
 $labels['helplistkeyboardnavcontacts'] = "Enter: Opna valinn/virkan tengilið.";
-?>

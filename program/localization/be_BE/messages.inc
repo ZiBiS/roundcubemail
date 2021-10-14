@@ -2,19 +2,18 @@
 
 /*
  +-----------------------------------------------------------------------+
- | localization/<lang>/messages.inc                                      |
- |                                                                       |
  | Localization file of the Roundcube Webmail client                     |
- | Copyright (C) 2005-2015, The Roundcube Dev Team                       |
+ |                                                                       |
+ | Copyright (C) The Roundcube Dev Team                                  |
  |                                                                       |
  | Licensed under the GNU General Public License version 3 or            |
  | any later version with exceptions for skins & plugins.                |
  | See the README file for a full license statement.                     |
- |                                                                       |
  +-----------------------------------------------------------------------+
 
  For translation see https://www.transifex.com/projects/p/roundcube-webmail/resource/messages/
 */
+
 $messages['errortitle']  = 'Здарылася памылка!';
 $messages['loginfailed']  = 'Не ўдалося ўвайсці.';
 $messages['cookiesdisabled'] = 'Ваш браўзер не падтрымлівае кукіс.';
@@ -54,7 +53,6 @@ $messages['blockedimages'] = 'Дзеля забеспячэння вашай п�
 $messages['encryptedmessage'] = 'Гэта зашыфраванае паведамленне. Яно не можа быць адлюстравана. Выбачайце!';
 $messages['nocontactsfound'] = 'Кантактаў не знойдзена.';
 $messages['contactnotfound'] = 'Запытаны кантакт не знойдзены.';
-$messages['contactsearchonly'] = 'Задайце выраз для пошука кантактаў';
 $messages['sendingfailed'] = 'Не ўдалося адправіць паведамленне.';
 $messages['senttooquickly'] = 'Пачакайце $sec секунд(ы) перад адпраўкай гэтага паведамлення.';
 $messages['errorsavingsent'] = 'Не ўдалося захаваць адпраўленае паведамленне.';
@@ -94,8 +92,6 @@ $messages['nospellerrors'] = 'Памылак правапісання не вы�
 $messages['folderdeleted'] = 'Папка выдалена.';
 $messages['foldersubscribed'] = 'Папка падпісана.';
 $messages['folderunsubscribed'] = 'Папка адпісана.';
-$messages['folderpurged'] = 'Папка ачышчана.';
-$messages['folderexpunged'] = 'Папка сціснута. ';
 $messages['deletedsuccessfully'] = 'Выдалена.';
 $messages['converting'] = 'Фарматаванне выдаляецца...';
 $messages['messageopenerror'] = 'Не ўдалося загрузіць паведамленне з сервера.';

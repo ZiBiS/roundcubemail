@@ -2,29 +2,32 @@
 
 /*
  +-----------------------------------------------------------------------+
- | localization/<lang>/labels.inc                                        |
- |                                                                       |
  | Localization file of the Roundcube Webmail client                     |
- | Copyright (C) 2005-2015, The Roundcube Dev Team                       |
+ |                                                                       |
+ | Copyright (C) The Roundcube Dev Team                                  |
  |                                                                       |
  | Licensed under the GNU General Public License version 3 or            |
  | any later version with exceptions for skins & plugins.                |
  | See the README file for a full license statement.                     |
- |                                                                       |
  +-----------------------------------------------------------------------+
 
  For translation see https://www.transifex.com/projects/p/roundcube-webmail/resource/labels/
 */
+
+
 $labels['welcome'] = 'Добро пожаловать в $product!';
 $labels['username'] = 'Имя пользователя';
 $labels['password'] = 'Пароль';
 $labels['server'] = 'Сервер';
 $labels['login'] = 'Войти';
+$labels['oauthlogin'] = 'Войти используя $provider';
 $labels['menu'] = 'Меню';
 $labels['logout'] = 'Выход';
 $labels['mail'] = 'Почта';
 $labels['settings'] = 'Настройки';
 $labels['addressbook'] = 'Контакты';
+$labels['darkmode'] = 'Темный режим';
+$labels['lightmode'] = 'Светлый режим';
 $labels['inbox'] = 'Входящие';
 $labels['drafts'] = 'Черновики';
 $labels['sent'] = 'Отправленные';
@@ -169,6 +172,7 @@ $labels['expand-all'] = 'Развернуть все';
 $labels['expand-unread'] = 'Развернуть непрочитанные';
 $labels['collapse-all'] = 'Свернуть все';
 $labels['threaded'] = 'Обсуждения';
+$labels['showunread'] = 'Показать непрочитанные сообщения';
 $labels['autoexpand_threads'] = 'Развернуть обсуждения';
 $labels['do_expand'] = 'все обсуждения';
 $labels['expand_only_unread'] = 'только с непрочитанными сообщениями';
@@ -240,7 +244,7 @@ $labels['charset'] = 'Кодировка';
 $labels['editortype'] = 'Редактор';
 $labels['returnreceipt'] = 'Запрос ответа';
 $labels['dsn'] = 'Уведомление о состоянии доставки';
-$labels['mailreplyintro'] = '$sender писал $date:';
+$labels['mailreplyintro'] = '$sender писал(а) $date:';
 $labels['originalmessage'] = 'Исходное сообщение';
 $labels['selectimage'] = 'Выбрать изображение';
 $labels['addimage'] = 'Добавить изображение';
@@ -300,6 +304,7 @@ $labels['alwaysallow'] = 'Всегда разрешать от $sender';
 $labels['isdraft'] = 'Это черновик.';
 $labels['andnmore'] = 'ещё $nr...';
 $labels['details'] = 'Подробности';
+$labels['summary'] = 'Итог';
 $labels['headers'] = 'Заголовки';
 $labels['allheaders'] = 'Все заголовки...';
 $labels['togglemoreheaders'] = 'Загрузить ещё заголовки сообщений';
@@ -313,10 +318,12 @@ $labels['addcc'] = 'Копия';
 $labels['addbcc'] = 'Скрытая копия';
 $labels['addreplyto'] = 'Кому ответить';
 $labels['addfollowupto'] = 'Добавить Followup-To';
+$labels['sendreceipt'] = 'Отправить уведомление о прочтении?';
 $labels['mdnrequest'] = 'Отправитель этого сообщения запросил уведомление о прочтении. Отправить уведомление?';
 $labels['receiptread'] = 'Уведомление о прочтении';
 $labels['yourmessage'] = 'Это уведомление о прочтении вашего сообщения';
 $labels['receiptnote'] = 'Это уведомление означает только, что сообщение было открыто получателем, и не гарантирует того, что оно было прочитано и (или) понято.';
+$labels['sendalwaysto'] = 'Всегда отправлять на $email';
 $labels['zoomin'] = 'Увеличить';
 $labels['zoomout'] = 'Уменьшить';
 $labels['rotate'] = 'Вращать';
@@ -396,6 +403,9 @@ $labels['rename'] = 'Переименовать';
 $labels['addphoto'] = 'Добавить';
 $labels['replacephoto'] = 'Заменить';
 $labels['uploadphoto'] = 'Загрузить фотографию';
+$labels['choosefile'] = 'Выберите файл...';
+$labels['choosefiles'] = 'Выберите файлы...';
+$labels['browse'] = 'Обзор';
 $labels['newcontact'] = 'Создать новый контакт';
 $labels['deletecontact'] = 'Удалить выбранные контакты';
 $labels['composeto'] = 'Создать сообщение для выбранных контактов';
@@ -432,6 +442,9 @@ $labels['importgroups'] = 'Распределение по группам при
 $labels['importgroupsall'] = 'Все (создать группы при необходимости)';
 $labels['importgroupsexisting'] = 'Только для существующих групп';
 $labels['importdesc'] = 'Вы можете загрузить контакты из существующей адресной книги. <br/>В настоящее время мы поддерживаем импорт адресов в формате визитной карточки <a href="https://en.wikipedia.org/wiki/VCard">vCard</a> или CSV (данные разделённые запятой).';
+$labels['importmapdesc'] = 'Перед тем, как продолжить импорт данных CSV (разделенных запятыми), убедитесь, что приведенная ниже информация о сопоставлении полей верна.';
+$labels['fieldnotmapped'] = 'Поле не сопоставлено (не импортировать)';
+$labels['skipheader'] = 'Не импортировать первую строку (заголовки)';
 $labels['done'] = 'Завершено';
 $labels['settingsfor'] = 'Настройки для';
 $labels['about'] = 'О программе';
@@ -478,6 +491,8 @@ $labels['askuser'] = 'спросить перед отправкой';
 $labels['autosend'] = 'отправлять автоматически';
 $labels['autosendknown'] = 'отправлять уведомления контактам из адресной книги, в противном случае спросить';
 $labels['autosendknownignore'] = 'отправлять уведомления только контактам из адресной книги, остальных игнорировать';
+$labels['autosendtrusted'] = 'отправить квитанцию доверенным отправителям, в противном случае спросите меня';
+$labels['autosendtrustedignore'] = 'отправить квитанцию доверенным отправителям, в противном случае игнорировать';
 $labels['ignorerequest'] = 'пропустить запрос';
 $labels['readwhendeleted'] = 'Помечать как прочитанное при удалении';
 $labels['flagfordeletion'] = 'Помечать для удаления вместо удаления';
@@ -487,6 +502,8 @@ $labels['deletejunk'] = 'Удалять сообщения из папки СП�
 $labels['showremoteimages'] = 'Показывать удаленные изображения';
 $labels['allowremoteresources'] = 'Разрешить внешние ресурсы (изображения, стили)';
 $labels['fromknownsenders'] = 'от известных отправителей';
+$labels['fromtrustedsenders'] = 'от доверенных отправителей';
+$labels['frommycontacts'] = 'от моих контактов';
 $labels['always'] = 'всегда';
 $labels['alwaysbutplain'] = 'всегда, кроме тех случаев, когда, ответ составлен обычным текстом';
 $labels['showinlineimages'] = 'Показывать вложенные изображения внизу сообщения';
@@ -507,7 +524,7 @@ $labels['advancedoptions'] = 'Дополнительные настройки';
 $labels['toggleadvancedoptions'] = 'Дополнительные параметры';
 $labels['focusonnewmessage'] = 'Фокусировать окно браузера при новом сообщении';
 $labels['checkallfolders'] = 'Проверять новые сообщения во всех папках';
-$labels['displaynext'] = 'Показать следующее сообщение, после удаления или перемещения данного';
+$labels['displaynext'] = 'Показать следующую запись списка после удаления/перемещения';
 $labels['defaultfont'] = 'Шрифт по умолчанию HTML сообщения';
 $labels['mainoptions'] = 'Основные настройки';
 $labels['browseroptions'] = 'Настройки обозревателя';
@@ -535,6 +552,10 @@ $labels['replysamefolder'] = 'Помещать ответы в ту же пап�
 $labels['defaultabook'] = 'Адресная книга по умолчанию';
 $labels['autocompletesingle'] = 'Пропускать дополнительные адреса в автозавершении';
 $labels['listnamedisplay'] = 'Выводить список контактов как';
+$labels['contactformmode'] = 'Режим формы Контакта';
+$labels['collectedaddresses'] = 'Собранные контакты';
+$labels['collectedrecipients'] = 'Собранные получатели';
+$labels['trustedsenders'] = 'Надежные отправители';
 $labels['spellcheckbeforesend'] = 'Проверять орфографию перед отправкой';
 $labels['spellcheckoptions'] = 'Параметры проверки орфографии';
 $labels['spellcheckignoresyms'] = 'Пропускать слова с символами';
@@ -583,6 +604,9 @@ $labels['encryptioncreatekey'] = 'Создать новую пару ключе�
 $labels['openmailvelopesettings'] = 'Открыть настройки Mailvelope';
 $labels['encryptionprivkeysinmailvelope'] = 'У вас есть $nr подходящих закрытых PGP ключей, хранящиеся на вашей связке ключей Mailvelope:';
 $labels['encryptionnoprivkeysinmailvelope'] = 'У этого идентификатора отправителя еще нет закрытого ключа PGP, хранящегося расширении Mailvelope. Вы хотите создать ключ для того, чтобы включить зашифрованный обмен сообщениями?';
+$labels['encryption'] = 'Шифрование';
+$labels['mailvelopeoptions'] = 'Mailvelope опции';
+$labels['mailvelopenotfound'] = 'Расширение Mailvelope не включено / не установлено в вашем браузере.';
 $labels['sortby'] = 'Сортировать по';
 $labels['sortasc'] = 'Возрастанию';
 $labels['sortdesc'] = 'Убыванию';
@@ -591,6 +615,7 @@ $labels['installedplugins'] = 'Установленные дополнения';
 $labels['plugin'] = 'Дополнение';
 $labels['version'] = 'Версия';
 $labels['source'] = 'Источник';
+$labels['destination'] = 'Назначение';
 $labels['license'] = 'Лицензия';
 $labels['support'] = 'Поддержка';
 $labels['savedsearches'] = 'Сохранённые запросы';
@@ -625,6 +650,7 @@ $labels['chinese'] = 'Китайский';
 $labels['arialabeltopnav'] = 'Управление окном';
 $labels['arialabeltasknav'] = 'Задачи приложения';
 $labels['arialabeltoolbar'] = 'Панель инструментов приложения';
+$labels['arialabellistnav'] = 'Навигация по списку';
 $labels['arialabelactivetask'] = 'Активная задача';
 $labels['arialabelmessagessearchfilter'] = 'Фильтр перечня сообщений';
 $labels['arialabelmailsearchform'] = 'Форма поиска в сообщении';
@@ -663,7 +689,7 @@ $labels['arialabelcontactexportoptions'] = 'Параметры экспорта 
 $labels['arialabelabookgroupoptions'] = 'Параметры адресной книги/группы';
 $labels['arialabelpreferencesform'] = 'Форма настроек';
 $labels['arialabelidentityeditfrom'] = 'Форма редактирования личных данных';
-$labels['arialabelresonseeditfrom'] = 'Форма редактирования ответа';
+$labels['arialabelresponseeditfrom'] = 'Форма редактирования ответа';
 $labels['arialabelsearchterms'] = 'Поисковый запросы';
 $labels['arialabeldropactionmenu'] = 'Меню действий при перетаскивании';
 $labels['arialabelheadersmenu'] = 'Меню добавления получателя (Заголовок)';
@@ -677,4 +703,3 @@ $labels['helplistkeyboardnavmessages'] = "Стрелки вправо/влево
 Enter: Открыть выделенное сообщение.
 Delete: Переместить выбранные сообщения в Корзину.";
 $labels['helplistkeyboardnavcontacts'] = "Enter: Открыть выбранный контакт.";
-?>

@@ -2,19 +2,19 @@
 
 /*
  +-----------------------------------------------------------------------+
- | localization/<lang>/labels.inc                                        |
- |                                                                       |
  | Localization file of the Roundcube Webmail client                     |
- | Copyright (C) 2005-2015, The Roundcube Dev Team                       |
+ |                                                                       |
+ | Copyright (C) The Roundcube Dev Team                                  |
  |                                                                       |
  | Licensed under the GNU General Public License version 3 or            |
  | any later version with exceptions for skins & plugins.                |
  | See the README file for a full license statement.                     |
- |                                                                       |
  +-----------------------------------------------------------------------+
 
  For translation see https://www.transifex.com/projects/p/roundcube-webmail/resource/labels/
 */
+
+
 $labels['welcome'] = 'Tervetuloa $product -käyttäjäksi';
 $labels['username'] = 'Käyttäjätunnus';
 $labels['password'] = 'Salasana';
@@ -147,6 +147,7 @@ $labels['last'] = 'Viimeinen';
 $labels['previous'] = 'Edellinen';
 $labels['next'] = 'Seuraava';
 $labels['select'] = 'Valitse';
+$labels['selection'] = 'Valinta';
 $labels['all'] = 'Kaikki';
 $labels['none'] = 'Ei mikään';
 $labels['currpage'] = 'Nykyinen sivu';
@@ -168,6 +169,7 @@ $labels['expand-all'] = 'Laajenna kaikki';
 $labels['expand-unread'] = 'Laajenna lukemattomat';
 $labels['collapse-all'] = 'Kutista kaikki';
 $labels['threaded'] = 'Säikeet';
+$labels['showunread'] = 'Näytä lukemattomat viestit';
 $labels['autoexpand_threads'] = 'Laajenna viestiketjut automaattisesti';
 $labels['do_expand'] = 'kaikki viestiketjut';
 $labels['expand_only_unread'] = 'vain ne joissa lukemattomia viestejä';
@@ -195,6 +197,8 @@ $labels['folderactions'] = 'Kansiotoiminnot...';
 $labels['compact'] = 'Tiivistä';
 $labels['empty'] = 'Tyhjennä';
 $labels['importmessages'] = 'Tuo viestejä';
+$labels['mailimportdesc'] = 'Voit lisätä sähköpostia tiedostoissa käyttäen <a href="https://en.wikipedia.org/wiki/Email#Message_format">MIME</a>- tai <a href="https://en.wikipedia.org/wiki/Mbox">Mbox</a>-muotoa.';
+$labels['mailimportzip'] = 'Useat tiedostot on mahdollista pakata zip-arkistoihin.';
 $labels['quota'] = 'Levytila';
 $labels['unknown'] = 'tuntematon';
 $labels['unlimited'] = 'rajoittamaton';
@@ -203,6 +207,8 @@ $labels['quotatotal'] = 'Raja';
 $labels['quotaused'] = 'Käytetty';
 $labels['quotastorage'] = 'Levytila';
 $labels['quotamessage'] = 'Viestien määrä';
+$labels['shortheaderto'] = 'Vastaanottajalle $to, $date';
+$labels['shortheaderfrom'] = 'Lähettäjältä $from, $date';
 $labels['quicksearch'] = 'Pikahaku';
 $labels['searchplaceholder'] = 'Hae...';
 $labels['resetsearch'] = 'Nollaa haku';
@@ -253,6 +259,7 @@ $labels['keyrevoked'] = 'Kumottu';
 $labels['bccinstead'] = 'Käytä Piilokopiota';
 $labels['addheader'] = 'LIsää vastaanottaja (header)';
 $labels['insert'] = 'Lisää';
+$labels['insertcontact'] = 'Lisää yhteystieto(ja)';
 $labels['recipient'] = 'Vastaanottaja';
 $labels['recipientedit'] = 'Vastaanottajan muokkaus';
 $labels['editidents'] = 'Muokkaa identiteettejä';
@@ -292,7 +299,10 @@ $labels['alwaysshow'] = 'Näytä aina lähettäjältä $sender saapuneet kuvat';
 $labels['alwaysallow'] = 'Salli aina lähettäjältä $sender';
 $labels['isdraft'] = 'Tämä on luonnosviesti.';
 $labels['andnmore'] = '$nr lisää...';
-$labels['headers'] = 'Otsikot';
+$labels['details'] = 'Tiedot';
+$labels['summary'] = 'Yhteenveto';
+$labels['headers'] = 'Otsakkeet';
+$labels['allheaders'] = 'Kaikki otsakkeet...';
 $labels['togglemoreheaders'] = 'Näytä lisää viestiotsakkeita';
 $labels['togglefullheaders'] = 'Viestin otsakkeet päällä/pois';
 $labels['htmltoggle'] = 'HTML';
@@ -387,12 +397,15 @@ $labels['rename'] = 'Nimeä uudelleen';
 $labels['addphoto'] = 'Lisää';
 $labels['replacephoto'] = 'Korvaa';
 $labels['uploadphoto'] = 'Lähetä kuva';
+$labels['choosefile'] = 'Valitse tiedosto...';
+$labels['choosefiles'] = 'Valitse tiedostot...';
+$labels['browse'] = 'Selaa';
 $labels['newcontact'] = 'Luo uusi yhteystieto';
 $labels['deletecontact'] = 'Poista valitut yhteystiedot';
 $labels['composeto'] = 'Kirjoita viesti yhteystiedolle';
 $labels['contactsfromto'] = 'Yhteystiedot $from-$to/$count';
 $labels['print'] = 'Tulosta';
-$labels['export'] = 'Vie (export)';
+$labels['export'] = 'Vie';
 $labels['exportall'] = 'Vie kaikki';
 $labels['exportsel'] = 'Vie valitut';
 $labels['exportvcards'] = 'Vie yhteystiedot vCard-muodossa';
@@ -422,6 +435,7 @@ $labels['importreplace'] = 'Korvaa koko osoitekirja';
 $labels['importgroups'] = 'Tuo ryhmämääritykset';
 $labels['importgroupsall'] = 'Kaikki (luo ryhmät tarvittaessa)';
 $labels['importgroupsexisting'] = 'Vain olemassa oleville ryhmille';
+$labels['importdesc'] = 'Voit tuoda yhteystietoja olemassa olevasta osoitekirjasta.<br/>Tuetut muodot ovat <a href="https://en.wikipedia.org/wiki/VCard">vCard</a> tai CSV.';
 $labels['done'] = 'Valmis';
 $labels['settingsfor'] = 'Asetukset';
 $labels['about'] = 'Tietoja';
@@ -497,7 +511,7 @@ $labels['advancedoptions'] = 'Lisäasetukset';
 $labels['toggleadvancedoptions'] = 'Vaihda edistyneemmät valinnat';
 $labels['focusonnewmessage'] = 'Tarkenna selainikkuna uuteen viestiin';
 $labels['checkallfolders'] = 'Tarkista kaikki kansiot uusien viestien varalta';
-$labels['displaynext'] = 'Viestin siirron tai poiston jälkeen, näytä seuraava viesti';
+$labels['displaynext'] = 'Näytä listalta seuraava poiston/siirron jälkeen';
 $labels['defaultfont'] = 'HTML-viestin oletuskirjasin';
 $labels['mainoptions'] = 'Pääasetukset';
 $labels['browseroptions'] = 'Selainasetukset';
@@ -570,6 +584,10 @@ $labels['dualusemail'] = 'viestit';
 $labels['dualusefolder'] = 'kansiot';
 $labels['generate'] = 'Luo';
 $labels['encryptioncreatekey'] = 'Luo uusi avainpari';
+$labels['openmailvelopesettings'] = 'Avaa Mailvelopen asetukset';
+$labels['encryptionprivkeysinmailvelope'] = 'Sinulla on $nr täsmäävää yksityistä avainta tallennettuna Mailvelope-avainketjuusi:';
+$labels['encryptionnoprivkeysinmailvelope'] = 'Tällä lähettäjäidentiteetillä ei vielä ole yksityistä PGP-avainta tallennettuna Mailvelope-laajennukseesi. Haluatko luoda avaimen mahdollistaaksesi salatun viestinnän?';
+$labels['encryption'] = 'Salaus';
 $labels['sortby'] = 'Järjestä';
 $labels['sortasc'] = 'Järjestä nousevasti (a-ö)';
 $labels['sortdesc'] = 'Järjestä laskevasti (ö-a)';
@@ -581,6 +599,12 @@ $labels['source'] = 'Lähde';
 $labels['license'] = 'Lisenssi';
 $labels['support'] = 'Hanki tukea';
 $labels['savedsearches'] = 'Tallennetut haut';
+$labels['dateformatY'] = 'VVVV';
+$labels['dateformaty'] = 'VV';
+$labels['dateformatm'] = 'KK';
+$labels['dateformatd'] = 'PP';
+$labels['dateformatj'] = 'P';
+$labels['dateformatn'] = 'K';
 $labels['B'] = 't';
 $labels['KB'] = 'Kt';
 $labels['MB'] = 'Mt';
@@ -606,6 +630,7 @@ $labels['chinese'] = 'Kiinalainen';
 $labels['arialabeltopnav'] = 'Ikkunan hallinta';
 $labels['arialabeltasknav'] = 'Sovelluksen tehtävät';
 $labels['arialabeltoolbar'] = 'Sovelluksen työkalupalkki';
+$labels['arialabellistnav'] = 'Listan navigointi';
 $labels['arialabelactivetask'] = 'Aktiivinen tehtävä';
 $labels['arialabelmessagessearchfilter'] = 'Sähköpostin listaussuodatin';
 $labels['arialabelmailsearchform'] = 'Sähköpostiviestin hakulomake';
@@ -644,9 +669,10 @@ $labels['arialabelcontactexportoptions'] = 'Yhteyshenkilön vientivalinnat';
 $labels['arialabelabookgroupoptions'] = 'Osoitekirjan/ryhmän valinnat';
 $labels['arialabelpreferencesform'] = 'Asetukset -lomake';
 $labels['arialabelidentityeditfrom'] = 'Henkilöyden muokkauslomake';
-$labels['arialabelresonseeditfrom'] = 'Vastauksen muokkauslomake';
+$labels['arialabelresponseeditfrom'] = 'Vastauksen muokkauslomake';
 $labels['arialabelsearchterms'] = 'Hakuehdot';
 $labels['arialabeldropactionmenu'] = 'Raahaa ja pudota toimintovalikko';
+$labels['arialabelheadersmenu'] = 'Vastaanottajaotsakkeen lisäysvalikko';
 $labels['arialabelimagetools'] = 'Kuvatyökalut';
 $labels['helplistnavigation'] = 'Luetteloi näppäimistönavigointi';
 $labels['helplistkeyboardnavigation'] = "Nuolet ylös/alas: Siirrä kohdistettua riviä/valintaa.
@@ -657,4 +683,3 @@ $labels['helplistkeyboardnavmessages'] = "Nuolinäppäimet oikealle/vasemmalle: 
 Entteri/rivinvaihto: Avaa valittu/kohdistettu viesti.
 Delete/poista: Siirrä valitut viestit roskakoriin.";
 $labels['helplistkeyboardnavcontacts'] = "Enter: avaa valittu/kohdistettu yhteystieto.";
-?>

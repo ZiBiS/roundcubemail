@@ -2,24 +2,25 @@
 
 /*
  +-----------------------------------------------------------------------+
- | localization/<lang>/labels.inc                                        |
- |                                                                       |
  | Localization file of the Roundcube Webmail client                     |
- | Copyright (C) 2005-2015, The Roundcube Dev Team                       |
+ |                                                                       |
+ | Copyright (C) The Roundcube Dev Team                                  |
  |                                                                       |
  | Licensed under the GNU General Public License version 3 or            |
  | any later version with exceptions for skins & plugins.                |
  | See the README file for a full license statement.                     |
- |                                                                       |
  +-----------------------------------------------------------------------+
 
  For translation see https://www.transifex.com/projects/p/roundcube-webmail/resource/labels/
 */
+
+
 $labels['welcome'] = 'Καλώς ήρθατε στο $product';
 $labels['username'] = 'Όνομα Χρήστη';
 $labels['password'] = 'Κωδικός Πρόσβασης';
 $labels['server'] = 'Εξυπηρετητής';
 $labels['login'] = 'Σύνδεση';
+$labels['menu'] = 'Μενού';
 $labels['logout'] = 'Αποσύνδεση';
 $labels['mail'] = 'E-Mail';
 $labels['settings'] = 'Ρυθμίσεις';
@@ -44,6 +45,7 @@ $labels['priority'] = 'Πρoτεραιότητα';
 $labels['organization'] = 'Οργανισμός';
 $labels['readstatus'] = 'Κατάσταση ανάγνωσης';
 $labels['listoptions'] = 'Κατάλογος επιλογών';
+$labels['listoptionstitle'] = 'Λίστα επιλογών';
 $labels['mailboxlist'] = 'Φάκελοι';
 $labels['messagesfromto'] = 'Μηνύματα $from από $to έως $count';
 $labels['threadsfromto'] = 'Θέματα $from έως $to από $count';
@@ -133,11 +135,15 @@ $labels['folders-all'] = 'Όλοι οι φάκελοι';
 $labels['more'] = 'Περισσότερα';
 $labels['back'] = 'Επιστροφή';
 $labels['options'] = 'Επιλογές';
+$labels['composeoptions'] = 'Επιλογές σύνταξης';
+$labels['optionsandattachments'] = 'Επιλογές και συνημμένα';
+$labels['actions'] = 'Ενέργειες';
 $labels['first'] = 'Πρώτο';
 $labels['last'] = 'Τελευταίο';
 $labels['previous'] = 'Προηγούμενο';
 $labels['next'] = 'Επόμενο';
 $labels['select'] = 'Επιλέξτε';
+$labels['selection'] = 'Επιλοή';
 $labels['all'] = 'Όλα';
 $labels['none'] = 'Κανένα';
 $labels['currpage'] = 'Τρέχουσα σελίδα';
@@ -159,6 +165,7 @@ $labels['expand-all'] = 'Ανάπτυξη όλων';
 $labels['expand-unread'] = 'Ανάπτυξη των μη αναγνωσμένων';
 $labels['collapse-all'] = 'Σύμπτυξη όλων';
 $labels['threaded'] = 'Θεματοποιημένα';
+$labels['showunread'] = 'Εμφάνιση αδιάβαστων μηνυμάτων';
 $labels['autoexpand_threads'] = 'Ανάπτυξη θεματοποιημένων μηνυμάτων';
 $labels['do_expand'] = 'όλα τα θέματα';
 $labels['expand_only_unread'] = 'μόνο με τα μη αναγνωσμένα μηνύματα';
@@ -174,6 +181,7 @@ $labels['listcolumns'] = 'Στήλες';
 $labels['listsorting'] = 'Ταξινόμηση στηλών';
 $labels['listorder'] = 'Σειρά ταξινόμησης';
 $labels['listmode'] = 'Προβολή σε λίστα';
+$labels['layout'] = 'Διάταξη';
 $labels['layoutdesktop'] = 'Επιφάνεια εργασίας';
 $labels['layoutlist'] = 'Λίστα';
 $labels['folderactions'] = 'Ενέργειες στους φακέλους';
@@ -188,7 +196,11 @@ $labels['quotatotal'] = 'Όριο';
 $labels['quotaused'] = 'Χρησιμοποιημένα';
 $labels['quotastorage'] = 'Χώρος στο δίσκο';
 $labels['quotamessage'] = 'Πλήθος μηνυμάτων';
+$labels['shortheaderdate'] = 'Στις $date';
+$labels['shortheaderto'] = 'Προς τον/ην $to στις $date';
+$labels['shortheaderfrom'] = 'Από τον/ην $from στις $date';
 $labels['quicksearch'] = 'Γρήγορη Αναζήτηση';
+$labels['searchplaceholder'] = 'Αναζήτηση...';
 $labels['resetsearch'] = 'Επαναφορά Αναζήτησης';
 $labels['searchmod'] = 'Aλλαγή αναζήτησης';
 $labels['msgtext'] = 'Σε όλο το μήνυμα';
@@ -269,6 +281,7 @@ $labels['showimages'] = 'Προβολή εικόνων';
 $labels['alwaysshow'] = 'Να προβάλλονται πάντα οι εικόνες που αποστέλλονται από τον $sender';
 $labels['isdraft'] = 'Αυτό το μήνυμα έχει σημανθεί σαν πρόχειρο';
 $labels['andnmore'] = '$nr περισσότερα...';
+$labels['details'] = 'Λεπτομέρειες';
 $labels['togglemoreheaders'] = 'Εμφάνιση περισσότερων κεφαλίδων';
 $labels['togglefullheaders'] = 'Εμφάνιση ακατέργαστων κεφαλίδων μηνύματος';
 $labels['htmltoggle'] = 'HTML';
@@ -348,10 +361,14 @@ $labels['cancel'] = 'Ακύρωση';
 $labels['save'] = 'Αποθήκευση';
 $labels['delete'] = 'Διαγραφή';
 $labels['discard'] = 'Διαγραφή';
+$labels['continue'] = 'Συνέχεια';
+$labels['ok'] = 'OK';
 $labels['rename'] = 'Μετονομασία';
 $labels['addphoto'] = 'Προσθήκη';
 $labels['replacephoto'] = 'Αντικατάσταση';
 $labels['uploadphoto'] = 'Φόρτωση εικόνας';
+$labels['choosefile'] = 'Επιλέξτε αρχείο...';
+$labels['choosefiles'] = 'Επιλέξτε αρχεία...';
 $labels['newcontact'] = 'Δημιουργία νέας επαφής';
 $labels['deletecontact'] = 'Διαγραφή επιλεγμένων επαφών';
 $labels['composeto'] = 'Σύνθεση μηνύματος προς';
@@ -459,7 +476,6 @@ $labels['advancedoptions'] = 'Προχωρημένες επιλογές';
 $labels['toggleadvancedoptions'] = 'Εναλλαγή προχωρημένων επιλογών';
 $labels['focusonnewmessage'] = 'Τα νέα μηνύματα να επιλέγονται αυτόματα';
 $labels['checkallfolders'] = 'Να γίνεται έλεγχος σε όλους τους φακέλους για νέα μηνύματα';
-$labels['displaynext'] = 'Μετά από κάθε μετακίνηση/διαγραφή μηνήματος να εμφανίζεται το επόμενο';
 $labels['defaultfont'] = 'Προεπιλεγμένη γραμματοσειρά για τα μηνύματα μορφής HTML';
 $labels['mainoptions'] = 'Βασικές επιλογές';
 $labels['browseroptions'] = 'Επιλογές περιηγητή';
@@ -523,7 +539,10 @@ $labels['findfolders'] = 'Εύρεση φακέλων';
 $labels['namespace.personal'] = 'Προσωπικά';
 $labels['namespace.other'] = 'Άλλοι χρήστες';
 $labels['namespace.shared'] = 'Διαμοιρασμένος';
+$labels['dualusemail'] = 'μηνύματα';
+$labels['dualusefolder'] = 'φάκελοι';
 $labels['encryptioncreatekey'] = 'Δημιουργία νέου ζεύγους κλειδιού';
+$labels['encryption'] = 'Κρυπτογράφηση';
 $labels['sortby'] = 'Ταξινόμηση κατά';
 $labels['sortasc'] = 'Αύξουσα ταξινόμηση';
 $labels['sortdesc'] = 'Φθίνουσα ταξινόμηση';
@@ -534,6 +553,7 @@ $labels['version'] = 'Έκδοση';
 $labels['source'] = 'Προέλευση';
 $labels['license'] = 'Άδεια χρήσης';
 $labels['support'] = 'Υποστήριξη';
+$labels['savedsearches'] = 'Αποθηκευμένες αναζητήσεις';
 $labels['B'] = 'B';
 $labels['KB'] = 'KB';
 $labels['MB'] = 'MB';
@@ -594,8 +614,9 @@ $labels['arialabelcontactexportoptions'] = 'Επιλογές εξαγωγής ε
 $labels['arialabelabookgroupoptions'] = 'Επιλογές βιβλίου διευθύνσεων/ομάδων';
 $labels['arialabelpreferencesform'] = 'Φόρμα προτιμήσεων';
 $labels['arialabelidentityeditfrom'] = 'Φόρμα επεξεργασίας ταυτότητας';
-$labels['arialabelresonseeditfrom'] = 'Φόρμα επεξεργασίας απάντησης';
+$labels['arialabelresponseeditfrom'] = 'Φόρμα επεξεργασίας απάντησης';
 $labels['arialabelsearchterms'] = 'Όροι αναζήτησης';
+$labels['arialabelimagetools'] = 'Εργαλεία εικόνας';
 $labels['helplistnavigation'] = 'Εμφάνιση πλοήγησης πληκτρολογίου';
 $labels['helplistkeyboardnavigation'] = "Βέλη πάνω/κάτω: Μετακίνηση εστίασης/επιλογής γραμμής.
 Διάστημα: Επιλογή εστιασμένης γραμμής.
@@ -605,4 +626,3 @@ $labels['helplistkeyboardnavmessages'] = "Βέλη αριστερά/δεξιά: 
 Enter: Άνοιγμα επιλεγμένου/εστιασμένου μηνύματος.
 Διαγραφή: Μετακίνηση επιλεγμένων μηνυμάτων στα Διεγραμμένα.";
 $labels['helplistkeyboardnavcontacts'] = "Enter: Άνοιγμα της επιλεγμένης/εστιασμένης επαφής.";
-?>

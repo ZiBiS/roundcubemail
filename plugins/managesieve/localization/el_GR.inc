@@ -2,25 +2,27 @@
 
 /*
  +-----------------------------------------------------------------------+
- | plugins/managesieve/localization/<lang>.inc                           |
- |                                                                       |
  | Localization file of the Roundcube Webmail Managesieve plugin         |
- | Copyright (C) 2012-2013, The Roundcube Dev Team                       |
+ |                                                                       |
+ | Copyright (C) The Roundcube Dev Team                                  |
  |                                                                       |
  | Licensed under the GNU General Public License version 3 or            |
  | any later version with exceptions for skins & plugins.                |
  | See the README file for a full license statement.                     |
- |                                                                       |
  +-----------------------------------------------------------------------+
 
  For translation see https://www.transifex.com/projects/p/roundcube-webmail/resource/plugin-managesieve/
 */
+
+
 $labels['filters'] = 'Φίλτρα';
 $labels['managefilters'] = 'Διαχείριση φίλτρων εισερχόμενων';
 $labels['filtername'] = 'Ονομασία φίλτρου';
 $labels['newfilter'] = 'Δημιουργία φίλτρου';
 $labels['filteradd'] = 'Προσθήκη φίλτρου';
 $labels['filterdel'] = 'Διαγραφή φίλτρου';
+$labels['rules'] = 'Κανόνες';
+$labels['actions'] = 'Ενέργειες';
 $labels['scope'] = 'Εύρος';
 $labels['moveup'] = 'Μετακίνηση πάνω';
 $labels['movedown'] = 'Μετακίνηση κάτω';
@@ -39,6 +41,9 @@ $labels['filterregex'] = 'ταιριάζει με κανονική έκφρασ�
 $labels['filternotregex'] = 'δεν ταιριάζει με κανονική έκφραση';
 $labels['filterunder'] = 'κάτω';
 $labels['filterover'] = 'πάνω';
+$labels['mime'] = 'MIME:';
+$labels['mimepart'] = 'MIME part:';
+$labels['mime-message'] = 'μήνυμα';
 $labels['addrule'] = 'Προσθήκη κανόνα';
 $labels['delrule'] = 'Διαγραφή κανόνα';
 $labels['messagemoveto'] = 'Μετακίνηση μηνύματος στο';
@@ -65,14 +70,8 @@ $labels['days'] = 'ημέρες';
 $labels['seconds'] = 'δευτερόλεπτα';
 $labels['rulestop'] = 'Παύση επαλήθευσης κανόνων';
 $labels['enable'] = 'Ενεργοποίηση/Απενεργοποίηση';
-$labels['filterset'] = 'Φίλτρα';
 $labels['filtersets'] = 'Φίλτρο';
-$labels['filtersetadd'] = 'Προσθήκη φίλτρων';
-$labels['filtersetact'] = 'Ενεργοποίηση φιλτρων';
-$labels['filtersetdeact'] = 'Απενεργοποίηση φιλτρων';
 $labels['filterdef'] = 'Ορισμος φιλτρου';
-$labels['filtersetname'] = 'Ονομασία φίλτρων';
-$labels['newfilterset'] = 'Νεα φιλτρα';
 $labels['active'] = 'ενεργο';
 $labels['none'] = 'κανένα';
 $labels['fromset'] = 'από το σύνολο ';
@@ -98,6 +97,8 @@ $labels['flagdeleted'] = 'Διεγραμμένο';
 $labels['flaganswered'] = 'Απαντήθηκε ';
 $labels['flagflagged'] = 'Σημειωμένο';
 $labels['flagdraft'] = 'Πρόχειρα';
+$labels['headername'] = 'Όνομα κεφαλίδας';
+$labels['headervalue'] = 'Τιμή κεφαλίδας';
 $labels['setvariable'] = 'Ορισμός μεταβλητής';
 $labels['setvarname'] = 'Όνομα μεταβλητης:';
 $labels['setvarvalue'] = 'Τιμη μεταβλητης:';
@@ -161,6 +162,8 @@ $labels['asciicasemap'] = 'πεζά ή κεφαλαία (ascii-casemap)';
 $labels['asciinumeric'] = 'αριθμητικό (ascii-αριθμητικο)';
 $labels['index'] = 'ευρετήριο:';
 $labels['indexlast'] = 'προς τα πίσω';
+$labels['spamtestequals'] = 'είναι ίσο με';
+$labels['spamtestnotequals'] = 'δεν είναι ίσο με';
 $labels['vacation.reply'] = 'Μήνυμα απάντησης';
 $labels['vacation.advanced'] = 'Προηγμένες ρυθμίσεις';
 $labels['vacation.from'] = 'Διεύθυνση απάντησης αποστολέα';
@@ -181,6 +184,7 @@ $labels['forward.redirect'] = 'Ανακατεύθυνση σε';
 $labels['forward.copy'] = 'Αποστολή αντιγράφου σε';
 $labels['forward.on'] = 'Ενεργό';
 $labels['forward.off'] = 'Ανενεργό';
+$labels['forward.status'] = 'Κατάσταση:';
 $labels['forward.saving'] = 'Αποθήκευση δεδομένων...';
 $labels['filladdresses'] = 'Συμπλήρωση με όλες τις email διευθύνσεις μου';
 $labels['arialabelfiltersetactions'] = 'Ενέργειες ομάδας φίλτρων';
@@ -211,15 +215,6 @@ $messages['actiondeleteconfirm'] = 'Θέλετε όντως να διαγράψ�
 $messages['forbiddenchars'] = 'Μη επιτρεπτοί χαρακτήρες στο πεδίο.';
 $messages['cannotbeempty'] = 'Το πεδίο δεν μπορεί να είναι κενό.';
 $messages['ruleexist'] = 'Φιλτρο με αυτο το όνομα υπάρχει ήδη. ';
-$messages['setactivateerror'] = 'Αδυναμία ενεργοποίησης επιλεγμένων ομάδων φίλτρων. Προέκυψε σφάλμα στον διακομιστή.';
-$messages['setdeactivateerror'] = 'Αδυναμία απενεργοποίησης επιλεγμένων ομάδων φίλτρων. Προέκυψε σφάλμα στον διακομιστή.';
-$messages['setdeleteerror'] = 'Αδυναμία διαγραφής των επιλεγμένων ομάδων φίλτρων. Προέκυψε σφάλμα στον διακομιστή';
-$messages['setactivated'] = 'Τα φίλτρα ενεργοποιήθηκαν με επιτυχία.';
-$messages['setdeactivated'] = 'Τα φίλτρα απενεργοποιήθηκαν με επιτυχία.';
-$messages['setdeleted'] = 'Τα φίλτρα διαγράφηκαν επιτυχώς.';
-$messages['setdeleteconfirm'] = 'Θέλετε όντως να διαγράψετε τα επιλεγμένα φιλτρα?';
-$messages['setcreateerror'] = 'Αδυναμία δημιουργίας ομάδας φίλτρων. Προέκυψε σφάλμα στον διακομιστή.';
-$messages['setcreated'] = 'Τα φιλτρα δημιουργηθηκαν επιτυχως.';
 $messages['activateerror'] = 'Αδυναμία ενεργοποίησης επιλεγμένου φίλτρου(ων). Προέκυψε σφάλμα στον διακομιστή.';
 $messages['deactivateerror'] = 'Αδυναμία απενεργοποίησης επιλεγμένου φίλτρου(ων). Προέκυψε σφάλμα στον διακομιστή.';
 $messages['deactivated'] = 'Το φιλτρο(α) απενεργοποιηθηκαν επιτυχως.';
@@ -234,4 +229,4 @@ $messages['invaliddateformat'] = 'Μη έγκυρη ημερομηνία ή η �
 $messages['saveerror'] = 'Αδύνατη η αποθήκευση δεδομένων. Προέκυψε σφάλμα στον διακομιστή';
 $messages['emptyvacationbody'] = 'Απαιτείται κείμενο για το μήνυμα διακοπών!';
 $messages['duplicate.conflict.err'] = 'Το μοναδικό αναγνωριστικό και το αναγνωριστικό κεφαλίδας δεν επιτρέπονται.';
-?>
+$messages['disabledaction'] = 'Μη επιτρεπόμενη ενέργεια.';

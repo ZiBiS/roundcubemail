@@ -2,29 +2,30 @@
 
 /*
  +-----------------------------------------------------------------------+
- | localization/<lang>/messages.inc                                      |
- |                                                                       |
  | Localization file of the Roundcube Webmail client                     |
- | Copyright (C) 2005-2015, The Roundcube Dev Team                       |
+ |                                                                       |
+ | Copyright (C) The Roundcube Dev Team                                  |
  |                                                                       |
  | Licensed under the GNU General Public License version 3 or            |
  | any later version with exceptions for skins & plugins.                |
  | See the README file for a full license statement.                     |
- |                                                                       |
  +-----------------------------------------------------------------------+
 
  For translation see https://www.transifex.com/projects/p/roundcube-webmail/resource/messages/
 */
+
 $messages['errortitle']  = 'Произошла ошибка!';
 $messages['loginfailed']  = 'Неудачная попытка входа.';
 $messages['cookiesdisabled'] = 'Ваш браузер не принимает cookie.';
 $messages['sessionerror'] = 'Ваша сессия устарела.';
+$messages['cookiesmismatch'] = 'Обнаружено несоответствие cookie. Очистите их в браузере.';
 $messages['storageerror'] = 'Неудачное соединение с IMAP сервером';
 $messages['servererror'] = 'Ошибка сервера!';
 $messages['servererrormsg'] = 'Ошибка сервера: $msg';
 $messages['accountlocked'] = 'Слишком много неудачных попыток входа. Попробуйте позже.';
 $messages['connerror'] = 'Ошибка соединения (Сбой подключения к серверу)!';
 $messages['dberror'] = 'Ошибка базы данных!';
+$messages['dbconnerror'] = 'Невозможно подключиться к базе данных.';
 $messages['windowopenerror'] = 'Всплывающее окно было заблокировано!';
 $messages['requesttimedout'] = 'Превышено время ожидания запроса';
 $messages['errorreadonly'] = 'Невозможно выполнить операцию. Папка доступна только для чтения.';
@@ -64,11 +65,11 @@ $messages['nopubkeyforsender'] = 'Отсутствует действитель�
 $messages['encryptnoattachments'] = 'Уже загруженные вложения не могут быть зашифрованы. Пожалуйста, повторно добавьте их в редакторе шифрования.';
 $messages['searchpubkeyservers'] = 'Вы хотите выполнить поиск серверов открытых ключей для отсутствующих ключей?';
 $messages['encryptpubkeysfound'] = 'Следующие открытые ключи были найдены:';
-$messages['keyservererror'] = 'Не удалось получить ключ от сервера ключей';
-$messages['keyimportsuccess'] = 'Открытый ключ $key успешно импортирован в хранилище ключей';
+$messages['keyservererror'] = 'Не удалось получить ключ от сервера ключей.';
+$messages['keyimportsuccess'] = 'Открытый ключ $key успешно импортирован в хранилище ключей.';
 $messages['nocontactsfound'] = 'Контакты не найдены.';
 $messages['contactnotfound'] = 'Требуемый контакт не найден.';
-$messages['contactsearchonly'] = 'Введите условия для поиска контактов';
+$messages['contactsearchonly'] = 'Для просмотра контактов из выбранной адресной книги необходимо использовать форму поиска.';
 $messages['sendingfailed'] = 'Не удалось отправить сообщение.';
 $messages['senttooquickly'] = 'Вы должны подождать $sec сек. для отправки сообщения.';
 $messages['errorsavingsent'] = 'Произошла ошибка при сохранении отправленного сообщения.';
@@ -117,16 +118,16 @@ $messages['nospellerrors'] = 'Орфографических ошибок не �
 $messages['folderdeleted'] = 'Папка удалена.';
 $messages['foldersubscribed'] = 'Папка подписана';
 $messages['folderunsubscribed'] = 'Папка отписана';
-$messages['folderpurged'] = 'Папка очищена.';
-$messages['folderexpunged'] = 'Папка сжата.';
 $messages['deletedsuccessfully'] = 'Удалено.';
 $messages['converting'] = 'Удаление форматирования сообщения...';
 $messages['messageopenerror'] = 'Невозможно загрузить сообщение с сервера.';
 $messages['filelinkerror'] = 'Сбой добавления вложения.';
 $messages['fileuploaderror'] = 'Ошибка загрузки файла.';
+$messages['csvfilemismatch'] = 'Импорт нескольких файлов CSV с разными полями не поддерживается.';
 $messages['filesizeerror'] = 'Загруженный файл больше максимального размера в $size.';
 $messages['filecounterror'] = 'Вы можете загрузить максимум $count файлов одновременно.';
 $messages['msgsizeerror'] = 'Не удалось прикрепить файл. Превышен максимальный размер сообщения: ($size).';
+$messages['msgsizeerrorfwd'] = 'Превышен максимальный размер сообщения ($size). $num сообщение(й) не было(и) прикреплено(ы).';
 $messages['copysuccess'] = 'Успешно скопировано $nr контактов.';
 $messages['movesuccess'] = 'Успешно перемещено $nr контактов.';
 $messages['copyerror'] = 'Контакты не скопированы.';
@@ -221,3 +222,5 @@ $messages['responseinserted'] = 'Ответ успешно вставлен.';
 $messages['listempty'] = 'Список пуст.';
 $messages['listusebutton'] = 'Используйте кнопку Создать, чтобы добавить новую запись.';
 $messages['keypaircreatesuccess'] = 'Новая пара ключей была создана для $identity.';
+$messages['emptyattachment'] = 'Это вложение похоже на пустое <br>Пожалуйста свяжитесь с отправителем для уточнения.';
+$messages['oauthloginfailed'] = 'Ошибка OAuth авторизации. Пожалуйста, попробуйте еще раз.';

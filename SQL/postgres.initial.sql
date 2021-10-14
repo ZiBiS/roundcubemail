@@ -24,8 +24,8 @@ CREATE TABLE users (
     last_login timestamp with time zone DEFAULT NULL,
     failed_login timestamp with time zone DEFAULT NULL,
     failed_login_counter integer DEFAULT NULL,
-    "language" varchar(5),
-    preferences text DEFAULT ''::text NOT NULL,
+    "language" varchar(16),
+    preferences text DEFAULT NULL,
     CONSTRAINT users_username_key UNIQUE (username, mail_host)
 );
 
@@ -75,11 +75,72 @@ CREATE TABLE identities (
     "reply-to" varchar(128),
     bcc varchar(128),
     signature text,
-    html_signature integer DEFAULT 0 NOT NULL
+    html_signature smallint DEFAULT 0 NOT NULL
 );
 
 CREATE INDEX identities_user_id_idx ON identities (user_id, del);
 CREATE INDEX identities_email_idx ON identities (email, del);
+
+
+--
+-- Sequence "responses_seq"
+-- Name: responses_seq; Type: SEQUENCE; Schema: public; Owner: postgres
+--
+
+CREATE SEQUENCE responses_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MAXVALUE
+    NO MINVALUE
+    CACHE 1;
+
+--
+-- Table "responses"
+-- Name: responses; Type: TABLE; Schema: public; Owner: postgres
+--
+
+CREATE TABLE responses (
+    response_id integer DEFAULT nextval('responses_seq'::text) PRIMARY KEY,
+    user_id integer NOT NULL
+        REFERENCES users (user_id) ON DELETE CASCADE ON UPDATE CASCADE,
+    changed timestamp with time zone DEFAULT now() NOT NULL,
+    del smallint DEFAULT 0 NOT NULL,
+    name varchar(255) NOT NULL,
+    data text NOT NULL,
+    is_html smallint DEFAULT 0 NOT NULL
+);
+
+CREATE INDEX responses_user_id_idx ON responses (user_id, del);
+
+
+--
+-- Sequence "collected_addresses_seq"
+-- Name: collected_addresses_seq; Type: SEQUENCE; Schema: public; Owner: postgres
+--
+
+CREATE SEQUENCE collected_addresses_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MAXVALUE
+    NO MINVALUE
+    CACHE 1;
+
+--
+-- Table "collected_addresses"
+-- Name: collected_addresses; Type: TABLE; Schema: public; Owner: postgres
+--
+
+CREATE TABLE collected_addresses (
+    address_id integer DEFAULT nextval('collected_addresses_seq'::text) PRIMARY KEY,
+    user_id integer NOT NULL
+        REFERENCES users (user_id) ON DELETE CASCADE ON UPDATE CASCADE,
+    changed timestamp with time zone DEFAULT now() NOT NULL,
+    name varchar(255) DEFAULT '' NOT NULL,
+    email varchar(255) NOT NULL,
+    "type" integer NOT NULL
+);
+
+CREATE UNIQUE INDEX collected_addresses_user_id_idx ON collected_addresses (user_id, "type", email);
 
 
 --
@@ -246,7 +307,7 @@ CREATE INDEX cache_messages_expires_idx ON cache_messages (expires);
 CREATE TABLE dictionary (
     user_id integer DEFAULT NULL
         REFERENCES users (user_id) ON DELETE CASCADE ON UPDATE CASCADE,
-   "language" varchar(5) NOT NULL,
+   "language" varchar(16) NOT NULL,
     data text NOT NULL,
     CONSTRAINT dictionary_user_id_language_key UNIQUE (user_id, "language")
 );
@@ -314,4 +375,4 @@ CREATE TABLE "system" (
     value text
 );
 
-INSERT INTO "system" (name, value) VALUES ('roundcube-version', '2018122300');
+INSERT INTO "system" (name, value) VALUES ('roundcube-version', '2021100300');
