@@ -108,9 +108,7 @@ function rcube_mail_ui()
     // write prefs to local storage (if supported)
     if (!rcmail.local_storage_set_item('prefs.larry', prefs)) {
       // store value in cookie
-      var exp = new Date();
-      exp.setYear(exp.getFullYear() + 1);
-      rcmail.set_cookie(key, val, exp);
+      rcmail.set_cookie(key, val, false);
     }
   }
 
@@ -171,7 +169,7 @@ function rcube_mail_ui()
           attachmentmenu_append(this);
         });
 
-        if (get_pref('previewheaders') == '1') {
+        if (rcmail.env.action == 'preview' && get_pref('previewheaders') == '1') {
           toggle_preview_headers();
         }
 
