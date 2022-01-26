@@ -95,3 +95,43 @@ a {
         opacity: .5;
     }
 }
+
+/* Scrollbar styles */
+
+html when not (@scrollbar-width = unset) {
+    scrollbar-color: @color-scrollbar-thumb @color-scrollbar-track;
+    scrollbar-width: @scrollbar-width;
+
+    textarea,
+    select,
+    .popover-body,
+    .popupmenu,
+    .ui-dialog-content,
+    .frame-content,
+    .formcontent,
+    .table-responsive,
+    .table-responsive-sm,
+    .scroller {
+        // Firefox does not inherit scrollbar size from the html element
+        scrollbar-width: @scrollbar-width;
+    }
+
+    &:not(.touch) {
+        ::-webkit-scrollbar when (@scrollbar-width = auto) {
+            // Note: If we do not set the width a default scrollbar is used in Chrome.
+            // And the custom colors set below do not work
+            width: 12px;
+        }
+        ::-webkit-scrollbar when (@scrollbar-width = thin) {
+            width: 6px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background-color: @color-scrollbar-track;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background-color: @color-scrollbar-thumb;
+        }
+    }
+}

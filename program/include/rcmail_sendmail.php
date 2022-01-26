@@ -147,7 +147,7 @@ class rcmail_sendmail
         }
         else {
             // ... if there is no identity record, this might be a custom from
-            $from_addresses = rcube_mime::decode_address_list($from);
+            $from_addresses = rcube_mime::decode_address_list($from, null, true, $charset);
 
             if (count($from_addresses) == 1) {
                 $from        = $from_addresses[1]['mailto'];
@@ -177,6 +177,9 @@ class rcmail_sendmail
             $message_id = $this->rcmail->gen_message_id($from);
         }
 
+        // Don't allow CRLF in subject (#8404)
+        $subject = trim(preg_replace('|\r?\n|', ' ', $subject));
+
         $this->options['dsn_enabled'] = $dsn_enabled;
         $this->options['from']        = $from;
         $this->options['mailto']      = $mailto;
@@ -189,7 +192,7 @@ class rcmail_sendmail
             'To'               => $mailto,
             'Cc'               => $mailcc,
             'Bcc'              => $mailbcc,
-            'Subject'          => trim($subject),
+            'Subject'          => $subject,
             'Reply-To'         => $this->email_input_format($replyto),
             'Mail-Reply-To'    => $this->email_input_format($replyto),
             'Mail-Followup-To' => $this->email_input_format($followupto),
@@ -1361,7 +1364,7 @@ class rcmail_sendmail
             $mdn_default = $_POST['_mdn'];
         }
         else if (in_array($this->data['mode'], [self::MODE_DRAFT, self::MODE_EDIT])) {
-            $mdn_default = (bool) $this->options['message']->headers->mdn_to;
+            $mdn_default = !empty($this->options['message']->headers->mdn_to);
         }
         else {
             $mdn_default = $this->rcmail->config->get('mdn_default');

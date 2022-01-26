@@ -246,7 +246,7 @@ class rcube_imap_generic
 
             while (strlen($out) < $bytes) {
                 $out = $this->readBytes($bytes);
-                if ($out === null) {
+                if ($out === '') {
                     break;
                 }
 
@@ -278,7 +278,7 @@ class rcube_imap_generic
 
             while (strlen($out) < $bytes) {
                 $line = $this->readBytes($bytes);
-                if ($line === null) {
+                if ($line === '') {
                     break;
                 }
 
@@ -2941,15 +2941,16 @@ class rcube_imap_generic
                 $bytes = (int) $m[1];
                 $prev  = '';
                 $found = true;
+                $chunkSize = 1024 * 1024;
 
                 // empty body
                 if (!$bytes) {
                     $result = '';
                 }
                 else while ($bytes > 0) {
-                    $line = $this->readLine(8192);
+                    $line = $this->readBytes($bytes > $chunkSize ? $chunkSize : $bytes);
 
-                    if ($line === null) {
+                    if ($line === '') {
                         break;
                     }
 

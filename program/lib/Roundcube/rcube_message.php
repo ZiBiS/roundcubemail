@@ -395,8 +395,9 @@ class rcube_message
                         return true;
                     }
 
-                    $max_delta = $depth - (1 + ($last == 'multipart/alternative' ? 1 : 0));
-                    $last      = !empty($parent->real_mimetype) ? $parent->real_mimetype : $parent->mimetype;
+                    $isCompound = $last == 'multipart/alternative' || $last == 'multipart/related';
+                    $max_delta  = $depth - ($isCompound ? 2 : 1);
+                    $last       = !empty($parent->real_mimetype) ? $parent->real_mimetype : $parent->mimetype;
 
                     if (!preg_match('/^multipart\/(alternative|related|signed|encrypted|mixed)$/', $last)
                         || ($last == 'multipart/mixed' && $parent_depth < $max_delta)
@@ -605,7 +606,8 @@ class rcube_message
 
             // parse headers from message/rfc822 part
             if (!isset($structure->headers['subject']) && !isset($structure->headers['from'])) {
-                list($headers, $body) = explode("\r\n\r\n", $this->get_part_body($structure->mime_id, false, 32768), 2);
+                $part_body = $this->get_part_body($structure->mime_id, false, 32768);
+                list($headers, $body) = rcube_utils::explode("\r\n\r\n", $part_body, 2);
                 $structure->headers = rcube_mime::parse_headers($headers);
 
                 if ($this->context === $structure->mime_id) {
@@ -614,7 +616,8 @@ class rcube_message
 
                 // For small text messages we can optimize, so an additional FETCH is not needed
                 if ($structure->size < 32768 && count($structure->parts) == 1 && $structure->parts[0]->ctype_primary == 'text') {
-                    $structure->parts[0]->body = $body;
+                    $encoding = $structure->headers['content-transfer-encoding'] ?? '7bit';
+                    $structure->parts[0]->body = rcube_mime::decode($body, $encoding);
                 }
             }
         }
@@ -909,7 +912,7 @@ class rcube_message
                 // part is a file/attachment
                 else if (
                     preg_match('/^(inline|attach)/', $mail_part->disposition)
-                    || $mail_part->headers['content-id']
+                    || !empty($mail_part->headers['content-id'])
                     || ($mail_part->filename &&
                         (empty($mail_part->disposition) || preg_match('/^[a-z0-9!#$&.+^_-]+$/i', $mail_part->disposition)))
                 ) {
@@ -923,7 +926,11 @@ class rcube_message
                     }
 
                     if (!empty($mail_part->headers['content-location'])) {
-                        $mail_part->content_location = $mail_part->headers['content-base'] . $mail_part->headers['content-location'];
+                        $mail_part->content_location = '';
+                        if (!empty($mail_part->headers['content-base'])) {
+                            $mail_part->content_location = $mail_part->headers['content-base'];
+                        }
+                        $mail_part->content_location .= $mail_part->headers['content-location'];
                     }
 
                     // part belongs to a related message and is linked

@@ -2,8 +2,29 @@
 
 ## Unreleased
 
+- Unified and simplified services connection options (#8310):
+    1. IMAP:
+        - renamed `default_host` to `imap_host`
+        - removed `default_port` option (non-standard port can be set via `imap_host`)
+        - set "localhost:143" as a default for `imap_host`
+    2. SMTP:
+        - renamed `smtp_server` to `smtp_host`
+        - removed `smtp_port` option (non-standard port can be set via `smtp_host`)
+        - set "localhost:587" as a default for `smtp_host`
+    3. LDAP:
+        - removed `port` option from `ldap_public` array (non-standard port can be set via `host`)
+        - removed `use_tls` option from `ldap_public` array (use tls:// prefix in `host`)
+    4. Managesieve:
+        - removed `managesieve_port` option (non-standard port can be set via `managesieve_host`)
+        - removed `managesieve_usetls` option (tls:// prefix in `managesieve_host` have to be used)
+- Plugin API: Removed `smtp_port` parameter in `smtp_connect` hook
+- Plugin API: Renamed `smtp_server` parameter to `smtp_host` in `smtp_connect` hook
+- Plugin API: Removed `port` parameter in `managesieve_connect` hook
+- Plugin API: Removed `usetls` parameter in `managesieve_connect` hook
+- Added support for PHP 8.1 (#8151)
 - Dropped support for PHP < 7.3 (#7976)
 - Dropped support for strftime-like format (with % sign) in date and time format configuration
+- Moved the Classic and Larry skins to their own repository (#8271)
 - SQLite: Use foreign keys, require SQLite >= 3.6.19
 - Replace Endroid QrCode with BaconQrCode (#8173)
 - Support responses (snippets) in HTML format (#5315)
@@ -12,15 +33,20 @@
 - Add option to purge deleted mails older than 30, 60 or 90 days (#5493)
 - Add ability to mark multiple messages as not deleted at once (#5133)
 - Add possibility to disable line-wrapping of sent mail body (#5101)
-- Improve auto-wrapping of plain text messages on preview and reply, don't wrap non-format=flowed content (#6974)
+- Improve/Fix wrapping of plain text messages on preview and reply (#6974, #8391, #8378, #8289)
 - Improve searching by sender/recipient headers, support Reply-To and Followup-To (#6582)
 - Add option to control links handling behavior on html to text conversion (#6485)
+- Add 'loginform_content' plugin hook (#8273, #6569)
 - SMTP: If requested use TLS also without authentication (#4590, #8111)
 - Display a generic error page on initial DB/configuration errors (#8222)
 - Display telephone numbers as tel: links (#8240)
+- Elastic: Move scrollbar settings to variables (#8352)
+- Elastic: Use thin scrollbars in both light and dark mode
+- Elastic: Make the scrollbar color lighter in dark mode (#8345)
 - Autologout: A new plugin to auto log out users with a POST request (#8270)
 - Enigma: Upgrade to OpenPGP.js v5.0
 - Identicon: Make background color of the image to match the current skin colors (#8256)
+- Newmail_notifier: Update favicon to match the current favicon style and size (#7826)
 - Password: Remove password_blowfish_cost option, in favor of password_algorithm_options
 - Password: Remove support for password_algorithms crypt, hash and cram-md5
 - Password: Remove support for %c, %d, %n, %q variables in password_query
@@ -28,7 +54,33 @@
 - Password: Verify current password with IMAP (#8142)
 - Password: Improve handling errors on executed commands (#8200)
 - Password: Add Mailcow driver (#8291)
+- Fix compatibility with Referrer-Policy: "strict-origin" (#8170)
 - Fix locked SQLite database for the CLI tools (#8035)
+- Fix Makefile on Linux (#8211)
+- Fix so PHP warnings are ignored when resizing a malformed image attachment (#8387)
+- Fix various PHP8 warnings (#8392)
+- Fix mail headers injection via the subject field on mail compose (#8404)
+- Fix bug where small message/rfc822 parts could not be decoded (#8408)
+- Fix setting HTML mode on reply/forward of a signed message (#8405)
+
+## Release 1.5.2
+
+- OAuth: pass 'id_token' to 'oauth_login' plugin hook (#8214)
+- OAuth: fix expiration of short-lived oauth tokens (#8147)
+- OAuth: fix relative path to assets if /index.php/foo/bar url is used (#8144)
+- OAuth: no auto-redirect on imap login failures (#8370)
+- OAuth: refresh access token in 'refresh' plugin hook (#8224)
+- Fix so folder search parameters are honored by subscriptions_option plugin (#8312)
+- Fix password change with Directadmin driver (#8322, #8329)
+- Fix so css files in plugins/jqueryui/themes will be minified too (#8337)
+- Fix handling of unicode/special characters in custom From input (#8357)
+- Fix some PHP8 compatibility issues (#8363)
+- Fix chpass-wrapper.py helper compatibility with Python 3 (#8324)
+- Fix scrolling and missing Close button in the Select image dialog in Elastic/mobile (#8367)
+- Security: Fix cross-site scripting (XSS) via HTML messages with malicious CSS content
+
+## Release 1.5.1
+
 - Fix importing contacts with no email address (#8227)
 - Fix so session's search scope is not used if search is not active (#8199)
 - Fix some PHP8 warnings (#8239)
@@ -38,7 +90,6 @@
 - Fix handling of dark_mode_support:false setting in skins meta.json - also when devel_mode=false (#8249)
 - Fix database initialization if db_prefix is a schema prefix (#8221)
 - Fix undefined constant error in Installer on Windows (#8258)
-- Fix Makefile on Linux (#8211)
 - Fix installation/upgrade on MySQL 5.5 - Index column size too large (#8231)
 - Fix regression in setting of contact listing name (#8260)
 - Fix bug in Larry skin where headers toggle state was reset on full page preview (#8203)
@@ -50,6 +101,7 @@
 - Fix fetching headers of multiple message parts at once in rcube_imap_generic::fetchMIMEHeaders() (#8282)
 - Fix bug where attachment download could sometimes fail with a CSRF check error (#8283)
 - Fix an infinite loop when parsing environment variables with float/integer values (#8293)
+- Fix so 'small-dark' logo has more priority than the 'small' logo (#8298)
 
 ## Release 1.5.0
 

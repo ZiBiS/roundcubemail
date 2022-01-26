@@ -1437,6 +1437,10 @@ class rcube
             return;
         }
 
+        if (!isset($arg['message'])) {
+            $arg['message'] = '';
+        }
+
         if (($log || $terminate) && !$cli && $arg['message']) {
             $arg['fatal'] = $terminate;
             self::log_bug($arg);
@@ -1492,7 +1496,7 @@ class rcube
             $arg_arr['message'],
             !empty($arg_arr['file']) ? sprintf(' in %s on line %d', $arg_arr['file'], $arg_arr['line']) : '',
             $_SERVER['REQUEST_METHOD'],
-            $uri
+            strip_tags($uri)
         );
 
         if (!self::write_log('errors', $log_entry)) {
