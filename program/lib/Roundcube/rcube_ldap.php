@@ -148,7 +148,7 @@ class rcube_ldap extends rcube_addressbook
 
         // use fieldmap to advertise supported coltypes to the application
         foreach ($this->fieldmap as $colv => $lfv) {
-            list($col, $type) = explode(':', $colv);
+            list($col, $type) = rcube_utils::explode(':', $colv);
             $params           = explode(':', $lfv);
 
             $lf    = array_shift($params);
@@ -170,7 +170,7 @@ class rcube_ldap extends rcube_addressbook
                 }
             }
 
-            if (!is_array($this->coltypes[$col])) {
+            if (!isset($this->coltypes[$col]) || !is_array($this->coltypes[$col])) {
                 $subtypes = $type ? [$type] : null;
                 $this->coltypes[$col] = ['limit' => $limit, 'subtypes' => $subtypes, 'attributes' => [$lf]];
             }
@@ -1677,7 +1677,7 @@ class rcube_ldap extends rcube_addressbook
                     continue;
                 }
 
-                list($col, $subtype) = explode(':', $rf);
+                list($col, $subtype) = rcube_utils::explode(':', $rf);
                 $out['_raw_attrib'][$lf][$i] = $value;
 
                 if ($col == 'email' && $this->mail_domain && !strpos($value, '@')) {
@@ -1754,7 +1754,7 @@ class rcube_ldap extends rcube_addressbook
             $val = $save_cols[$rf];
 
             // check for value in base field (e.g. email instead of email:foo)
-            list($col, $subtype) = explode(':', $rf);
+            list($col, $subtype) = rcube_utils::explode(':', $rf);
             if (!$val && !empty($save_cols[$col])) {
                 $val = $save_cols[$col];
                 unset($save_cols[$col]);  // use this value only once
@@ -1794,7 +1794,7 @@ class rcube_ldap extends rcube_addressbook
     /**
      * Returns unified attribute name (resolving aliases)
      */
-    private static function _attr_name($namev)
+    private static function _attr_name($name)
     {
         // list of known attribute aliases
         static $aliases = [
@@ -1805,9 +1805,14 @@ class rcube_ldap extends rcube_addressbook
             'pkcs9email'    => 'email',
         ];
 
-        list($name, $limit) = explode(':', $namev, 2);
-        $suffix = $limit ? ':'.$limit : '';
-        $name   = strtolower($name);
+        $suffix = '';
+
+        if (strpos($name, ':')) {
+            list($name, $limit) = explode(':', $name, 2);
+            $suffix = $limit ? ":$limit" : '';
+        }
+
+        $name = strtolower($name);
 
         return ($aliases[$name] ?? $name) . $suffix;
     }
