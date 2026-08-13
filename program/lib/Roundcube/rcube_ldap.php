@@ -683,7 +683,8 @@ class rcube_ldap extends rcube_addressbook
 
         // fetch group object
         if (empty($entries)) {
-            $attribs = array_merge(['dn', 'objectClass', 'memberURL'], array_values($this->group_types));
+            // Filter null: groupOfURLs has no member attr; PHP 8.1+ ldap_read() rejects null in $attributes
+            $attribs = array_merge(['dn', 'objectClass', 'memberURL'], array_filter(array_values($this->group_types)));
             $entries = $this->ldap->read_entries($dn, '(objectClass=*)', $attribs);
             if ($entries === false) {
                 return $group_members;
@@ -737,7 +738,7 @@ class rcube_ldap extends rcube_addressbook
 
         // read these attributes for all members
         $attrib = $count ? ['dn', 'objectClass'] : $this->prop['list_attributes'];
-        $attrib = array_merge($attrib, array_values($this->group_types));
+        $attrib = array_merge($attrib, array_filter(array_values($this->group_types)));
         $attrib[] = 'memberURL';
 
         $filter = !empty($this->prop['groups']['member_filter']) ? $this->prop['groups']['member_filter'] : '(objectclass=*)';
