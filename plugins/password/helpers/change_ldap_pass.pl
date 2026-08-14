@@ -31,15 +31,16 @@ my $active_server = 0;
 my $ldap;
 while ((my $server = shift @servers) && !($active_server)) {
     my $ldap_uri = URI->new($server);
+    my %opts = (
+        version => 3,
+        timeout => 10,
+    );
     if ($ldap_uri->secure) {
-        $ldap = Net::LDAP->new($ldap_uri->as_string,
-            version => 3,
-            verify  => 'require',
-            sslversion => 'tlsv1',
-            cafile  => $PAR{'ca'});
-    } else {
-        $ldap = Net::LDAP->new($ldap_uri->as_string, version => 3);
+        $opts{verify}     = 'require';
+        $opts{sslversion} = 'tlsv1_2';
+        $opts{cafile}     = $PAR{'ca'} if $PAR{'ca'};
     }
+    $ldap = Net::LDAP->new($ldap_uri->as_string, %opts);
     $active_server = 1 if ($ldap);
 }
 

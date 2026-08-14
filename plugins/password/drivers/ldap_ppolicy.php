@@ -59,12 +59,13 @@ class rcube_ldap_ppolicy_password
             fwrite($pipes[0], $username."\n");
             fwrite($pipes[0], $currpass."\n");
             fwrite($pipes[0], $newpass."\n");
-            fwrite($pipes[0], $cafile);
+            fwrite($pipes[0], $cafile."\n");
+            // Close stdin before reading — otherwise Perl blocks on <> and we deadlock
+            fclose($pipes[0]);
 
             $result = trim(stream_get_contents($pipes[1]));
             $stderr = trim(stream_get_contents($pipes[2]));
 
-            fclose($pipes[0]);
             fclose($pipes[1]);
             fclose($pipes[2]);
             proc_close($process);
