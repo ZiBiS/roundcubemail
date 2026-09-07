@@ -1,0 +1,19 @@
+<?php
+
+/**
+ * Password Complexity Plugin - Configuration
+ *
+ * Available rule types:
+ *   min_length  - minimum password length
+ *   uppercase   - minimum uppercase letters (Unicode-aware)
+ *   lowercase   - minimum lowercase letters (Unicode-aware)
+ *   digit       - minimum digits
+ *   special     - minimum special characters (non-letter, non-digit)
+ */
+$config['password_complexity_rules'] = [
+    ['type' => 'min_length', 'value' => 12, 'label_key' => 'rule_min_length'],
+    ['type' => 'uppercase',  'value' => 1,  'label_key' => 'rule_uppercase'],
+    ['type' => 'lowercase',  'value' => 1,  'label_key' => 'rule_lowercase'],
+    ['type' => 'digit',      'value' => 1,  'label_key' => 'rule_digit'],
+    ['type' => 'special',    'value' => 1,  'label_key' => 'rule_special'],
+];
